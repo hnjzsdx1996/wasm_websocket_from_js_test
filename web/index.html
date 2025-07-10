@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>WASM WebSocket 测试</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        #log { border: 1px solid #ccc; height: 200px; overflow: auto; padding: 0.5em; margin-bottom: 1em; }
+        input, button { margin: 0.2em; }
+    </style>
+</head>
+<body>
+    <h2>WASM WebSocket 测试</h2>
+    <div>
+        WebSocket地址: <input id="wsUrl" value="wss://echo.websocket.org" size="40">
+        <button onclick="connectWS()">连接</button>
+        <button onclick="closeWS()">断开</button>
+    </div>
+    <div>
+        <input id="msgInput" placeholder="输入要发送的消息" size="40">
+        <button onclick="sendMsg()">发送</button>
+    </div>
+    <div id="log"></div>
+    <script>
+        let sdk = null;
+        // 只声明一次Module，并确保在js引入前
+        var Module = {
+            locateFile: function(path, prefix) {
+                console.log('locateFile:', path, prefix);
+                return prefix + path;
+            }
+        };
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        function connectWS() {
+            const url = document.getElementById('wsUrl').value;
+            if (!sdk) {
+                log('WASM未加载完成');
+                return;
+            }
+            sdk.createWebSocket(url);
+            log('已请求连接: ' + url);
+        }
+        function sendMsg() {
+            const msg = document.getElementById('msgInput').value;
+            if (!sdk || !sdk.isWebSocketOpen()) {
+                log('WebSocket未连接');
+                return;
+            }
+            sdk.sendWebSocketMessage(msg);
+            log('发送: ' + msg);
+        }
+        function closeWS() {
+            if (sdk) sdk.closeWebSocket();
+            log('已请求断开');
+        }
+        // 注册C++回调，收到消息时直接打印
+        function onWasmMessage(msg) {
+            log('收到: ' + msg);
+        }
+        window.addEventListener('load', function() {
+            if (typeof NotificationCenterSDK !== 'function') {
+                log('NotificationCenterSDK 工厂函数未加载');
+                return;
+            }
+            NotificationCenterSDK(Module).then(function(ModuleInstance) {
+                sdk = new ModuleInstance.SDKManager();
+                sdk.setOnMessageCallback(function(msg) {
+                    log('收到: ' + msg);
+                });
+                log('WASM加载完成，可操作WebSocket');
+                window.Module = ModuleInstance;
+            });
+        });
+    </script>
+    <script src="NotificationCenterSDK.js"></script>
+</body>
+</html> 
