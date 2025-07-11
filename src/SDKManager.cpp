@@ -1,90 +1,72 @@
 #include "SDKManager.h"
-#include <unordered_map>
-#include <emscripten/bind.h>
-using namespace emscripten;
-#include "JSWebSocket.h"
 #include <iostream>
-#include <emscripten/val.h>
+#include "message_define/common.h"
 
 SDKManager::SDKManager() {}
-SDKManager::~SDKManager() { closeWebSocket(); }
+SDKManager::~SDKManager() {}
 
-void SDKManager::createWebSocket(const std::string& url) {
-    ws = std::make_unique<JSWebSocket>(); // todo: 移动到platform相关代码中
-    ws->setOnOpen([this]() { onWSOpen(); });
-    ws->setOnMessage([this](const std::string& msg) { onWSMessage(msg); });
-    ws->setOnClose([this]() { onWSClose(); });
-    ws->setOnError([this](const std::string& err) { onWSError(err); });
-    ws->connect(url);
+void SDKManager::configure(const std::string& config) {
+    std::cout << "SDKManager: 配置 " << config << std::endl;
+    auto config_ = SDKConfig();
+    config_.FromJsonString(config);
+    printf("sn: %s, ping_pong_interval: %d\n", config_.sn.c_str(), config_.ping_pong_interval);
 }
 
-void SDKManager::sendWebSocketMessage(const std::string& msg) {
-    if (ws && wsOpen) ws->send(msg);
+void SDKManager::connect(const std::string& url) {
+    std::cout << "SDKManager: 连接 " << url << std::endl;
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->connect(url);
+    } else {
+        std::cout << "SDKManager: 未注入 WebSocket 实现" << std::endl;
+    }
 }
 
-void SDKManager::closeWebSocket() {
-    if (ws) ws->close();
-    wsOpen = false;
+void SDKManager::send(const std::string& message) {
+    std::cout << "SDKManager: 发送 " << message << std::endl;
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->send(message);
+    } else {
+        std::cout << "SDKManager: 未注入 WebSocket 实现" << std::endl;
+    }
 }
 
-bool SDKManager::isWebSocketOpen() const {
-    return wsOpen;
+void SDKManager::close() {
+    std::cout << "SDKManager: 关闭连接" << std::endl;
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->close();
+    }
 }
 
-std::string SDKManager::getLastMessage() const {
-    return lastMessage;
+void SDKManager::setWebSocket(WebSocketBase* ws) {
+    wsHolder_.setWebSocket(ws);
 }
 
-void SDKManager::setInfo(const std::string& key, const std::string& value) {
-    infoMap[key] = value;
+WebSocketHolder& SDKManager::getWebSocketHolder() {
+    return wsHolder_;
 }
 
-std::string SDKManager::getInfo(const std::string& key) const {
-    auto it = infoMap.find(key);
-    return it != infoMap.end() ? it->second : "";
+void SDKManager::setMessageCallback(MessageCallback cb) {
+    messageCallback_ = std::move(cb);
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->setOnMessage(messageCallback_);
+    }
 }
 
-// void SDKManager::setOnMessageCallback(std::function<void(std::string)> cb) {
-//     onMessageCallback = std::move(cb);
-//     if (ws) ws->setOnMessageCallback(onMessageCallback);
-// }
-
-void SDKManager::setOnMessageCallbackJS(emscripten::val cb) {
-    onMessageCallback = [cb](std::string msg) {
-        cb(msg);
-    };
-    if (ws) ws->setOnMessageCallback(onMessageCallback);
+void SDKManager::setOpenCallback(OpenCallback cb) {
+    openCallback_ = std::move(cb);
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->setOnOpen(openCallback_);
+    }
 }
-
-// WebSocket回调
-void SDKManager::onWSOpen() {
-    wsOpen = true;
-    std::cout << "WebSocket opened" << std::endl;
+void SDKManager::setCloseCallback(CloseCallback cb) {
+    closeCallback_ = std::move(cb);
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->setOnClose(closeCallback_);
+    }
 }
-void SDKManager::onWSMessage(const std::string& msg) {
-    lastMessage = msg;
-    std::cout << "WebSocket message: " << msg << std::endl;
-    if (onMessageCallback) onMessageCallback(msg);
-}
-void SDKManager::onWSClose() {
-    wsOpen = false;
-    std::cout << "WebSocket closed" << std::endl;
-}
-void SDKManager::onWSError(const std::string& err) {
-    std::cout << "WebSocket error: " << err << std::endl;
-}
-
-// embind导出
-EMSCRIPTEN_BINDINGS(sdk_manager_bindings) {
-    emscripten::function("dummyCallbackType", emscripten::optional_override([](const std::function<void(std::string)>&){}));
-    emscripten::class_<SDKManager>("SDKManager")
-        .constructor<>()
-        .function("createWebSocket", &SDKManager::createWebSocket)
-        .function("sendWebSocketMessage", &SDKManager::sendWebSocketMessage)
-        .function("closeWebSocket", &SDKManager::closeWebSocket)
-        .function("isWebSocketOpen", &SDKManager::isWebSocketOpen)
-        .function("getLastMessage", &SDKManager::getLastMessage)
-        .function("setInfo", &SDKManager::setInfo)
-        .function("getInfo", &SDKManager::getInfo)
-        .function("setOnMessageCallback", &SDKManager::setOnMessageCallbackJS);
+void SDKManager::setErrorCallback(ErrorCallback cb) {
+    errorCallback_ = std::move(cb);
+    if (wsHolder_.getWebSocket()) {
+        wsHolder_.getWebSocket()->setOnError(errorCallback_);
+    }
 } 

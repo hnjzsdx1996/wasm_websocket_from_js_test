@@ -1,0 +1,3 @@
+[submodule "src/third_party/AIGCJson"]
+	path = src/third_party/AIGCJson
+	url = https://github.com/AIGMix/AIGCJson

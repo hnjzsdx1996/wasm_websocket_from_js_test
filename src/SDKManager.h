@@ -1,36 +1,40 @@
 #pragma once
-#include <memory>
 #include <string>
-#include "WebSocketBase.h"
-#include <emscripten/val.h>
+#include "websocket/WebSocketHolder.h"
 
 class SDKManager {
 public:
+    using MessageCallback = std::function<void(const std::string&)>;
+    using OpenCallback = std::function<void()>;
+    using CloseCallback = std::function<void()>;
+    using ErrorCallback = std::function<void(const std::string&)>;
     SDKManager();
     ~SDKManager();
 
-    // WebSocket相关
-    void createWebSocket(const std::string& url);
-    void sendWebSocketMessage(const std::string& msg);
-    void closeWebSocket();
-    bool isWebSocketOpen() const;
-    std::string getLastMessage() const;
-    void setOnMessageCallbackJS(emscripten::val cb);
+    // sdk 配置
+    void configure(const std::string& config);
 
-    // 其他接口
-    void setInfo(const std::string& key, const std::string& value);
-    std::string getInfo(const std::string& key) const;
+    // websocket 管理
+    void connect(const std::string& url);
+    void send(const std::string& message);
+    void close();
+
+    // 注入 websocket 能力
+    void setWebSocket(WebSocketBase* ws);
+
+    // 设置回调
+    void setMessageCallback(MessageCallback cb);
+    void setOpenCallback(OpenCallback cb);
+    void setCloseCallback(CloseCallback cb);
+    void setErrorCallback(ErrorCallback cb);
+
+    WebSocketHolder& getWebSocketHolder();
 
 private:
-    std::unique_ptr<WebSocketBase> ws;
-    bool wsOpen = false;
-    std::string lastMessage;
-    std::unordered_map<std::string, std::string> infoMap;
-    std::function<void(std::string)> onMessageCallback;
-
-    // 回调
-    void onWSOpen();
-    void onWSMessage(const std::string& msg);
-    void onWSClose();
-    void onWSError(const std::string& err);
-}; 
+    WebSocketHolder wsHolder_;
+    MessageCallback messageCallback_;
+    OpenCallback openCallback_;
+    CloseCallback closeCallback_;
+    ErrorCallback errorCallback_;
+    // 其它成员...
+};  

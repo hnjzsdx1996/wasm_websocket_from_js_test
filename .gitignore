@@ -1,3 +1,9 @@
-emsdk/
-build/
 .vscode/
+.idea/
+build/
+build_cpp/
+
+platform/web/emsdk/
+platform/web/build/
+platform/cpp/build/
+cmake-build-debug/
