@@ -15,6 +15,9 @@ set(SOURCES
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/websocket)
 
+# 使用 third_party
+include(${CMAKE_CURRENT_SOURCE_DIR}/third_party/ThirdParty.cmake)
+
 # 生成可执行文件
 add_library(NotificationCenterSDK STATIC ${SOURCES})
 add_library(NotificationCenterSDKShared SHARED ${SOURCES})

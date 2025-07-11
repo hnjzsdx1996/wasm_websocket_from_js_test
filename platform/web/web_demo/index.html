@@ -67,6 +67,14 @@
             NotificationCenterSDK().then(function(ModuleInstance) {
                 sdk = ModuleInstance;
                 sdkHandle = sdk._js_sdk_create();
+                // 配置参数
+                const configObj = { sn: "1234567890", ping_pong_interval: 100 };
+                const configStr = JSON.stringify(configObj);
+                // 分配内存并拷贝字符串
+                const configPtr = sdk._malloc(sdk.lengthBytesUTF8(configStr) + 1);
+                sdk.stringToUTF8(configStr, configPtr, sdk.lengthBytesUTF8(configStr) + 1);
+                sdk._js_sdk_configure(sdkHandle, configPtr);
+                sdk._free(configPtr);
                 // 创建 JSWebSocket 并注入
                 const wsHandle = sdk._js_sdk_create_js_websocket();
                 sdk._js_sdk_set_websocket(sdkHandle, wsHandle);

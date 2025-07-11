@@ -1,12 +1,15 @@
 #include "SDKManager.h"
 #include <iostream>
+#include "message_define/common.h"
 
 SDKManager::SDKManager() {}
 SDKManager::~SDKManager() {}
 
 void SDKManager::configure(const std::string& config) {
     std::cout << "SDKManager: 配置 " << config << std::endl;
-    // TODO: 解析和应用配置
+    auto config_ = SDKConfig();
+    config_.FromJsonString(config);
+    printf("sn: %s, ping_pong_interval: %d\n", config_.sn.c_str(), config_.ping_pong_interval);
 }
 
 void SDKManager::connect(const std::string& url) {

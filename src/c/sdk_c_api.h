@@ -23,9 +23,6 @@ void sdk_send(sdk_handle h, const char* msg);
 void sdk_close(sdk_handle h);
 void sdk_set_websocket(sdk_handle h, websocket_handle ws);
 
-// 工厂函数：创建 JSWebSocket 实例
-websocket_handle sdk_create_js_websocket();
-
 #ifdef __cplusplus
 }
 #endif 

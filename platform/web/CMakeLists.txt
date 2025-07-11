@@ -3,34 +3,25 @@ project(wasm_websocket_sdk_web)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# 包含src目录和web/src目录的头文件
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../src)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../src/websocket)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+# 复用 src 目录的主库
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src ${CMAKE_CURRENT_BINARY_DIR}/src_build)
 
-# 源文件（web相关和平台无关的都要）
-set(SRC
+# 只编译 web 相关源码
+set(WEB_SRC
     src/JSWebSocket.cpp
     src/sdk_c_api_web.cpp
-    ../../src/SDKManager.cpp
-    ../../src/websocket/CppWebSocket.cpp
-    ../../src/websocket/WebSocketBase.h
-    ../../src/websocket/CppWebSocket.h
-    ../../src/websocket/WebSocketHolder.cpp
-    ../../src/websocket/WebSocketHolder.h
-    ../../src/c/sdk_c_api.cpp
 )
 
-# 生成wasm和js
-add_executable(NotificationCenterSDK ${SRC})
+add_executable(NotificationCenterSDKWeb ${WEB_SRC})
+target_link_libraries(NotificationCenterSDKWeb PRIVATE NotificationCenterSDK)
 
 # emscripten专用设置
 if(EMSCRIPTEN)
-    set_target_properties(NotificationCenterSDK PROPERTIES
+    set_target_properties(NotificationCenterSDKWeb PROPERTIES
         OUTPUT_NAME "NotificationCenterSDK"
         SUFFIX ".js"
     )
-    target_link_options(NotificationCenterSDK PRIVATE
+    target_link_options(NotificationCenterSDKWeb PRIVATE
         "SHELL:-sMODULARIZE=1"
         "SHELL:-sEXPORT_NAME=NotificationCenterSDK"
         "SHELL:-sALLOW_MEMORY_GROWTH=1"

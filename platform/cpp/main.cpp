@@ -28,6 +28,7 @@ int main() {
 
     // 创建 SDKManager 实例
     SDKManager sdk;
+    sdk.configure(R"({"sn":"1234567890","ping_pong_interval":100})");
 
     // 注册回调
     sdk.setMessageCallback(on_message);
