@@ -1,4 +1,6 @@
-emsdk/
 build/
 .vscode/
 build_cpp/
+
+platform/web/emsdk/
+platform/web/build/

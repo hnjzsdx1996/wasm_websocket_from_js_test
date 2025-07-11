@@ -2,18 +2,19 @@
 set -e
 
 # 加载 emsdk 环境
-source ../../emsdk/emsdk_env.sh
+source ../emsdk/emsdk_env.sh
 
 # 工程根目录
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/../.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/../../.." && pwd)"
 SRC_DIR="$ROOT_DIR/src"
-BUILD_DIR="$ROOT_DIR/build"
-WEB_DIR="$ROOT_DIR/platform/web/web_demo"
+BUILD_DIR="$ROOT_DIR/platform/web/build"
+WEB_DIR="$ROOT_DIR/platform/web/dist"
+WEB_DEMO_DIR="$ROOT_DIR/platform/web/web_demo"
 PLATFORM_WEB_DIR="$ROOT_DIR/platform/web"
 
 # 检查 emsdk 环境
 if ! command -v emcmake >/dev/null 2>&1; then
-  echo "请先激活emsdk环境 (source ../../emsdk/emsdk_env.sh)"
+  echo "激活emsdk环境失败"
   exit 1
 fi
 
@@ -29,4 +30,8 @@ mkdir -p "$WEB_DIR"
 rm -f "$WEB_DIR"/NotificationCenterSDK.js "$WEB_DIR"/NotificationCenterSDK.wasm
 cp NotificationCenterSDK.js NotificationCenterSDK.wasm "$WEB_DIR/"
 
-echo "编译完成，输出已拷贝到 $WEB_DIR/" 
+mkdir -p "$WEB_DEMO_DIR"
+rm -f "$WEB_DEMO_DIR"/NotificationCenterSDK.js "$WEB_DEMO_DIR"/NotificationCenterSDK.wasm
+cp NotificationCenterSDK.js NotificationCenterSDK.wasm "$WEB_DEMO_DIR/"
+
+echo "编译完成" 
