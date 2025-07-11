@@ -24,6 +24,7 @@ static std::mutex g_wsMapMutex;
 
 JSWebSocket::JSWebSocket() {
     std::cout << "JSWebSocket: ctor" << std::endl;
+    this->jsWebSocketPtr = this; // 关键：用 this 指针作为 wsPtr
     // 注册到全局映射
     std::lock_guard<std::mutex> lock(g_wsMapMutex);
     g_wsPtr2Instance[jsWebSocketPtr] = this;
@@ -132,32 +133,36 @@ extern "C" {
 }
 
 // JavaScript回调函数实现
-void JSWebSocket::onJSMessage(const std::string& message) {
-    std::cout << "JSWebSocket: 收到消息 " << message << std::endl;
-    if (onMessage) {
-        onMessage(message);
-    }
+void JSWebSocket::setOnMessage(MessageCallback cb) {
+    onMessage_ = std::move(cb);
+}
+void JSWebSocket::setOnOpen(OpenCallback cb) {
+    onOpen_ = std::move(cb);
+}
+void JSWebSocket::setOnClose(CloseCallback cb) {
+    onClose_ = std::move(cb);
+}
+void JSWebSocket::setOnError(ErrorCallback cb) {
+    onError_ = std::move(cb);
 }
 
+void JSWebSocket::onJSMessage(const std::string& message) {
+    std::cout << "JSWebSocket: 收到消息 " << message << std::endl;
+    if (onMessage_) {
+        onMessage_(message);
+    }
+}
 void JSWebSocket::onJSOpen() {
     std::cout << "JSWebSocket: 连接已打开" << std::endl;
     connected = true;
-    if (onOpen) {
-        onOpen();
-    }
+    if (onOpen_) onOpen_();
 }
-
 void JSWebSocket::onJSClose() {
     std::cout << "JSWebSocket: 连接已关闭" << std::endl;
     connected = false;
-    if (onClose) {
-        onClose();
-    }
+    if (onClose_) onClose_();
 }
-
 void JSWebSocket::onJSError(const std::string& error) {
     std::cout << "JSWebSocket: 发生错误 " << error << std::endl;
-    if (onError) {
-        onError(error);
-    }
+    if (onError_) onError_(error);
 } 

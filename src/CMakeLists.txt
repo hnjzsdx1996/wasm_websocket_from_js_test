@@ -5,13 +5,18 @@ set(CMAKE_CXX_STANDARD 17)
 
 # 源文件
 set(SRC
-    JSWebSocket.cpp
+    websocket/WebSocketBase.h
+    websocket/JSWebSocket.h
+    websocket/CppWebSocket.h
+    websocket/JSWebSocket.cpp
     SDKManager.cpp
-    CppWebSocket.cpp
+    websocket/CppWebSocket.cpp
+    websocket/WebSocketHolder.cpp
 )
 
 # 头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/websocket)
 
 # 生成可执行文件
 add_executable(NotificationCenterSDK ${SRC})

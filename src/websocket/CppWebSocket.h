@@ -13,9 +13,16 @@ public:
     void send(const std::string& message) override;
     void close() override;
     bool isOpen() const override;
-
+    void setOnMessage(MessageCallback cb) override;
+    void setOnOpen(OpenCallback cb) override;
+    void setOnClose(CloseCallback cb) override;
+    void setOnError(ErrorCallback cb) override;
 private:
     class Impl;
     std::unique_ptr<Impl> pImpl;
     bool connected = false;
+    MessageCallback onMessage_;
+    OpenCallback onOpen_;
+    CloseCallback onClose_;
+    ErrorCallback onError_;
 }; 

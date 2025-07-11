@@ -23,13 +23,7 @@
     <div id="log"></div>
     <script>
         let sdk = null;
-        // 只声明一次Module，并确保在js引入前
-        var Module = {
-            locateFile: function(path, prefix) {
-                console.log('locateFile:', path, prefix);
-                return prefix + path;
-            }
-        };
+        let sdkHandle = null;
         function log(msg) {
             const logDiv = document.getElementById('log');
             logDiv.innerHTML += msg + '<br>';
@@ -37,43 +31,62 @@
         }
         function connectWS() {
             const url = document.getElementById('wsUrl').value;
-            if (!sdk) {
+            if (!sdk || !sdkHandle) {
                 log('WASM未加载完成');
                 return;
             }
-            sdk.createWebSocket(url);
+            // 分配内存并拷贝字符串
+            const urlPtr = sdk._malloc(sdk.lengthBytesUTF8(url) + 1);
+            sdk.stringToUTF8(url, urlPtr, sdk.lengthBytesUTF8(url) + 1);
+            sdk._sdk_connect(sdkHandle, urlPtr);
+            sdk._free(urlPtr);
             log('已请求连接: ' + url);
         }
         function sendMsg() {
             const msg = document.getElementById('msgInput').value;
-            if (!sdk || !sdk.isWebSocketOpen()) {
-                log('WebSocket未连接');
+            if (!sdk || !sdkHandle) {
+                log('WASM未加载完成');
                 return;
             }
-            sdk.sendWebSocketMessage(msg);
+            // 分配内存并拷贝字符串
+            const msgPtr = sdk._malloc(sdk.lengthBytesUTF8(msg) + 1);
+            sdk.stringToUTF8(msg, msgPtr, sdk.lengthBytesUTF8(msg) + 1);
+            sdk._sdk_send(sdkHandle, msgPtr);
+            sdk._free(msgPtr);
             log('发送: ' + msg);
         }
         function closeWS() {
-            if (sdk) sdk.closeWebSocket();
+            if (sdk && sdkHandle) sdk._sdk_close(sdkHandle);
             log('已请求断开');
-        }
-        // 注册C++回调，收到消息时直接打印
-        function onWasmMessage(msg) {
-            log('收到: ' + msg);
         }
         window.addEventListener('load', function() {
             if (typeof NotificationCenterSDK !== 'function') {
                 log('NotificationCenterSDK 工厂函数未加载');
                 return;
             }
-            NotificationCenterSDK(Module).then(function(ModuleInstance) {
-                // 明确指定使用JS WebSocket
-                sdk = new ModuleInstance.SDKManager(ModuleInstance.WebSocketType.JS);
-                // 设置JS WebSocket对象指针（这里用一个简单的数字即可）
-                sdk.setJSWebSocketPtr(12345);
-                sdk.setOnMessageCallback(function(msg) {
+            NotificationCenterSDK().then(function(ModuleInstance) {
+                sdk = ModuleInstance;
+                sdkHandle = sdk._sdk_create();
+                // 创建 JSWebSocket 并注入
+                const wsHandle = sdk._sdk_create_js_websocket();
+                sdk._sdk_set_websocket(sdkHandle, wsHandle);
+                // 注册回调
+                sdk._sdk_set_message_callback(sdkHandle, sdk.addFunction(function(msgPtr, userData) {
+                    const msg = sdk.UTF8ToString(msgPtr);
                     log('收到: ' + msg);
-                });
+                    sdk._free(msgPtr); // 用完后释放
+                }, 'vii'), 0);
+                sdk._sdk_set_open_callback(sdkHandle, sdk.addFunction(function(userData) {
+                    log('连接已打开');
+                }, 'vi'), 0);
+                sdk._sdk_set_close_callback(sdkHandle, sdk.addFunction(function(userData) {
+                    log('连接已关闭');
+                }, 'vi'), 0);
+                sdk._sdk_set_error_callback(sdkHandle, sdk.addFunction(function(errPtr, userData) {
+                    const err = sdk.UTF8ToString(errPtr);
+                    log('发生错误: ' + err);
+                    sdk._free(errPtr); // 用完后释放
+                }, 'vii'), 0);
                 log('WASM加载完成，可操作WebSocket');
                 window.Module = ModuleInstance;
             });

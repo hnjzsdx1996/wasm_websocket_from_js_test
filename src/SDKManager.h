@@ -1,61 +1,40 @@
 #pragma once
-#include <memory>
 #include <string>
-#include <unordered_map>
-#include "WebSocketBase.h"
-#include <cstdint>
-#ifdef __EMSCRIPTEN__
-#include <emscripten/val.h>
-#endif
-
-// WebSocket类型枚举
-enum class WebSocketType {
-    CPP,    // C++原生实现
-    JS      // JavaScript实现
-};
+#include "websocket/WebSocketHolder.h"
 
 class SDKManager {
 public:
-    // 构造函数，可以指定WebSocket类型
-    explicit SDKManager(WebSocketType wsType = WebSocketType::CPP);
+    using MessageCallback = std::function<void(const std::string&)>;
+    using OpenCallback = std::function<void()>;
+    using CloseCallback = std::function<void()>;
+    using ErrorCallback = std::function<void(const std::string&)>;
+    SDKManager();
     ~SDKManager();
 
-    // 设置WebSocket类型（在创建连接前调用）
-    void setWebSocketType(WebSocketType wsType);
-    
-    // 设置JavaScript WebSocket对象（仅在使用JS类型时）
-    void setJSWebSocketPtr(uintptr_t jsWebSocketPtr);
+    // sdk 配置
+    void configure(const std::string& config);
 
-    // WebSocket相关
-    void createWebSocket(const std::string& url);
-    void sendWebSocketMessage(const std::string& msg);
-    void closeWebSocket();
-    bool isWebSocketOpen() const;
-    std::string getLastMessage() const;
+    // websocket 管理
+    void connect(const std::string& url);
+    void send(const std::string& message);
+    void close();
 
-    // 其他接口
-    void setInfo(const std::string& key, const std::string& value);
-    std::string getInfo(const std::string& key) const;
-#ifdef __EMSCRIPTEN__
-    void setOnMessageCallback(emscripten::val cb);
-#endif
+    // 注入 websocket 能力
+    void setWebSocket(WebSocketBase* ws);
+
+    // 设置回调
+    void setMessageCallback(MessageCallback cb);
+    void setOpenCallback(OpenCallback cb);
+    void setCloseCallback(CloseCallback cb);
+    void setErrorCallback(ErrorCallback cb);
+
+    WebSocketHolder& getWebSocketHolder();
 
 private:
-    std::unique_ptr<WebSocketBase> ws;
-    WebSocketType currentWsType;
-    void* jsWebSocketPtr = nullptr;
-    std::string lastMessage;
-    std::unordered_map<std::string, std::string> infoMap;
-#ifdef __EMSCRIPTEN__
-    std::function<void(std::string)> onMessageCallback;
-#endif
-
-    // 创建WebSocket实例
-    void createWebSocketInstance();
-    
-    // 回调
-    void onWSOpen();
-    void onWSMessage(const std::string& msg);
-    void onWSClose();
-    void onWSError(const std::string& err);
+    WebSocketHolder wsHolder_;
+    MessageCallback messageCallback_;
+    OpenCallback openCallback_;
+    CloseCallback closeCallback_;
+    ErrorCallback errorCallback_;
+    // 其它成员...
 };  
