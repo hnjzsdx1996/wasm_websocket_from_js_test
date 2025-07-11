@@ -1,5 +1,6 @@
-.vscode/
+.cache/
 .idea/
+.vscode/
 build/
 build_cpp/
 

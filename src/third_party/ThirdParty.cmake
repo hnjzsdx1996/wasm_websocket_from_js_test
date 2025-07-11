@@ -44,3 +44,7 @@ include_directories(${THIRD_PARTIES_SRC_DIR}/AIGCJson/include)
 include_directories(${THIRD_PARTIES_SRC_DIR}/AIGCJson/include/rapidjson)
 include_directories(${THIRD_PARTIES_SRC_DIR}/AIGCJson/include/rapidjson/error)
 include_directories(${THIRD_PARTIES_SRC_DIR}/AIGCJson/include/rapidjson/internal) 
+
+# ------------------------- plog ------------------------- #
+include_directories(${THIRD_PARTIES_SRC_DIR}/plog/include) 
+

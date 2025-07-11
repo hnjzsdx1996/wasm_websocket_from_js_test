@@ -14,6 +14,7 @@ set(SOURCES
 # 头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/websocket)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/base/logger)
 
 # 使用 third_party
 include(${CMAKE_CURRENT_SOURCE_DIR}/third_party/ThirdParty.cmake)

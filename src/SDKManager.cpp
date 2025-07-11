@@ -1,11 +1,17 @@
 #include "SDKManager.h"
 #include <iostream>
 #include "message_define/common.h"
+#include "base/logger/logger.h"
 
-SDKManager::SDKManager() {}
+SDKManager::SDKManager() {
+    nc_logger::init(plog::info, "notification_center_log.log");
+    NC_LOG_INFO("SDKManager ctor");
+}
+
 SDKManager::~SDKManager() {}
 
 void SDKManager::configure(const std::string& config) {
+    NC_LOG_INFO("SDKManager configure");
     std::cout << "SDKManager: 配置 " << config << std::endl;
     auto config_ = SDKConfig();
     config_.FromJsonString(config);

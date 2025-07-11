@@ -1,3 +1,6 @@
 [submodule "src/third_party/AIGCJson"]
 	path = src/third_party/AIGCJson
 	url = https://github.com/AIGMix/AIGCJson
+[submodule "src/third_party/plog"]
+	path = src/third_party/plog
+	url = https://github.com/SergiusTheBest/plog
