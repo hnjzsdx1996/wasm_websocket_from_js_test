@@ -7,7 +7,7 @@ source ../emsdk/emsdk_env.sh
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/.." && pwd)"
 SRC_DIR="$ROOT_DIR/src"
 BUILD_DIR="$ROOT_DIR/build"
-WEB_DIR="$ROOT_DIR/web"
+WEB_DIR="$ROOT_DIR/web_demo"
 
 # 检查emsdk环境
 if ! command -v emcmake >/dev/null 2>&1; then
