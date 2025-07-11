@@ -1,1 +1,0 @@
-source /mnt/emsdk_test/wasm_websocket_from_js_test/emsdk/emsdk_env.sh

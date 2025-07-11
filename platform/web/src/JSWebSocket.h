@@ -1,5 +1,5 @@
 #pragma once
-#include "WebSocketBase.h"
+#include "../../../src/websocket/WebSocketBase.h"
 #include <string>
 
 // JS WebSocket接口，用于接收来自JavaScript的WebSocket对象
