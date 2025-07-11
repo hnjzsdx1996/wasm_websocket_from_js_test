@@ -2264,6 +2264,70 @@ async function createWasm() {
     };
   var __embind_register_emval = (rawType) => registerType(rawType, EmValType);
 
+  
+  var enumReadValueFromPointer = (name, width, signed) => {
+      switch (width) {
+        case 1: return signed ?
+          function(pointer) { return this['fromWireType'](HEAP8[pointer]) } :
+          function(pointer) { return this['fromWireType'](HEAPU8[pointer]) };
+        case 2: return signed ?
+          function(pointer) { return this['fromWireType'](HEAP16[((pointer)>>1)]) } :
+          function(pointer) { return this['fromWireType'](HEAPU16[((pointer)>>1)]) };
+        case 4: return signed ?
+          function(pointer) { return this['fromWireType'](HEAP32[((pointer)>>2)]) } :
+          function(pointer) { return this['fromWireType'](HEAPU32[((pointer)>>2)]) };
+        default:
+          throw new TypeError(`invalid integer width (${width}): ${name}`);
+      }
+    };
+  
+  
+  /** @suppress {globalThis} */
+  var __embind_register_enum = (rawType, name, size, isSigned) => {
+      name = AsciiToString(name);
+  
+      function ctor() {}
+      ctor.values = {};
+  
+      registerType(rawType, {
+        name,
+        constructor: ctor,
+        'fromWireType': function(c) {
+          return this.constructor.values[c];
+        },
+        'toWireType': (destructors, c) => c.value,
+        argPackAdvance: GenericWireTypeSize,
+        'readValueFromPointer': enumReadValueFromPointer(name, size, isSigned),
+        destructorFunction: null,
+      });
+      exposePublicSymbol(name, ctor);
+    };
+
+  
+  
+  
+  
+  var requireRegisteredType = (rawType, humanName) => {
+      var impl = registeredTypes[rawType];
+      if (undefined === impl) {
+        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
+      }
+      return impl;
+    };
+  var __embind_register_enum_value = (rawEnumType, name, enumValue) => {
+      var enumType = requireRegisteredType(rawEnumType, 'enum');
+      name = AsciiToString(name);
+  
+      var Enum = enumType.constructor;
+  
+      var Value = Object.create(enumType.constructor.prototype, {
+        value: {value: enumValue},
+        constructor: {value: createNamedFunction(`${enumType.name}_${name}`, function() {})},
+      });
+      Enum.values[enumValue] = Value;
+      Enum[name] = Value;
+    };
+
   var floatReadValueFromPointer = (name, width) => {
       switch (width) {
         case 4: return function(pointer) {
@@ -2295,32 +2359,6 @@ async function createWasm() {
         argPackAdvance: GenericWireTypeSize,
         'readValueFromPointer': floatReadValueFromPointer(name, size),
         destructorFunction: null, // This type does not need a destructor
-      });
-    };
-
-  
-  
-  
-  
-  
-  
-  
-  
-  var __embind_register_function = (name, argCount, rawArgTypesAddr, signature, rawInvoker, fn, isAsync, isNonnullReturn) => {
-      var argTypes = heap32VectorToArray(argCount, rawArgTypesAddr);
-      name = AsciiToString(name);
-      name = getFunctionName(name);
-  
-      rawInvoker = embind__requireFunction(signature, rawInvoker, isAsync);
-  
-      exposePublicSymbol(name, function() {
-        throwUnboundTypeError(`Cannot call ${name} due to unbound types`, argTypes);
-      }, argCount - 1);
-  
-      whenDependentTypesAreResolved([], argTypes, (argTypes) => {
-        var invokerArgsArray = [argTypes[0] /* return value */, null /* no class 'this'*/].concat(argTypes.slice(1) /* actual params */);
-        replacePublicSymbol(name, craftInvokerFunction(name, invokerArgsArray, null /* no class 'this'*/, rawInvoker, fn, isAsync), argCount - 1);
-        return [];
       });
     };
 
@@ -2841,15 +2879,6 @@ async function createWasm() {
       return id;
     };
   
-  
-  
-  var requireRegisteredType = (rawType, humanName) => {
-      var impl = registeredTypes[rawType];
-      if (undefined === impl) {
-        throwBindingError(`${humanName} has unknown type ${getTypeName(rawType)}`);
-      }
-      return impl;
-    };
   var emval_lookupTypes = (argCount, argTypes) => {
       var a = new Array(argCount);
       for (var i = 0; i < argCount; ++i) {
@@ -5830,6 +5859,87 @@ async function createWasm() {
   }
   }
 
+  function _js_websocket_close(wsPtr) {
+      const wsMap = Module.wsMap;
+      if (!wsMap) return;
+      const ws = wsMap.get(wsPtr);
+      if (ws) {
+        console.log('JS: 关闭WebSocket连接');
+        ws.close();
+        wsMap.delete(wsPtr);
+      }
+    }
+
+  function _js_websocket_connect(wsPtr, url) {
+      const urlStr = UTF8ToString(url);
+      if (!Module.wsMap) Module.wsMap = new Map();
+      const wsMap = Module.wsMap;
+      console.log('JS: 创建WebSocket连接', urlStr);
+      try {
+        const ws = new WebSocket(urlStr);
+        wsMap.set(wsPtr, ws);
+        ws.onopen = function() {
+          console.log('JS: WebSocket连接已打开');
+          if (Module._js_websocket_on_open) Module._js_websocket_on_open(wsPtr);
+        };
+        ws.onmessage = function(event) {
+          console.log('JS: 收到消息', event.data);
+          const len = Module.lengthBytesUTF8(event.data) + 1;
+          const msgPtr = Module._malloc(len);
+          Module.stringToUTF8(event.data, msgPtr, len);
+          if (Module._js_websocket_on_message) Module._js_websocket_on_message(wsPtr, msgPtr);
+          Module._free(msgPtr);
+        };
+        ws.onclose = function() {
+          console.log('JS: WebSocket连接已关闭');
+          wsMap.delete(wsPtr);
+          if (Module._js_websocket_on_close) Module._js_websocket_on_close(wsPtr);
+        };
+        ws.onerror = function(event) {
+          console.log('JS: WebSocket错误', event);
+          const errMsg = 'WebSocket error';
+          const errLen = Module.lengthBytesUTF8(errMsg) + 1;
+          const errPtr = Module._malloc(errLen);
+          Module.stringToUTF8(errMsg, errPtr, errLen);
+          if (Module._js_websocket_on_error) Module._js_websocket_on_error(wsPtr, errPtr);
+          Module._free(errPtr);
+        };
+      } catch (error) {
+        console.error('JS: WebSocket创建失败', error);
+        const errMsg = error.message;
+        const errLen = Module.lengthBytesUTF8(errMsg) + 1;
+        const errPtr = Module._malloc(errLen);
+        Module.stringToUTF8(errMsg, errPtr, errLen);
+        if (Module._js_websocket_on_error) Module._js_websocket_on_error(wsPtr, errPtr);
+        Module._free(errPtr);
+      }
+    }
+
+  function _js_websocket_is_open(wsPtr) {
+      const wsMap = Module.wsMap;
+      if (!wsMap) return 0;
+      const ws = wsMap.get(wsPtr);
+      return ws && ws.readyState === WebSocket.OPEN;
+    }
+
+  var _js_websocket_send = function(wsPtr, message) {
+      const wsMap = Module.wsMap;
+      console.log('JS: send wsPtr', wsPtr, typeof wsPtr, 'wsMap keys:', Array.from(wsMap ? wsMap.keys() : []).map(k => [k, typeof k]));
+      if (!wsMap) return;
+      const ws = wsMap.get(wsPtr);
+      if (!ws) {
+        console.error('JS: WebSocket对象不存在', wsPtr);
+        return;
+      }
+      if (ws.readyState !== WebSocket.OPEN) {
+        console.error('JS: WebSocket未连接', wsPtr, 'readyState:', ws.readyState);
+        return;
+      }
+      const messageStr = UTF8ToString(message);
+      console.log('JS: 发送消息', messageStr);
+      ws.send(messageStr);
+    };
+
   var getCFunc = (ident) => {
       var func = Module['_' + ident]; // closure exported function
       assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
@@ -5921,27 +6031,7 @@ async function createWasm() {
       return (...args) => ccall(ident, returnType, argTypes, args, opts);
     };
 
-  var ALLOC_STACK = 1;
-  
-  
-  
-  var allocate = (slab, allocator) => {
-      var ret;
-      assert(typeof allocator == 'number', 'allocate no longer takes a type argument')
-      assert(typeof slab != 'number', 'allocate no longer takes a number as arg0')
-  
-      if (allocator == ALLOC_STACK) {
-        ret = stackAlloc(slab.length);
-      } else {
-        ret = _malloc(slab.length);
-      }
-  
-      if (!slab.subarray && !slab.slice) {
-        slab = new Uint8Array(slab);
-      }
-      HEAPU8.set(slab, ret);
-      return ret;
-    };
+
 
 
 init_ClassHandle();
@@ -5992,9 +6082,10 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
 // Begin runtime exports
   Module['ccall'] = ccall;
   Module['cwrap'] = cwrap;
+  Module['UTF8ToString'] = UTF8ToString;
+  Module['stringToUTF8'] = stringToUTF8;
+  Module['lengthBytesUTF8'] = lengthBytesUTF8;
   Module['intArrayFromString'] = intArrayFromString;
-  Module['ALLOC_STACK'] = ALLOC_STACK;
-  Module['allocate'] = allocate;
   var missingLibrarySymbols = [
   'writeI53ToI64',
   'writeI53ToI64Clamped',
@@ -6147,6 +6238,8 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'registerWebGlEventCallback',
   'runAndAbortIfError',
   'ALLOC_NORMAL',
+  'ALLOC_STACK',
+  'allocate',
   'writeStringToMemory',
   'writeAsciiToMemory',
   'demangle',
@@ -6158,7 +6251,6 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   'unregisterInheritedInstance',
   'getInheritedInstanceCount',
   'getLiveInheritedInstances',
-  'enumReadValueFromPointer',
   'setDelayFunction',
   'validateThis',
   'count_emval_handles',
@@ -6224,10 +6316,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'PATH_FS',
   'UTF8Decoder',
   'UTF8ArrayToString',
-  'UTF8ToString',
   'stringToUTF8Array',
-  'stringToUTF8',
-  'lengthBytesUTF8',
   'AsciiToString',
   'UTF16Decoder',
   'UTF16ToString',
@@ -6449,6 +6538,7 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'registeredPointers',
   'registerType',
   'integerReadValueFromPointer',
+  'enumReadValueFromPointer',
   'floatReadValueFromPointer',
   'assertIntegerRange',
   'readPointer',
@@ -6501,22 +6591,19 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
-function js_ws_connect(wsId,url) { if (!window.cppWsMap) window.cppWsMap = {}; let ws = new WebSocket(UTF8ToString(url)); window.cppWsMap[wsId] = ws; ws.onopen = function() { Module._js_ws_on_open(wsId); }; ws.onmessage = function(e) { var str = e.data; var arr = intArrayFromString(str); var ptr = stackAlloc(arr.length); HEAP8.set(arr, ptr); Module._js_ws_on_message(wsId, ptr); }; ws.onclose = function() { Module._js_ws_on_close(wsId); }; ws.onerror = function(e) { var arr = intArrayFromString('error'); var ptr = stackAlloc(arr.length); HEAP8.set(arr, ptr); Module._js_ws_on_error(wsId, ptr); }; }
-function js_ws_send(wsId,msg) { let ws = window.cppWsMap && window.cppWsMap[wsId]; if (ws && ws.readyState === 1) ws.send(UTF8ToString(msg)); }
-function js_ws_close(wsId) { let ws = window.cppWsMap && window.cppWsMap[wsId]; if (ws) ws.close(); }
 
 // Imports from the Wasm binary.
 var ___getTypeName = makeInvalidEarlyAccess('___getTypeName');
-var _js_ws_on_open = Module['_js_ws_on_open'] = makeInvalidEarlyAccess('_js_ws_on_open');
-var _js_ws_on_message = Module['_js_ws_on_message'] = makeInvalidEarlyAccess('_js_ws_on_message');
-var _js_ws_on_close = Module['_js_ws_on_close'] = makeInvalidEarlyAccess('_js_ws_on_close');
-var _js_ws_on_error = Module['_js_ws_on_error'] = makeInvalidEarlyAccess('_js_ws_on_error');
-var _malloc = makeInvalidEarlyAccess('_malloc');
+var _js_websocket_on_open = Module['_js_websocket_on_open'] = makeInvalidEarlyAccess('_js_websocket_on_open');
+var _js_websocket_on_message = Module['_js_websocket_on_message'] = makeInvalidEarlyAccess('_js_websocket_on_message');
+var _js_websocket_on_close = Module['_js_websocket_on_close'] = makeInvalidEarlyAccess('_js_websocket_on_close');
+var _js_websocket_on_error = Module['_js_websocket_on_error'] = makeInvalidEarlyAccess('_js_websocket_on_error');
+var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var _fflush = makeInvalidEarlyAccess('_fflush');
 var _emscripten_stack_get_end = makeInvalidEarlyAccess('_emscripten_stack_get_end');
 var _emscripten_stack_get_base = makeInvalidEarlyAccess('_emscripten_stack_get_base');
 var _strerror = makeInvalidEarlyAccess('_strerror');
-var _free = makeInvalidEarlyAccess('_free');
+var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
 var _emscripten_stack_init = makeInvalidEarlyAccess('_emscripten_stack_init');
 var _emscripten_stack_get_free = makeInvalidEarlyAccess('_emscripten_stack_get_free');
 var __emscripten_stack_restore = makeInvalidEarlyAccess('__emscripten_stack_restore');
@@ -6525,16 +6612,16 @@ var _emscripten_stack_get_current = makeInvalidEarlyAccess('_emscripten_stack_ge
 
 function assignWasmExports(wasmExports) {
   ___getTypeName = createExportWrapper('__getTypeName', 1);
-  Module['_js_ws_on_open'] = _js_ws_on_open = createExportWrapper('js_ws_on_open', 1);
-  Module['_js_ws_on_message'] = _js_ws_on_message = createExportWrapper('js_ws_on_message', 2);
-  Module['_js_ws_on_close'] = _js_ws_on_close = createExportWrapper('js_ws_on_close', 1);
-  Module['_js_ws_on_error'] = _js_ws_on_error = createExportWrapper('js_ws_on_error', 2);
-  _malloc = createExportWrapper('malloc', 1);
+  Module['_js_websocket_on_open'] = _js_websocket_on_open = createExportWrapper('js_websocket_on_open', 1);
+  Module['_js_websocket_on_message'] = _js_websocket_on_message = createExportWrapper('js_websocket_on_message', 2);
+  Module['_js_websocket_on_close'] = _js_websocket_on_close = createExportWrapper('js_websocket_on_close', 1);
+  Module['_js_websocket_on_error'] = _js_websocket_on_error = createExportWrapper('js_websocket_on_error', 2);
+  Module['_malloc'] = _malloc = createExportWrapper('malloc', 1);
   _fflush = createExportWrapper('fflush', 1);
   _emscripten_stack_get_end = wasmExports['emscripten_stack_get_end'];
   _emscripten_stack_get_base = wasmExports['emscripten_stack_get_base'];
   _strerror = createExportWrapper('strerror', 1);
-  _free = createExportWrapper('free', 1);
+  Module['_free'] = _free = createExportWrapper('free', 1);
   _emscripten_stack_init = wasmExports['emscripten_stack_init'];
   _emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'];
   __emscripten_stack_restore = wasmExports['_emscripten_stack_restore'];
@@ -6559,9 +6646,11 @@ var wasmImports = {
   /** @export */
   _embind_register_emval: __embind_register_emval,
   /** @export */
-  _embind_register_float: __embind_register_float,
+  _embind_register_enum: __embind_register_enum,
   /** @export */
-  _embind_register_function: __embind_register_function,
+  _embind_register_enum_value: __embind_register_enum_value,
+  /** @export */
+  _embind_register_float: __embind_register_float,
   /** @export */
   _embind_register_integer: __embind_register_integer,
   /** @export */
@@ -6601,11 +6690,13 @@ var wasmImports = {
   /** @export */
   fd_write: _fd_write,
   /** @export */
-  js_ws_close,
+  js_websocket_close: _js_websocket_close,
   /** @export */
-  js_ws_connect,
+  js_websocket_connect: _js_websocket_connect,
   /** @export */
-  js_ws_send
+  js_websocket_is_open: _js_websocket_is_open,
+  /** @export */
+  js_websocket_send: _js_websocket_send
 };
 var wasmExports = await createWasm();
 

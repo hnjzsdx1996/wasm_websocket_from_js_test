@@ -7,12 +7,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(SRC
     JSWebSocket.cpp
     SDKManager.cpp
+    CppWebSocket.cpp
 )
 
 # 头文件目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# 生成wasm和js
+# 生成可执行文件
 add_executable(NotificationCenterSDK ${SRC})
 
 # emscripten专用设置
@@ -27,5 +28,10 @@ if(EMSCRIPTEN)
         "SHELL:-sALLOW_MEMORY_GROWTH=1"
         "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','allocate','intArrayFromString','ALLOC_STACK']"
         "SHELL:--bind"
+    )
+else()
+    # 纯C++编译设置
+    set_target_properties(NotificationCenterSDK PROPERTIES
+        OUTPUT_NAME "NotificationCenterSDK"
     )
 endif() 

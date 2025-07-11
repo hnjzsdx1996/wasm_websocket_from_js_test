@@ -67,7 +67,10 @@
                 return;
             }
             NotificationCenterSDK(Module).then(function(ModuleInstance) {
-                sdk = new ModuleInstance.SDKManager();
+                // 明确指定使用JS WebSocket
+                sdk = new ModuleInstance.SDKManager(ModuleInstance.WebSocketType.JS);
+                // 设置JS WebSocket对象指针（这里用一个简单的数字即可）
+                sdk.setJSWebSocketPtr(12345);
                 sdk.setOnMessageCallback(function(msg) {
                     log('收到: ' + msg);
                 });

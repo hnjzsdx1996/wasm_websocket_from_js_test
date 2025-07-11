@@ -15,7 +15,7 @@ public:
     virtual void connect(const std::string& url) = 0;
     virtual void send(const std::string& message) = 0;
     virtual void close() = 0;
-    virtual void setOnMessageCallback(std::function<void(std::string)> cb) = 0;
+    virtual bool isOpen() const = 0;
 
     void setOnOpen(OnOpenCallback cb) { onOpen = std::move(cb); }
     void setOnMessage(OnMessageCallback cb) { onMessage = std::move(cb); }
