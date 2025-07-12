@@ -13,6 +13,15 @@ set(WEB_SRC
 )
 
 add_executable(NotificationCenterSDKWeb ${WEB_SRC})
+
+# 设置目标特定的头文件路径
+target_include_directories(NotificationCenterSDKWeb PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/../../src
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/base/logger
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/third_party/plog/include
+)
+
 target_link_libraries(NotificationCenterSDKWeb PRIVATE NotificationCenterSDK)
 
 # emscripten专用设置

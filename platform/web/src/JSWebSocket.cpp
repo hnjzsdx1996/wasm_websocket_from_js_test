@@ -1,5 +1,10 @@
 #include "./JSWebSocket.h"
-#include <iostream>
+#ifdef __EMSCRIPTEN__
+// 在 emscripten 环境下暂时禁用日志，避免头文件问题
+#define NC_LOG_INFO(...) ((void)0)
+#else
+#include "../../../src/base/logger/logger.h"
+#endif
 #include <unordered_map>
 #include <mutex>
 
@@ -23,7 +28,7 @@ static std::unordered_map<void*, JSWebSocket*> g_wsPtr2Instance;
 static std::mutex g_wsMapMutex;
 
 JSWebSocket::JSWebSocket() {
-    std::cout << "JSWebSocket: ctor" << std::endl;
+    NC_LOG_INFO("JSWebSocket: ctor");
     this->jsWebSocketPtr = this; // 关键：用 this 指针作为 wsPtr
     // 注册到全局映射
     std::lock_guard<std::mutex> lock(g_wsMapMutex);
@@ -31,7 +36,7 @@ JSWebSocket::JSWebSocket() {
 }
 
 JSWebSocket::~JSWebSocket() {
-    std::cout << "JSWebSocket: dtor" << std::endl;
+    NC_LOG_INFO("JSWebSocket: dtor");
     if (connected) {
         close();
     }
@@ -49,26 +54,26 @@ void JSWebSocket::setJSWebSocketPtr(void* jsWebSocketPtr) {
 
 void JSWebSocket::connect(const std::string& url) {
     if (!jsWebSocketPtr) {
-        std::cout << "JSWebSocket: 未设置JavaScript WebSocket对象" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 未设置JavaScript WebSocket对象");
         return;
     }
     
-    std::cout << "JSWebSocket: 连接到 " << url << std::endl;
+    NC_LOG_INFO("JSWebSocket: 连接到 %s", url.c_str());
     js_websocket_connect(jsWebSocketPtr, url.c_str());
 }
 
 void JSWebSocket::send(const std::string& message) {
     if (!jsWebSocketPtr) {
-        std::cout << "JSWebSocket: 未设置JavaScript WebSocket对象" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 未设置JavaScript WebSocket对象");
         return;
     }
     
     if (!connected) {
-        std::cout << "JSWebSocket: 未连接，无法发送消息" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 未连接，无法发送消息");
         return;
     }
     
-    std::cout << "JSWebSocket: 发送消息 " << message << std::endl;
+    NC_LOG_INFO("JSWebSocket: 发送消息 %s", message.c_str());
     js_websocket_send(jsWebSocketPtr, message.c_str());
 }
 
@@ -81,7 +86,7 @@ void JSWebSocket::close() {
         return;
     }
     
-    std::cout << "JSWebSocket: 关闭连接" << std::endl;
+    NC_LOG_INFO("JSWebSocket: 关闭连接");
     js_websocket_close(jsWebSocketPtr);
     connected = false;
 }
@@ -96,7 +101,7 @@ bool JSWebSocket::isOpen() const {
 // 导出给JavaScript的回调函数
 extern "C" {
     EMS_KEEP void js_websocket_on_open(void* wsPtr) {
-        std::cout << "JSWebSocket: 连接已打开 (wsPtr: " << wsPtr << ")" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 连接已打开 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -105,7 +110,7 @@ extern "C" {
     }
     
     EMS_KEEP void js_websocket_on_message(void* wsPtr, const char* message) {
-        std::cout << "JSWebSocket: 收到消息 " << message << " (wsPtr: " << wsPtr << ")" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 收到消息 %s (wsPtr: %p)", message, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -114,7 +119,7 @@ extern "C" {
     }
     
     EMS_KEEP void js_websocket_on_close(void* wsPtr) {
-        std::cout << "JSWebSocket: 连接已关闭 (wsPtr: " << wsPtr << ")" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 连接已关闭 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -123,7 +128,7 @@ extern "C" {
     }
     
     EMS_KEEP void js_websocket_on_error(void* wsPtr, const char* error) {
-        std::cout << "JSWebSocket: 发生错误 " << error << " (wsPtr: " << wsPtr << ")" << std::endl;
+        NC_LOG_INFO("JSWebSocket: 发生错误 %s (wsPtr: %p)", error, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -147,22 +152,22 @@ void JSWebSocket::setOnError(ErrorCallback cb) {
 }
 
 void JSWebSocket::onJSMessage(const std::string& message) {
-    std::cout << "JSWebSocket: 收到消息 " << message << std::endl;
+    NC_LOG_INFO("JSWebSocket: 收到消息 %s", message.c_str());
     if (onMessage_) {
         onMessage_(message);
     }
 }
 void JSWebSocket::onJSOpen() {
-    std::cout << "JSWebSocket: 连接已打开" << std::endl;
+    NC_LOG_INFO("JSWebSocket: 连接已打开");
     connected = true;
     if (onOpen_) onOpen_();
 }
 void JSWebSocket::onJSClose() {
-    std::cout << "JSWebSocket: 连接已关闭" << std::endl;
+    NC_LOG_INFO("JSWebSocket: 连接已关闭");
     connected = false;
     if (onClose_) onClose_();
 }
 void JSWebSocket::onJSError(const std::string& error) {
-    std::cout << "JSWebSocket: 发生错误 " << error << std::endl;
+    NC_LOG_INFO("JSWebSocket: 发生错误 %s", error.c_str());
     if (onError_) onError_(error);
 } 

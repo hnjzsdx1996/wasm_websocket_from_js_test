@@ -1,6 +1,6 @@
 #include "sdk_c_api.h"
 #include "../SDKManager.h"
-#include <iostream>
+#include "../base/logger/logger.h"
 
 extern "C" {
 
@@ -41,13 +41,13 @@ void sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_
     if (!h) return;
     static_cast<SDKManager*>(h)->setMessageCallback(
         [cb, user_data](const std::string& msg) {
-            std::cout << "[C++] sdk_set_message_callback: msg='" << msg << "'\n";
-            std::cout << "[C++] msg.size()=" << msg.size() << std::endl;
+            NC_LOG_INFO("[C++] sdk_set_message_callback: msg='%s'", msg.c_str());
+            NC_LOG_INFO("[C++] msg.size()=%zu", msg.size());
             if (cb) {
                 char* buf = (char*)malloc(msg.size() + 1);
                 std::memcpy(buf, msg.c_str(), msg.size() + 1);
-                std::cout << "[C++] malloc buf ptr=" << (void*)buf << std::endl;
-                std::cout << "[C++] buf content='" << buf << "'\n";
+                NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
+                NC_LOG_INFO("[C++] buf content='%s'", buf);
                 cb(buf, user_data);
             }
         }
@@ -73,13 +73,13 @@ void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_data
     if (!h) return;
     static_cast<SDKManager*>(h)->setErrorCallback(
         [cb, user_data](const std::string& err) {
-            std::cout << "[C++] sdk_set_error_callback: err='" << err << "'\n";
-            std::cout << "[C++] err.size()=" << err.size() << std::endl;
+            NC_LOG_INFO("[C++] sdk_set_error_callback: err='%s'", err.c_str());
+            NC_LOG_INFO("[C++] err.size()=%zu", err.size());
             if (cb) {
                 char* buf = (char*)malloc(err.size() + 1);
                 std::memcpy(buf, err.c_str(), err.size() + 1);
-                std::cout << "[C++] malloc buf ptr=" << (void*)buf << std::endl;
-                std::cout << "[C++] buf content='" << buf << "'\n";
+                NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
+                NC_LOG_INFO("[C++] buf content='%s'", buf);
                 cb(buf, user_data);
             }
         }

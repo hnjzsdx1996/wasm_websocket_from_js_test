@@ -1,5 +1,5 @@
 #include "CppWebSocket.h"
-#include <iostream>
+#include "base/logger/logger.h"
 
 class CppWebSocket::Impl {
 public:
@@ -14,18 +14,18 @@ CppWebSocket::CppWebSocket() {}
 CppWebSocket::~CppWebSocket() {}
 
 void CppWebSocket::connect(const std::string& url) {
-    std::cout << "CppWebSocket: 连接 " << url << std::endl;
+    NC_LOG_INFO("CppWebSocket: 连接 %s", url.c_str());
     // ... 连接逻辑 ...
     if (onOpen_) onOpen_();
 }
 
 void CppWebSocket::send(const std::string& message) {
-    std::cout << "CppWebSocket: 发送 " << message << std::endl;
+    NC_LOG_INFO("CppWebSocket: 发送 %s", message.c_str());
     // ... 发送逻辑 ...
 }
 
 void CppWebSocket::close() {
-    std::cout << "CppWebSocket: 关闭连接" << std::endl;
+    NC_LOG_INFO("CppWebSocket: 关闭连接");
     // ... 关闭逻辑 ...
     if (onClose_) onClose_();
 }

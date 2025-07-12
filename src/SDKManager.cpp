@@ -12,32 +12,32 @@ SDKManager::~SDKManager() {}
 
 void SDKManager::configure(const std::string& config) {
     NC_LOG_INFO("SDKManager configure");
-    std::cout << "SDKManager: 配置 " << config << std::endl;
+    NC_LOG_INFO("SDKManager: 配置 %s", config.c_str());
     auto config_ = SDKConfig();
     config_.FromJsonString(config);
-    printf("sn: %s, ping_pong_interval: %d\n", config_.sn.c_str(), config_.ping_pong_interval);
+    NC_LOG_INFO("sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
 }
 
 void SDKManager::connect(const std::string& url) {
-    std::cout << "SDKManager: 连接 " << url << std::endl;
+    NC_LOG_INFO("SDKManager: 连接 %s", url.c_str());
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->connect(url);
     } else {
-        std::cout << "SDKManager: 未注入 WebSocket 实现" << std::endl;
+        NC_LOG_INFO("SDKManager: 未注入 WebSocket 实现");
     }
 }
 
 void SDKManager::send(const std::string& message) {
-    std::cout << "SDKManager: 发送 " << message << std::endl;
+    NC_LOG_INFO("SDKManager: 发送 %s", message.c_str());
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->send(message);
     } else {
-        std::cout << "SDKManager: 未注入 WebSocket 实现" << std::endl;
+        NC_LOG_INFO("SDKManager: 未注入 WebSocket 实现");
     }
 }
 
 void SDKManager::close() {
-    std::cout << "SDKManager: 关闭连接" << std::endl;
+    NC_LOG_INFO("SDKManager: 关闭连接");
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->close();
     }

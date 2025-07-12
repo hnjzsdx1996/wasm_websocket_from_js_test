@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AIGCJson.hpp>
+#include "base/logger/logger.h"
 
 class SDKConfig {
 public:
@@ -14,7 +15,7 @@ public:
         std::string json_string;
         aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
         if (!err.empty()) {
-            printf("CloudLinkConfigInfo ToJsonString error, err: %s", err.c_str());
+            NC_LOG_ERROR("CloudLinkConfigInfo ToJsonString error, err: %s", err.c_str());
         }
         return json_string;
     }
@@ -23,7 +24,7 @@ public:
         std::string err;
         aigc::JsonHelper::JsonToObject(*this, json_string, {}, &err);
         if (!err.empty()) {
-            printf("CloudLinkConfigInfo FromJsonString error, err: %s, json: %s", err.c_str(), json_string.c_str());
+            NC_LOG_ERROR("CloudLinkConfigInfo FromJsonString error, err: %s, json: %s", err.c_str(), json_string.c_str());
         }
     }
 };
