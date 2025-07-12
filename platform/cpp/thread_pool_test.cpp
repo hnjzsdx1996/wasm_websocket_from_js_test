@@ -1,7 +1,5 @@
 #include "../../src/base/async/thread_pool_executor.h"
 #include "../../src/base/logger/logger.h"
-#include <plog/Log.h>
-#include <plog/Severity.h>
 #include <iostream>
 #include <thread>
 #include <chrono>

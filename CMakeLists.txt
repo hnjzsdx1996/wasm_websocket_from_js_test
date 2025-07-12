@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(NotifycationCenterSDKAll)
 
+# 生成 compile_commands.json 用于 IDE 支持
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # 主库
 add_subdirectory(src)
 
