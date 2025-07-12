@@ -10,6 +10,7 @@ set(SOURCES
     websocket/CppWebSocket.cpp
     websocket/WebSocketHolder.cpp
     c/sdk_c_api.cpp
+    base/logger/thread_info.cpp
 )
 
 # 头文件目录

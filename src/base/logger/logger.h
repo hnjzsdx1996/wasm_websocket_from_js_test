@@ -6,8 +6,11 @@
 #include <memory>
 #include <cstdio>
 #include <cstdarg>
+#include <sstream>
 
 #include "plog/Initializers/RollingFileInitializer.h"
+#include "thread_info.h"
+#include "custom_formatter.h"
 
 // 文件名截取工具
 #ifndef FILE_NAME
@@ -55,22 +58,19 @@ inline void init(plog::Severity severity = plog::info, const char* file = nullpt
     static std::shared_ptr<plog::IAppender> consoleAppender;
     static bool initialized = false;
     if (!initialized) {
+        // 设置日志格式包含线程 ID
+        plog::init(severity);
+
         if (file && file[0] != '\0') {
             fileAppender = std::make_shared<plog::RollingFileAppender<plog::TxtFormatter>>(file);
-            if (alsoConsole) {
-                consoleAppender = std::make_shared<plog::ConsoleAppender<plog::TxtFormatter>>();
-                plog::init(severity, fileAppender.get()).addAppender(consoleAppender.get());
-            } else {
-                plog::init(severity, fileAppender.get());
-            }
-        } else {
-            if (alsoConsole) {
-                consoleAppender = std::make_shared<plog::ConsoleAppender<plog::TxtFormatter>>();
-                plog::init(severity, consoleAppender.get());
-            } else {
-                plog::init(severity, "tmp.txt");
-            }
+            plog::get()->addAppender(fileAppender.get());
         }
+
+        if (alsoConsole) {
+            consoleAppender = std::make_shared<plog::ConsoleAppender<plog::TxtFormatter>>();
+            plog::get()->addAppender(consoleAppender.get());
+        }
+
         initialized = true;
     }
 }

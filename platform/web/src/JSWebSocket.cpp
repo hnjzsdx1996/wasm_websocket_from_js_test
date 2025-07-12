@@ -1,26 +1,15 @@
 #include "./JSWebSocket.h"
-#ifdef __EMSCRIPTEN__
-// 在 emscripten 环境下暂时禁用日志，避免头文件问题
-#define NC_LOG_INFO(...) ((void)0)
-#else
 #include "../../../src/base/logger/logger.h"
-#endif
 #include <unordered_map>
 #include <mutex>
-
-#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
-#define EMS_KEEP EMSCRIPTEN_KEEPALIVE
-#else
-#define EMS_KEEP
-#endif
 
 // 声明外部C函数，这些函数将在JavaScript中实现
 extern "C" {
-    EMS_KEEP void js_websocket_connect(void* wsPtr, const char* url);
-    EMS_KEEP void js_websocket_send(void* wsPtr, const char* message);
-    EMS_KEEP void js_websocket_close(void* wsPtr);
-    EMS_KEEP bool js_websocket_is_open(void* wsPtr);
+    EMSCRIPTEN_KEEPALIVE void js_websocket_connect(void* wsPtr, const char* url);
+    EMSCRIPTEN_KEEPALIVE void js_websocket_send(void* wsPtr, const char* message);
+    EMSCRIPTEN_KEEPALIVE void js_websocket_close(void* wsPtr);
+    EMSCRIPTEN_KEEPALIVE bool js_websocket_is_open(void* wsPtr);
 }
 
 // 静态映射 wsPtr -> JSWebSocket*
@@ -100,7 +89,7 @@ bool JSWebSocket::isOpen() const {
 
 // 导出给JavaScript的回调函数
 extern "C" {
-    EMS_KEEP void js_websocket_on_open(void* wsPtr) {
+    EMSCRIPTEN_KEEPALIVE void js_websocket_on_open(void* wsPtr) {
         NC_LOG_INFO("JSWebSocket: 连接已打开 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
@@ -109,7 +98,7 @@ extern "C" {
         }
     }
     
-    EMS_KEEP void js_websocket_on_message(void* wsPtr, const char* message) {
+    EMSCRIPTEN_KEEPALIVE void js_websocket_on_message(void* wsPtr, const char* message) {
         NC_LOG_INFO("JSWebSocket: 收到消息 %s (wsPtr: %p)", message, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
@@ -118,7 +107,7 @@ extern "C" {
         }
     }
     
-    EMS_KEEP void js_websocket_on_close(void* wsPtr) {
+    EMSCRIPTEN_KEEPALIVE void js_websocket_on_close(void* wsPtr) {
         NC_LOG_INFO("JSWebSocket: 连接已关闭 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
@@ -127,7 +116,7 @@ extern "C" {
         }
     }
     
-    EMS_KEEP void js_websocket_on_error(void* wsPtr, const char* error) {
+    EMSCRIPTEN_KEEPALIVE void js_websocket_on_error(void* wsPtr, const char* error) {
         NC_LOG_INFO("JSWebSocket: 发生错误 %s (wsPtr: %p)", error, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);

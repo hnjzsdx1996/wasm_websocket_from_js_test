@@ -8,10 +8,13 @@
 #include <chrono>
 #include <functional>
 #include <atomic>
+#include <string>
+#include <utility>
+#include "../logger/thread_info.h"
 
 class ThreadPool {
 public:
-    ThreadPool() : stop_(false), running_task_(false) {
+    explicit ThreadPool(std::string  name = "") : name_(std::move(name)), stop_(false), running_task_(false) {
         worker_ = std::thread(&ThreadPool::workerThread, this);
     }
 
@@ -40,9 +43,7 @@ private:
     struct Task {
         std::function<void()> func;
         std::chrono::steady_clock::time_point exec_time;
-
         bool operator<(const Task &other) const {
-            // 优先队列默认是大顶堆，这里需要小顶堆，所以取反
             return exec_time > other.exec_time;
         }
     };
@@ -53,6 +54,7 @@ private:
     std::thread worker_;
     std::atomic<bool> stop_;
     bool running_task_;
+    std::string name_;
 
     void addTask(Task task) { {
             std::unique_lock<std::mutex> lock(mutex_);
@@ -62,6 +64,8 @@ private:
     }
 
     void workerThread() {
+        // 设置当前线程名
+        nc_logger::set_thread_name(name_);
         while (true) {
             std::unique_lock<std::mutex> lock(mutex_);
             if (stop_) {

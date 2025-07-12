@@ -15,7 +15,7 @@ std::atomic<int> delayed_task_counter{0};
 // 测试任务函数
 void test_task(int task_id) {
     auto thread_id = std::this_thread::get_id();
-    NC_LOG_INFO("[任务 %d] 在线程 %zu 执行", task_id, std::hash<std::thread::id>{}(thread_id));
+    NC_LOG_INFO("[任务 %d] 在线程 %zu 执行", task_id, thread_id);
     task_counter.fetch_add(1, std::memory_order_relaxed);
     
     // 模拟一些工作
@@ -25,7 +25,7 @@ void test_task(int task_id) {
 // 延迟任务函数
 void test_delayed_task(int task_id) {
     auto thread_id = std::this_thread::get_id();
-    NC_LOG_INFO("[延迟任务 %d] 在线程 %zu 执行", task_id, std::hash<std::thread::id>{}(thread_id));
+    NC_LOG_INFO("[延迟任务 %d] 在线程 %zu 执行", task_id, thread_id);
     delayed_task_counter.fetch_add(1, std::memory_order_relaxed);
 }
 

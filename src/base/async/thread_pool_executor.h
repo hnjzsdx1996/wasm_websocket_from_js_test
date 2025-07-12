@@ -14,21 +14,21 @@ public:
 
     static std::shared_ptr<ThreadPool> Worker() {
         if (worker_ == nullptr) {
-            worker_ = std::make_shared<ThreadPool>();
+            worker_ = std::make_shared<ThreadPool>("Worker");
         }
         return worker_;
     }
 
     static std::shared_ptr<ThreadPool> IO() {
         if (io_ == nullptr) {
-            io_ = std::make_shared<ThreadPool>();
+            io_ = std::make_shared<ThreadPool>("IO");
         }
         return io_;
     }
 
     static std::shared_ptr<ThreadPool> Compute() {
         if (compute_ == nullptr) {
-            compute_ = std::make_shared<ThreadPool>();
+            compute_ = std::make_shared<ThreadPool>("Compute");
         }
         return compute_;
     }

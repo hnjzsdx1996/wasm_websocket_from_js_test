@@ -2,6 +2,7 @@
 #include <iostream>
 #include "message_define/common.h"
 #include "base/logger/logger.h"
+#include "base/async/thread_pool_executor.h"
 
 SDKManager::SDKManager() {
     nc_logger::init(plog::info, "notification_center_log.log");
@@ -16,6 +17,36 @@ void SDKManager::configure(const std::string& config) {
     auto config_ = SDKConfig();
     config_.FromJsonString(config);
     NC_LOG_INFO("sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
+
+    // todo:实现所有任务丢到worker线程，处理完毕后回调回主线程
+
+    // 初始化线程
+    ThreadPoolExecutor::Worker()->Post([]()-> void
+    {
+        NC_LOG_INFO("task from Worker");
+    });
+    ThreadPoolExecutor::Worker()->PostDelayed([]()-> void
+    {
+        NC_LOG_INFO("task from Worker delayed 1000ms");
+    }, std::chrono::milliseconds(1000));
+
+    ThreadPoolExecutor::IO()->Post([]()-> void
+    {
+        NC_LOG_INFO("task from IO");
+    });
+    ThreadPoolExecutor::IO()->PostDelayed([]()-> void
+    {
+        NC_LOG_INFO("task from IO delayed 1000ms");
+    }, std::chrono::milliseconds(1000));
+
+    ThreadPoolExecutor::Compute()->Post([]()-> void
+    {
+        NC_LOG_INFO("task from Compute");
+    });
+    ThreadPoolExecutor::Compute()->PostDelayed([]()-> void
+    {
+        NC_LOG_INFO("task from Compute delayed 1000ms");
+    }, std::chrono::milliseconds(1000));
 }
 
 void SDKManager::connect(const std::string& url) {
