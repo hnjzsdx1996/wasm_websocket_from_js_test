@@ -1,31 +1,42 @@
 cmake_minimum_required(VERSION 3.0)
-project(wasm_websocket_sdk)
+project(NotificationCenterSDK)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# 源文件
-set(SOURCES
-    base/async/thread_pool_executor.cpp
-    SDKManager.cpp
-    websocket/CppWebSocket.cpp
-    websocket/WebSocketHolder.cpp
-    c/sdk_c_api.cpp
-    base/logger/thread_info.cpp
+# 自动收集所有源文件
+file(GLOB_RECURSE SOURCES 
+    "*.cpp"
+    "*.c"
 )
 
-# 头文件目录
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/websocket)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/base/logger)
+# 排除第三方库文件（如果有的话）
+list(FILTER SOURCES EXCLUDE REGEX "third_party/.*")
 
 # 使用 third_party
 include(${CMAKE_CURRENT_SOURCE_DIR}/third_party/ThirdParty.cmake)
 
-# 生成可执行文件
+# 生成库
 add_library(NotificationCenterSDK STATIC ${SOURCES})
 add_library(NotificationCenterSDKShared SHARED ${SOURCES})
 
-# 纯C++编译设置
+# 设置目标属性
 set_target_properties(NotificationCenterSDK PROPERTIES
     OUTPUT_NAME "NotificationCenterSDK"
+)
+
+set_target_properties(NotificationCenterSDKShared PROPERTIES
+    OUTPUT_NAME "NotificationCenterSDK"
+)
+
+# 使用现代的 target_include_directories
+target_include_directories(NotificationCenterSDK PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/websocket>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/base/logger>
+)
+
+target_include_directories(NotificationCenterSDKShared PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/websocket>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/base/logger>
 ) 
