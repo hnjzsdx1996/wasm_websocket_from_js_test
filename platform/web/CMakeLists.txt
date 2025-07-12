@@ -55,7 +55,7 @@ if(EMSCRIPTEN)
         # 多线程支持
         "SHELL:-pthread"
         "SHELL:-sUSE_PTHREADS=1"
-        "SHELL:-sPTHREAD_POOL_SIZE=4"
+        "SHELL:-sPTHREAD_POOL_SIZE_STRICT=0"
         "SHELL:-matomics"
         "SHELL:-mbulk-memory"
         # 导出所有 C API 和 glue code 回调
