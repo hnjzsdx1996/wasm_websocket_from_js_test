@@ -62,12 +62,12 @@ inline void init(plog::Severity severity = plog::info, const char* file = nullpt
         plog::init(severity);
 
         if (file && file[0] != '\0') {
-            fileAppender = std::make_shared<plog::RollingFileAppender<plog::TxtFormatter>>(file);
+            fileAppender = std::make_shared<plog::RollingFileAppender<CustomFormatter>>(file);
             plog::get()->addAppender(fileAppender.get());
         }
 
         if (alsoConsole) {
-            consoleAppender = std::make_shared<plog::ConsoleAppender<plog::TxtFormatter>>();
+            consoleAppender = std::make_shared<plog::ConsoleAppender<CustomFormatter>>();
             plog::get()->addAppender(consoleAppender.get());
         }
 

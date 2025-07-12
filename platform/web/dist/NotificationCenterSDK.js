@@ -6624,6 +6624,7 @@ function checkIncomingModuleAPI() {
 // Imports from the Wasm binary.
 var ___getTypeName = makeInvalidEarlyAccess('___getTypeName');
 var __embind_initialize_bindings = makeInvalidEarlyAccess('__embind_initialize_bindings');
+var _pthread_self = makeInvalidEarlyAccess('_pthread_self');
 var _malloc = Module['_malloc'] = makeInvalidEarlyAccess('_malloc');
 var _free = Module['_free'] = makeInvalidEarlyAccess('_free');
 var _js_websocket_on_open = Module['_js_websocket_on_open'] = makeInvalidEarlyAccess('_js_websocket_on_open');
@@ -6643,7 +6644,6 @@ var _js_sdk_set_open_callback = Module['_js_sdk_set_open_callback'] = makeInvali
 var _js_sdk_set_close_callback = Module['_js_sdk_set_close_callback'] = makeInvalidEarlyAccess('_js_sdk_set_close_callback');
 var _js_sdk_set_error_callback = Module['_js_sdk_set_error_callback'] = makeInvalidEarlyAccess('_js_sdk_set_error_callback');
 var __emscripten_tls_init = makeInvalidEarlyAccess('__emscripten_tls_init');
-var _pthread_self = makeInvalidEarlyAccess('_pthread_self');
 var __emscripten_thread_init = makeInvalidEarlyAccess('__emscripten_thread_init');
 var __emscripten_thread_crashed = makeInvalidEarlyAccess('__emscripten_thread_crashed');
 var _fflush = makeInvalidEarlyAccess('_fflush');
@@ -6664,6 +6664,7 @@ var _emscripten_stack_get_current = makeInvalidEarlyAccess('_emscripten_stack_ge
 function assignWasmExports(wasmExports) {
   ___getTypeName = createExportWrapper('__getTypeName', 1);
   __embind_initialize_bindings = createExportWrapper('_embind_initialize_bindings', 0);
+  _pthread_self = wasmExports['pthread_self'];
   Module['_malloc'] = _malloc = createExportWrapper('malloc', 1);
   Module['_free'] = _free = createExportWrapper('free', 1);
   Module['_js_websocket_on_open'] = _js_websocket_on_open = createExportWrapper('js_websocket_on_open', 1);
@@ -6683,7 +6684,6 @@ function assignWasmExports(wasmExports) {
   Module['_js_sdk_set_close_callback'] = _js_sdk_set_close_callback = createExportWrapper('js_sdk_set_close_callback', 3);
   Module['_js_sdk_set_error_callback'] = _js_sdk_set_error_callback = createExportWrapper('js_sdk_set_error_callback', 3);
   __emscripten_tls_init = createExportWrapper('_emscripten_tls_init', 0);
-  _pthread_self = wasmExports['pthread_self'];
   __emscripten_thread_init = createExportWrapper('_emscripten_thread_init', 6);
   __emscripten_thread_crashed = createExportWrapper('_emscripten_thread_crashed', 0);
   _fflush = createExportWrapper('fflush', 1);
