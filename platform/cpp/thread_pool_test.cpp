@@ -130,7 +130,7 @@ int main() {
     NC_LOG_INFO("=== ThreadPoolExecutor 测试程序 ===");
     
     // 初始化日志
-    nc_logger::init(plog::debug);
+    nc_logger::init(plog::debug, "thread_pool_test.log");
     nc_logger::set_level(plog::debug);
     
     NC_LOG_INFO("开始测试 ThreadPoolExecutor...");
