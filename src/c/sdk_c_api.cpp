@@ -46,13 +46,13 @@ void sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_
     if (!h) return;
     static_cast<SDKManager*>(h)->setMessageCallback(
         [cb, user_data](const std::string& msg) {
-            NC_LOG_INFO("[C++] sdk_set_message_callback: msg='%s'", msg.c_str());
-            NC_LOG_INFO("[C++] msg.size()=%zu", msg.size());
+            // NC_LOG_INFO("[C++] sdk_set_message_callback: msg='%s'", msg.c_str());
+            // NC_LOG_INFO("[C++] msg.size()=%zu", msg.size());
             if (cb) {
                 char* buf = (char*)malloc(msg.size() + 1);
                 std::memcpy(buf, msg.c_str(), msg.size() + 1);
-                NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
-                NC_LOG_INFO("[C++] buf content='%s'", buf);
+                // NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
+                // NC_LOG_INFO("[C++] buf content='%s'", buf);
                 cb(buf, user_data);
             }
         }
