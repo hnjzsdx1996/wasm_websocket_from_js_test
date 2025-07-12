@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "thread_pool.h"
+#include "main_thread_executor.h"
 
 #include "../utils/non_copyable.h"
 
@@ -31,6 +32,14 @@ public:
             compute_ = std::make_shared<ThreadPool>("Compute");
         }
         return compute_;
+    }
+
+    /**
+     * 获取主线程执行器
+     * 用于将任务从工作线程抛回主线程
+     */
+    static MainThreadExecutor& Main() {
+        return MainThreadExecutor::getInstance();
     }
 
 private:

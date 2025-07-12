@@ -37,6 +37,11 @@ void sdk_set_websocket(sdk_handle h, websocket_handle ws) {
     static_cast<SDKManager*>(h)->setWebSocket(static_cast<WebSocketBase*>(ws));
 }
 
+size_t sdk_poll(sdk_handle h) {
+    if (!h) return 0;
+    return static_cast<SDKManager*>(h)->poll();
+}
+
 void sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_data) {
     if (!h) return;
     static_cast<SDKManager*>(h)->setMessageCallback(

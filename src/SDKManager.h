@@ -28,6 +28,13 @@ public:
     void setCloseCallback(CloseCallback cb);
     void setErrorCallback(ErrorCallback cb);
 
+    /**
+     * 轮询主线程任务
+     * 用户需要定期调用此方法来处理主线程任务
+     * @return 执行的任务数量
+     */
+    size_t poll();
+
     WebSocketHolder& getWebSocketHolder();
 
 private:
@@ -36,5 +43,4 @@ private:
     OpenCallback openCallback_;
     CloseCallback closeCallback_;
     ErrorCallback errorCallback_;
-    // 其它成员...
 };  

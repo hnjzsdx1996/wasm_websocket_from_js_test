@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>  // for size_t
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,6 +23,7 @@ void sdk_connect(sdk_handle h, const char* url);
 void sdk_send(sdk_handle h, const char* msg);
 void sdk_close(sdk_handle h);
 void sdk_set_websocket(sdk_handle h, websocket_handle ws);
+size_t sdk_poll(sdk_handle h);
 
 #ifdef __cplusplus
 }

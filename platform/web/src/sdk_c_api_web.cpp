@@ -64,4 +64,9 @@ void js_sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_d
     ::sdk_set_error_callback(h, cb, user_data);
 }
 
+EMSCRIPTEN_KEEPALIVE
+size_t js_sdk_poll(sdk_handle h) {
+    return ::sdk_poll(h);
+}
+
 } 

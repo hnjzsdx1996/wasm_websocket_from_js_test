@@ -1,5 +1,7 @@
 #include "./JSWebSocket.h"
 #include "../../../src/base/logger/logger.h"
+#include "../../../src/base/async/thread_pool_executor.h"
+#include <chrono>
 #include <unordered_map>
 #include <mutex>
 #include <emscripten/emscripten.h>
@@ -145,6 +147,21 @@ void JSWebSocket::onJSMessage(const std::string& message) {
     if (onMessage_) {
         onMessage_(message);
     }
+    NC_LOG_INFO("JSWebSocket: 收到消息回调给JS完毕");
+    ThreadPoolExecutor::Worker()->Post([message, cb = onMessage_]()->void{
+        NC_LOG_INFO("JSWebSocket: 在Worker线程处理消息 %s", message.c_str());
+
+        std::string proceed_message = message + " proceed";
+
+        // 处理消息，延迟返回到Main线程回调
+        ThreadPoolExecutor::Main().postDelayed([proceed_message, cb = cb]()->void{
+            NC_LOG_INFO("JSWebSocket: 在Main线程延迟2s处理消息 %s", proceed_message.c_str());
+            if (cb) {
+                cb(proceed_message);
+            }
+        }, std::chrono::seconds(2));
+
+    });
 }
 void JSWebSocket::onJSOpen() {
     NC_LOG_INFO("JSWebSocket: 连接已打开");

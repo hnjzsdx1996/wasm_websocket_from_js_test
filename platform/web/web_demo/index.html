@@ -24,6 +24,8 @@
     <script>
         let sdk = null;
         let sdkHandle = null;
+        let pollingInterval = null;
+        let isPolling = false;
         function log(msg) {
             const logDiv = document.getElementById('log');
             logDiv.innerHTML += msg + '<br>';
@@ -59,6 +61,30 @@
             if (sdk && sdkHandle) sdk._js_sdk_close(sdkHandle);
             log('已请求断开');
         }
+        
+        function startPolling() {
+            if (!sdk || !sdkHandle) {
+                log('WASM未加载完成');
+                return;
+            }
+            
+            if (isPolling) {
+                log('轮询已在运行中');
+                return;
+            }
+            
+            isPolling = true;
+
+            pollingInterval = setInterval(() => {
+                const executedTasks = sdk._js_sdk_poll(sdkHandle);
+                if (executedTasks > 0) {
+                    log(`主线程执行器: 执行了 ${executedTasks} 个任务`);
+                }
+            }, 16); // 约60FPS
+            
+            log('开始轮询主线程任务 (60FPS)');
+        }
+
         window.addEventListener('load', function() {
             if (typeof NotificationCenterSDK !== 'function') {
                 log('NotificationCenterSDK 工厂函数未加载');
@@ -95,8 +121,12 @@
                     log('发生错误: ' + err);
                     sdk._free(errPtr); // 用完后释放
                 }, 'vii'), 0);
-                log('WASM加载完成，可操作WebSocket');
-                window.Module = ModuleInstance;
+                log('WASM加载完成, 可操作WebSocket');
+                
+                // 延迟100ms后开始轮询
+                setTimeout(() => {
+                    startPolling();
+                }, 100);
             });
         });
     </script>

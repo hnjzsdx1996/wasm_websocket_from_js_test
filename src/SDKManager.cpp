@@ -12,41 +12,10 @@ SDKManager::SDKManager() {
 SDKManager::~SDKManager() {}
 
 void SDKManager::configure(const std::string& config) {
-    NC_LOG_INFO("SDKManager configure");
     NC_LOG_INFO("SDKManager: 配置 %s", config.c_str());
     auto config_ = SDKConfig();
     config_.FromJsonString(config);
     NC_LOG_INFO("sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
-
-    // todo:实现所有任务丢到worker线程，处理完毕后回调回主线程
-
-    // 初始化线程
-    ThreadPoolExecutor::Worker()->Post([]()-> void
-    {
-        NC_LOG_INFO("task from Worker");
-    });
-    ThreadPoolExecutor::Worker()->PostDelayed([]()-> void
-    {
-        NC_LOG_INFO("task from Worker delayed 1000ms");
-    }, std::chrono::milliseconds(1000));
-
-    ThreadPoolExecutor::IO()->Post([]()-> void
-    {
-        NC_LOG_INFO("task from IO");
-    });
-    ThreadPoolExecutor::IO()->PostDelayed([]()-> void
-    {
-        NC_LOG_INFO("task from IO delayed 1000ms");
-    }, std::chrono::milliseconds(1000));
-
-    ThreadPoolExecutor::Compute()->Post([]()-> void
-    {
-        NC_LOG_INFO("task from Compute");
-    });
-    ThreadPoolExecutor::Compute()->PostDelayed([]()-> void
-    {
-        NC_LOG_INFO("task from Compute delayed 1000ms");
-    }, std::chrono::milliseconds(1000));
 }
 
 void SDKManager::connect(const std::string& url) {
@@ -107,3 +76,8 @@ void SDKManager::setErrorCallback(ErrorCallback cb) {
         wsHolder_.getWebSocket()->setOnError(errorCallback_);
     }
 } 
+
+size_t SDKManager::poll() {
+    // 轮询主线程任务
+    return ThreadPoolExecutor::Main().poll();
+}
