@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # 源文件
 set(SOURCES
+    base/async/thread_pool_executor.cpp
     SDKManager.cpp
     websocket/CppWebSocket.cpp
     websocket/WebSocketHolder.cpp
