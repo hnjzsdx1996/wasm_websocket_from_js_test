@@ -8,6 +8,7 @@ set(ALL_SOURCES
     # 主库源文件
     ${CMAKE_CURRENT_LIST_DIR}/../../src/base/async/thread_pool_executor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/base/async/main_thread_executor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/base/async/timer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/SDKManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/CppWebSocket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/WebSocketHolder.cpp

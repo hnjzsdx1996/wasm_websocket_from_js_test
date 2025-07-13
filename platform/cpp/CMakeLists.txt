@@ -34,3 +34,16 @@ target_include_directories(thread_pool_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/internal
 )
 target_link_libraries(thread_pool_test NotificationCenterSDK) 
+
+add_executable(timer_test timer_test.cpp)
+target_include_directories(timer_test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/websocket
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/base
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/plog/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/error
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/internal
+)
+target_link_libraries(timer_test NotificationCenterSDK pthread) 

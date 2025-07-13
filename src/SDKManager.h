@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+#include "base/async/timer.h"
 #include <string>
 #include "websocket/WebSocketHolder.h"
 
@@ -43,4 +45,7 @@ private:
     OpenCallback openCallback_;
     CloseCallback closeCallback_;
     ErrorCallback errorCallback_;
+
+    // 测试Timer
+    std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();
 };  

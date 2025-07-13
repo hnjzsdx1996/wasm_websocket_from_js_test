@@ -1,5 +1,7 @@
 #include "SDKManager.h"
+#include <chrono>
 #include <iostream>
+#include "base/async/main_thread_executor.h"
 #include "message_define/common.h"
 #include "base/logger/logger.h"
 #include "base/async/thread_pool_executor.h"
@@ -16,6 +18,12 @@ void SDKManager::configure(const std::string& config) {
     auto config_ = SDKConfig();
     config_.FromJsonString(config);
     NC_LOG_INFO("sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
+
+    // 测试Timer
+    // timer_->SetDefaultExecutor(ThreadPoolExecutor::Worker());
+    // timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(1000), []()->void{
+    //     NC_LOG_INFO("SDKManager: heart_beat");
+    // });
 }
 
 void SDKManager::connect(const std::string& url) {
