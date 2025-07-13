@@ -5,20 +5,34 @@
     <title>WASM WebSocket 测试</title>
     <style>
         body { font-family: sans-serif; margin: 2em; }
-        #log { border: 1px solid #ccc; height: 200px; overflow: auto; padding: 0.5em; margin-bottom: 1em; }
-        input, button { margin: 0.2em; }
+        #log { border: 1px solid #ccc; height: 400px; overflow: auto; padding: 0.5em; margin-bottom: 1em; font-family: monospace; font-size: 12px; }
+        input, button, select { margin: 0.2em; padding: 0.3em; }
+        select { min-width: 200px; }
+        .url-container { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5em; margin-bottom: 1em; }
+        .url-container > * { margin: 0; }
+        #msgInput { width: 100%; height: 100px; font-family: monospace; font-size: 12px; resize: vertical; }
+        .message-container { margin-bottom: 1em; }
     </style>
 </head>
 <body>
     <h2>WASM WebSocket 测试</h2>
-    <div>
-        WebSocket地址: <input id="wsUrl" value="wss://echo.websocket.org" size="40">
+    <div class="url-container">
+        <label for="wsUrlSelect">WebSocket地址:</label>
+        <select id="wsUrlSelect" onchange="updateUrlInput()">
+            <option value="wss://echo.websocket.org">wss://echo.websocket.org (Echo服务)</option>
+            <option value="ws://localhost:3001">ws://localhost:3001 (本地服务)</option>
+            <option value="custom">自定义地址...</option>
+        </select>
+        <input id="wsUrl" value="wss://echo.websocket.org" size="40" placeholder="输入WebSocket地址">
         <button onclick="connectWS()">连接</button>
         <button onclick="closeWS()">断开</button>
     </div>
-    <div>
-        <input id="msgInput" placeholder="输入要发送的消息" size="40">
-        <button onclick="sendMsg()">发送</button>
+    <div class="message-container">
+        <div>发送消息:</div>
+        <textarea id="msgInput" placeholder="输入要发送的消息">{"timestamp":1752374563734,"topic":"subscribe","data":[{"sn":"drone_001","topic_list":["topic1"]}],"uuid":"54c56d3c-6fbd-4c0b-b236-b2107e85d30f"}</textarea>
+        <div style="margin-top: 0.5em;">
+            <button onclick="sendMsg()">发送</button>
+        </div>
     </div>
     <div id="log"></div>
     <script>
@@ -26,10 +40,25 @@
         let sdkHandle = null;
         let pollingInterval = null;
         let isPolling = false;
+        
+        function updateUrlInput() {
+            const select = document.getElementById('wsUrlSelect');
+            const input = document.getElementById('wsUrl');
+            const selectedValue = select.value;
+            
+            if (selectedValue === 'custom') {
+                input.value = '';
+                input.placeholder = '请输入自定义WebSocket地址';
+                input.focus();
+            } else {
+                input.value = selectedValue;
+                input.placeholder = '输入WebSocket地址';
+            }
+        }
         function log(msg) {
             const logDiv = document.getElementById('log');
             logDiv.innerHTML += msg + '<br>';
-            logDiv.scrollTop = logDiv.scrollHeight;
+            // 移除自动滚动，让用户可以固定查看特定行
         }
         function connectWS() {
             const url = document.getElementById('wsUrl').value;
