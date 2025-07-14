@@ -5,6 +5,7 @@
 
 #include "business_manager/BusinessManager.h"
 #include "websocket/WebSocketHolder.h"
+#include "topic_engine/TopicManager.h"
 
 class SDKManager {
 public:
@@ -44,6 +45,10 @@ public:
     std::shared_ptr<BusinessManager> GetBusinessManager() {
         return business_manager_;
     }
+    
+    std::shared_ptr<TopicManager> GetTopicManager() {
+        return topic_manager_;
+    }
 
 private:
     WebSocketHolder wsHolder_;
@@ -56,4 +61,5 @@ private:
     std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();
 
     std::shared_ptr<BusinessManager> business_manager_;
+    std::shared_ptr<TopicManager> topic_manager_;
 };  

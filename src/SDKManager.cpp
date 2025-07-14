@@ -5,11 +5,14 @@
 #include "message_define/common.h"
 #include "base/logger/logger.h"
 #include "base/async/thread_pool_executor.h"
+#include "topic_engine/TopicManager.h"
+#include "business_manager/BusinessManager.h"
 
 SDKManager::SDKManager() {
-    nc_logger::init(plog::info, "notification_center_log.log");
-    NC_LOG_INFO("SDKManager ctor");
-    business_manager_ = std::make_shared<BusinessManager>();
+    // 初始化TopicManager和BusinessManager
+    topic_manager_ = std::make_shared<TopicManager>();
+    business_manager_ = std::make_shared<BusinessManager>(topic_manager_.get());
+    topic_manager_->setWebSocketHolder(&wsHolder_);
 }
 
 SDKManager::~SDKManager() {}
@@ -28,25 +31,33 @@ void SDKManager::configure(const std::string& config) {
 }
 
 void SDKManager::connect(const std::string& url) {
-    NC_LOG_INFO("SDKManager: 连接 %s", url.c_str());
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->connect(url);
-    } else {
-        NC_LOG_INFO("SDKManager: 未注入 WebSocket 实现");
+        wsHolder_.getWebSocket()->setOnMessage([this](const std::string& msg) {
+            if (topic_manager_) {
+                topic_manager_->OnWebSocketMessage(msg);
+            }
+            if (messageCallback_) messageCallback_(msg);
+        });
+        wsHolder_.getWebSocket()->setOnOpen([this]() {
+            if (openCallback_) openCallback_();
+        });
+        wsHolder_.getWebSocket()->setOnClose([this]() {
+            if (closeCallback_) closeCallback_();
+        });
+        wsHolder_.getWebSocket()->setOnError([this](const std::string& err) {
+            if (errorCallback_) errorCallback_(err);
+        });
     }
 }
 
 void SDKManager::send(const std::string& message) {
-    NC_LOG_INFO("SDKManager: 发送 %s", message.c_str());
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->send(message);
-    } else {
-        NC_LOG_INFO("SDKManager: 未注入 WebSocket 实现");
     }
 }
 
 void SDKManager::close() {
-    NC_LOG_INFO("SDKManager: 关闭连接");
     if (wsHolder_.getWebSocket()) {
         wsHolder_.getWebSocket()->close();
     }
@@ -54,6 +65,9 @@ void SDKManager::close() {
 
 void SDKManager::setWebSocket(WebSocketBase* ws) {
     wsHolder_.setWebSocket(ws);
+    if (topic_manager_) {
+        topic_manager_->setWebSocketHolder(&wsHolder_);
+    }
 }
 
 WebSocketHolder& SDKManager::getWebSocketHolder() {
@@ -61,30 +75,20 @@ WebSocketHolder& SDKManager::getWebSocketHolder() {
 }
 
 void SDKManager::setMessageCallback(MessageCallback cb) {
-    messageCallback_ = std::move(cb);
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->setOnMessage(messageCallback_);
-    }
+    messageCallback_ = cb;
 }
 
 void SDKManager::setOpenCallback(OpenCallback cb) {
-    openCallback_ = std::move(cb);
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->setOnOpen(openCallback_);
-    }
+    openCallback_ = cb;
 }
+
 void SDKManager::setCloseCallback(CloseCallback cb) {
-    closeCallback_ = std::move(cb);
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->setOnClose(closeCallback_);
-    }
+    closeCallback_ = cb;
 }
+
 void SDKManager::setErrorCallback(ErrorCallback cb) {
-    errorCallback_ = std::move(cb);
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->setOnError(errorCallback_);
-    }
-} 
+    errorCallback_ = cb;
+}
 
 size_t SDKManager::poll() {
     // 轮询主线程任务
