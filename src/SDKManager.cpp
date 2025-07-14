@@ -9,6 +9,7 @@
 SDKManager::SDKManager() {
     nc_logger::init(plog::info, "notification_center_log.log");
     NC_LOG_INFO("SDKManager ctor");
+    business_manager_ = std::make_shared<BusinessManager>();
 }
 
 SDKManager::~SDKManager() {}

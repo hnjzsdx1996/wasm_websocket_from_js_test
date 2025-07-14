@@ -2,6 +2,8 @@
 #include <memory>
 #include "base/async/timer.h"
 #include <string>
+
+#include "business_manager/BusinessManager.h"
 #include "websocket/WebSocketHolder.h"
 
 class SDKManager {
@@ -39,6 +41,10 @@ public:
 
     WebSocketHolder& getWebSocketHolder();
 
+    std::shared_ptr<BusinessManager> GetBusinessManager() {
+        return business_manager_;
+    }
+
 private:
     WebSocketHolder wsHolder_;
     MessageCallback messageCallback_;
@@ -48,4 +54,6 @@ private:
 
     // 测试Timer
     std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();
+
+    std::shared_ptr<BusinessManager> business_manager_;
 };  
