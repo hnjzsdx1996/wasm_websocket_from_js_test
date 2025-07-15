@@ -5,16 +5,21 @@
 
 class DeviceOsdMessage {
 public:
-    int velocity;
+    int velocity = 0;
     AIGC_JSON_HELPER(velocity);
 };
 
 class DeviceOsdTopic : public TopicMessageWrapper {
 public:
-    DeviceOsdMessage msg;
-    AIGC_JSON_HELPER_INHERIT(TopicMessageWrapper, msg);
+    DeviceOsdTopic() {
+        message_topic = "device_osd";
+    }
 
-    std::string ToJsonString() const override {
+    DeviceOsdMessage message_data;
+    AIGC_JSON_HELPER(message_data);
+    AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
+
+    std::string ToJsonString() override {
         std::string err, json_string;
         aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
         return json_string;

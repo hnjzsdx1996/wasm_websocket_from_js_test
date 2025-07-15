@@ -14,7 +14,7 @@
 
 class ThreadPool {
 public:
-    explicit ThreadPool(std::string  name = "") : name_(std::move(name)), stop_(false), running_task_(false) {
+    explicit ThreadPool(std::string  name = "") : stop_(false), running_task_(false), name_(std::move(name)) {
         worker_ = std::thread(&ThreadPool::workerThread, this);
     }
 

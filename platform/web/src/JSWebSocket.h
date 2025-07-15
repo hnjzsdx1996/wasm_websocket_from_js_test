@@ -12,12 +12,6 @@ public:
     void send(const std::string& message) override;
     void close() override;
     bool isOpen() const override;
-    void setOnMessage(MessageCallback cb) override;
-    void setOnOpen(OpenCallback cb) override;
-    void setOnClose(CloseCallback cb) override;
-    void setOnError(ErrorCallback cb) override;
-    // 设置JavaScript WebSocket对象指针（由外部传入）
-    void setJSWebSocketPtr(void* jsWebSocketPtr);
     
     // 回调函数，供JavaScript调用
     void onJSMessage(const std::string& message);
@@ -27,9 +21,4 @@ public:
 
 private:
     void* jsWebSocketPtr = nullptr;
-    bool connected = false;
-    MessageCallback onMessage_;
-    OpenCallback onOpen_;
-    CloseCallback onClose_;
-    ErrorCallback onError_;
-}; 
+};

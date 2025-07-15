@@ -1,6 +1,7 @@
 #include "SDKManager.h"
 #include <chrono>
 #include <iostream>
+#include <utility>
 #include "base/async/main_thread_executor.h"
 #include "message_define/common.h"
 #include "base/logger/logger.h"
@@ -9,85 +10,54 @@
 #include "business_manager/BusinessManager.h"
 
 SDKManager::SDKManager() {
+    nc_logger::init(plog::info, "notification_center_log.log");
+
+    NC_LOG_INFO("[SDKManager] ctor: %p", this);
     // 初始化TopicManager和BusinessManager
+    // todo:sdk wsHolder_ 的构造，内部持有的 websocket 对象的使用重构
+    wsHolder_ = std::make_shared<WebSocketHolder>();
     topic_manager_ = std::make_shared<TopicManager>();
-    business_manager_ = std::make_shared<BusinessManager>(topic_manager_.get());
-    topic_manager_->setWebSocketHolder(&wsHolder_);
+    business_manager_ = std::make_shared<BusinessManager>(topic_manager_);
+    topic_manager_->setWebSocketHolder(wsHolder_);
 }
 
-SDKManager::~SDKManager() {}
+SDKManager::~SDKManager() {
+    NC_LOG_INFO("[SDKManager] dtor: %p", this);
+}
 
 void SDKManager::configure(const std::string& config) {
-    NC_LOG_INFO("SDKManager: 配置 %s", config.c_str());
+    NC_LOG_INFO("[SDKManager] configure %s", config.c_str());
     auto config_ = SDKConfig();
     config_.FromJsonString(config);
-    NC_LOG_INFO("sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
-
-    // 测试Timer
-    // timer_->SetDefaultExecutor(ThreadPoolExecutor::Worker());
-    // timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(1000), []()->void{
-    //     NC_LOG_INFO("SDKManager: heart_beat");
-    // });
+    NC_LOG_INFO("[SDKManager] configure sn: %s, ping_pong_interval: %d", config_.sn.c_str(), config_.ping_pong_interval);
 }
 
 void SDKManager::connect(const std::string& url) {
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->connect(url);
-        wsHolder_.getWebSocket()->setOnMessage([this](const std::string& msg) {
-            if (topic_manager_) {
-                topic_manager_->OnWebSocketMessage(msg);
-            }
-            if (messageCallback_) messageCallback_(msg);
-        });
-        wsHolder_.getWebSocket()->setOnOpen([this]() {
-            if (openCallback_) openCallback_();
-        });
-        wsHolder_.getWebSocket()->setOnClose([this]() {
-            if (closeCallback_) closeCallback_();
-        });
-        wsHolder_.getWebSocket()->setOnError([this](const std::string& err) {
-            if (errorCallback_) errorCallback_(err);
-        });
+    if (wsHolder_->getWebSocket()) {
+        wsHolder_->getWebSocket()->connect(url);
     }
 }
 
 void SDKManager::send(const std::string& message) {
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->send(message);
+    if (wsHolder_->getWebSocket()) {
+        wsHolder_->getWebSocket()->send(message);
     }
 }
 
 void SDKManager::close() {
-    if (wsHolder_.getWebSocket()) {
-        wsHolder_.getWebSocket()->close();
+    if (wsHolder_->getWebSocket()) {
+        wsHolder_->getWebSocket()->close();
     }
 }
 
 void SDKManager::setWebSocket(WebSocketBase* ws) {
-    wsHolder_.setWebSocket(ws);
-    if (topic_manager_) {
-        topic_manager_->setWebSocketHolder(&wsHolder_);
-    }
+    NC_LOG_INFO("[SDKManager] setWebSocket: %p", ws);
+    std::shared_ptr<WebSocketBase> sp_ws(ws);
+    wsHolder_->setWebSocket(sp_ws);
 }
 
-WebSocketHolder& SDKManager::getWebSocketHolder() {
+std::weak_ptr<WebSocketHolder> SDKManager::getWebSocketHolder() {
     return wsHolder_;
-}
-
-void SDKManager::setMessageCallback(MessageCallback cb) {
-    messageCallback_ = cb;
-}
-
-void SDKManager::setOpenCallback(OpenCallback cb) {
-    openCallback_ = cb;
-}
-
-void SDKManager::setCloseCallback(CloseCallback cb) {
-    closeCallback_ = cb;
-}
-
-void SDKManager::setErrorCallback(ErrorCallback cb) {
-    errorCallback_ = cb;
 }
 
 size_t SDKManager::poll() {

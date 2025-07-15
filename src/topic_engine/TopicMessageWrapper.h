@@ -5,16 +5,16 @@
 
 class TopicMessageWrapper {
 public:
-    std::string topic_;
-    std::string uuid_;
-    bool need_replay_{false};
-    uint8_t version_{1};
-    uint64_t timestamp_{0};
-    std::string raw_string_data_;
+    std::string message_topic;
+    std::string message_id;
+    std::string device_sn;
+    bool need_replay{false};
+    std::string version;
+    uint64_t timestamp{0};
 
-    AIGC_JSON_HELPER(topic_, uuid_, need_replay_, version_, timestamp_, raw_string_data_);
+    AIGC_JSON_HELPER(message_topic, message_id, device_sn, need_replay, version, timestamp);
 
-    virtual std::string ToJsonString() const {
+    virtual std::string ToJsonString() {
         std::string err, json_string;
         aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
         return json_string;

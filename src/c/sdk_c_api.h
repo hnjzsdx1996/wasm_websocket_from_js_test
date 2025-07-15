@@ -7,6 +7,7 @@ extern "C" {
 typedef void* sdk_handle;
 typedef void* websocket_handle;
 
+// todo:sdk 不应该直接把 websocket 的原始 message_callback 之类的接口给到用户，需要封装
 typedef void (*sdk_message_callback)(const char* msg, void* user_data);
 typedef void (*sdk_open_callback)(void* user_data);
 typedef void (*sdk_close_callback)(void* user_data);

@@ -7,6 +7,10 @@
 #include "websocket/WebSocketHolder.h"
 #include "topic_engine/TopicManager.h"
 
+// 整个 SDK 的管理器，一条 websocket 链路创建一个 SDKManager 实例
+// WebSocketHolder: 管理 websocket 连接
+// TopicManager: 在 WebSocketHolder 基础上实现消息收发的匹配，解析消息内容
+// BusinessManager: 业务逻辑处理
 class SDKManager {
 public:
     using MessageCallback = std::function<void(const std::string&)>;
@@ -20,18 +24,14 @@ public:
     void configure(const std::string& config);
 
     // websocket 管理
+    // todo:sdk websocket 原始接口不应该暴露出去，需要封装
     void connect(const std::string& url);
     void send(const std::string& message);
     void close();
 
     // 注入 websocket 能力
     void setWebSocket(WebSocketBase* ws);
-
-    // 设置回调
-    void setMessageCallback(MessageCallback cb);
-    void setOpenCallback(OpenCallback cb);
-    void setCloseCallback(CloseCallback cb);
-    void setErrorCallback(ErrorCallback cb);
+    std::weak_ptr<WebSocketHolder> getWebSocketHolder();
 
     /**
      * 轮询主线程任务
@@ -39,8 +39,6 @@ public:
      * @return 执行的任务数量
      */
     size_t poll();
-
-    WebSocketHolder& getWebSocketHolder();
 
     std::shared_ptr<BusinessManager> GetBusinessManager() {
         return business_manager_;
@@ -51,11 +49,7 @@ public:
     }
 
 private:
-    WebSocketHolder wsHolder_;
-    MessageCallback messageCallback_;
-    OpenCallback openCallback_;
-    CloseCallback closeCallback_;
-    ErrorCallback errorCallback_;
+    std::shared_ptr<WebSocketHolder> wsHolder_;
 
     // 测试Timer
     std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();

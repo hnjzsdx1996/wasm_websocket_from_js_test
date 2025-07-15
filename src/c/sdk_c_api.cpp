@@ -44,51 +44,66 @@ size_t sdk_poll(sdk_handle h) {
 
 void sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_data) {
     if (!h) return;
-    static_cast<SDKManager*>(h)->setMessageCallback(
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_set_message_callback: strong_ws_holder is nullptr");
+        return;
+    }
+    strong_ws_holder->setOnMessage(
         [cb, user_data](const std::string& msg) {
-            // NC_LOG_INFO("[C++] sdk_set_message_callback: msg='%s'", msg.c_str());
-            // NC_LOG_INFO("[C++] msg.size()=%zu", msg.size());
             if (cb) {
                 char* buf = (char*)malloc(msg.size() + 1);
                 std::memcpy(buf, msg.c_str(), msg.size() + 1);
-                // NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
-                // NC_LOG_INFO("[C++] buf content='%s'", buf);
-                cb(buf, user_data);
-            }
-        }
-    );
-}
-void sdk_set_open_callback(sdk_handle h, sdk_open_callback cb, void* user_data) {
-    if (!h) return;
-    static_cast<SDKManager*>(h)->setOpenCallback(
-        [cb, user_data]() {
-            if (cb) cb(user_data);
-        }
-    );
-}
-void sdk_set_close_callback(sdk_handle h, sdk_close_callback cb, void* user_data) {
-    if (!h) return;
-    static_cast<SDKManager*>(h)->setCloseCallback(
-        [cb, user_data]() {
-            if (cb) cb(user_data);
-        }
-    );
-}
-void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_data) {
-    if (!h) return;
-    static_cast<SDKManager*>(h)->setErrorCallback(
-        [cb, user_data](const std::string& err) {
-            // NC_LOG_INFO("[C++] sdk_set_error_callback: err='%s'", err.c_str());
-            // NC_LOG_INFO("[C++] err.size()=%zu", err.size());
-            if (cb) {
-                char* buf = (char*)malloc(err.size() + 1);
-                std::memcpy(buf, err.c_str(), err.size() + 1);
-                // NC_LOG_INFO("[C++] malloc buf ptr=%p", (void*)buf);
-                // NC_LOG_INFO("[C++] buf content='%s'", buf);
                 cb(buf, user_data);
             }
         }
     );
 }
 
-} 
+void sdk_set_open_callback(sdk_handle h, sdk_open_callback cb, void* user_data) {
+    if (!h) return;
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_set_open_callback: strong_ws_holder is nullptr");
+        return;
+    }
+    strong_ws_holder->setOnOpen(
+        [cb, user_data]() {
+            if (cb) cb(user_data);
+        }
+    );
+}
+
+void sdk_set_close_callback(sdk_handle h, sdk_close_callback cb, void *user_data) {
+    if (!h) return;
+    auto strong_ws_holder = static_cast<SDKManager *>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_set_open_callback: strong_ws_holder is nullptr");
+        return;
+    }
+    strong_ws_holder->setOnClose(
+        [cb, user_data]() {
+            if (cb) cb(user_data);
+        }
+    );
+}
+
+void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void *user_data) {
+    if (!h) return;
+    auto strong_ws_holder = static_cast<SDKManager *>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_set_open_callback: strong_ws_holder is nullptr");
+        return;
+    }
+    strong_ws_holder->setOnError(
+        [cb, user_data](const std::string &err) {
+            if (cb) {
+                char *buf = (char *) malloc(err.size() + 1);
+                std::memcpy(buf, err.c_str(), err.size() + 1);
+                cb(buf, user_data);
+            }
+        }
+    );
+}
+
+}

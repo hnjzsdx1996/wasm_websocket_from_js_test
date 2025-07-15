@@ -3,6 +3,8 @@
 #include <thread>
 #include <chrono>
 
+#include "logger.h"
+
 // 简单的消息回调
 void on_message(const std::string& msg) {
     std::cout << "[收到消息] " << msg << std::endl;
@@ -24,6 +26,9 @@ void on_error(const std::string& err) {
 }
 
 int main() {
+    nc_logger::init(plog::debug, "example_cpp.log");
+    nc_logger::set_level(plog::debug);
+
     std::cout << "=== C++ WebSocket SDK Example ===" << std::endl;
 
     // 创建 SDKManager 实例
@@ -31,10 +36,14 @@ int main() {
     sdk.configure(R"({"sn":"1234567890","ping_pong_interval":100})");
 
     // 注册回调
-    sdk.setMessageCallback(on_message);
-    sdk.setOpenCallback(on_open);
-    sdk.setCloseCallback(on_close);
-    sdk.setErrorCallback(on_error);
+    auto strong_websocket_holder = sdk.getWebSocketHolder().lock();
+    if (strong_websocket_holder == nullptr) {
+        return -1;
+    }
+    strong_websocket_holder->setOnMessage(on_message);
+    strong_websocket_holder->setOnOpen(on_open);
+    strong_websocket_holder->setOnClose(on_close);
+    strong_websocket_holder->setOnError(on_error);
 
     // 连接 WebSocket 服务器
     std::string url = "wss://echo.websocket.org";

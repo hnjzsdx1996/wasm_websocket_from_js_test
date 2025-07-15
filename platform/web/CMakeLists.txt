@@ -12,6 +12,9 @@ set(ALL_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../src/SDKManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/CppWebSocket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/WebSocketHolder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/WebSocketBase.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/topic_engine/TopicManager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/business_manager/BusinessManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/c/sdk_c_api.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/base/logger/thread_info.cpp
     # Web 平台特定源文件
@@ -45,7 +48,15 @@ if(EMSCRIPTEN)
         OUTPUT_NAME "NotificationCenterSDK"
         SUFFIX ".js"
     )
+    target_compile_options(NotificationCenterSDKWeb PRIVATE
+        -g
+        -gsource-map
+        -O0
+    )
     target_link_options(NotificationCenterSDKWeb PRIVATE
+        "SHELL:-g"
+        "SHELL:-gsource-map"
+        "SHELL:-O0"
         "SHELL:-sMODULARIZE=1"
         "SHELL:-sEXPORT_NAME=NotificationCenterSDK"
         "SHELL:-sINITIAL_MEMORY=32MB"
