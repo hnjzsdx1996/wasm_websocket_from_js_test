@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "logger.h"
+#include "base/async/thread_pool_executor.h"
 #include "base/utils/json_utils.h"
 
 
@@ -50,6 +51,7 @@ void TopicManager::CancelObserve(int64_t listen_id) {
 }
 
 int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, TopicCallback cb) {
+    NC_LOG_INFO("[TopicManager] SendMessage: %s", msg->ToJsonString().c_str());
     auto strong_ws_holder = ws_holder_.lock();
     if (strong_ws_holder == nullptr) {
         return TopicManager_ErrorNoWebsocket;
@@ -58,8 +60,21 @@ int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, T
         std::lock_guard<std::mutex> lock(mtx_);
         if (cb != nullptr && msg->need_replay == true) {
             // 消息发出后需要回调
-            // todo:sdk 消息超时发送需要回调
             pending_requests_[msg->message_id] = std::move(cb);
+            WeakDummy(weak_ptr);
+            ThreadPoolExecutor::Worker()->PostDelayed([this, weak_ptr, msg_uuid = msg->message_id]()->void {
+                WeakDummyReturn(weak_ptr);
+                if (pending_requests_.count(msg_uuid)) {
+                    // 消息还在队列，说明没有收到回复
+                    auto callback = pending_requests_[msg_uuid];
+                    pending_requests_.erase(msg_uuid);
+                    ThreadPoolExecutor::Main().post([this, weak_ptr, cb = callback]()->void {
+                        cb(TopicManager_ErrorTimeout, nullptr);
+                    });
+                } else {
+                    NC_LOG_INFO("[TopicManager] SendMessage, 收到回调");
+                }
+            }, std::chrono::milliseconds(3000));
         }
         strong_ws_holder->getWebSocket()->send(msg->ToJsonString());
         return TopicManager_NoError;
@@ -103,16 +118,56 @@ void TopicManager::OnWebSocketMessage(const std::string& json) {
 }
 
 void TopicManager::OnSubscribe(const std::string &json) {
-    // todo:sdk
     // 收到 subscribe 消息，是来自服务端对 SDK 发起的 subscribe 的回复
     // 匹配之前发出的消息
+    auto subscribe_msg = std::make_shared<TopicMessageWrapper>();
+    subscribe_msg->FromJsonString(json);
+
+    NC_LOG_ERROR("[TopicManager] OnSubscribe subscribe_msg: %s", subscribe_msg->ToJsonString().c_str());
+
+    if (subscribe_msg->isValid() == false) {
+        NC_LOG_ERROR("[TopicManager] OnSubscribe unknown: %s", json.c_str());
+        return;
+    }
+    // subscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
+    // 1. 响应回调
+    if (pending_requests_.count(subscribe_msg->message_id)) {
+        TopicCallback cb;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            cb = pending_requests_[subscribe_msg->message_id];
+            pending_requests_.erase(subscribe_msg->message_id);
+        }
+        cb(TopicManager_NoError, subscribe_msg);
+        return;
+    }
 
 }
 
 void TopicManager::OnUnSubscribe(const std::string &json) {
-    // todo:sdk
     // 收到 unsubscribe 消息，是来自服务端对 SDK 发起的 unsubscribe 的回复
     // 匹配之前发出的消息
+    auto unsubscribe_msg = std::make_shared<TopicMessageWrapper>();
+    unsubscribe_msg->FromJsonString(json);
+
+    NC_LOG_ERROR("[TopicManager] OnUnSubscribe unsubscribe_msg: %s", unsubscribe_msg->ToJsonString().c_str());
+
+    if (unsubscribe_msg->isValid() == false) {
+        NC_LOG_ERROR("[TopicManager] OnUnSubscribe unknown: %s", json.c_str());
+        return;
+    }
+    // unsubscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
+    // 1. 响应回调
+    if (pending_requests_.count(unsubscribe_msg->message_id)) {
+        TopicCallback cb;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            cb = pending_requests_[unsubscribe_msg->message_id];
+            pending_requests_.erase(unsubscribe_msg->message_id);
+        }
+        cb(TopicManager_NoError, unsubscribe_msg);
+        return;
+    }
 }
 
 void TopicManager::OnPublish(const std::string &json) {
@@ -126,17 +181,7 @@ void TopicManager::OnPublish(const std::string &json) {
         return;
     }
 
-    // 1. 响应回调
-    if (pending_requests_.count(publish_msg->message_id)) {
-        TopicCallback cb;
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            cb = pending_requests_[publish_msg->message_id];
-            pending_requests_.erase(publish_msg->message_id);
-        }
-        cb(TopicManager_NoError, publish_msg);
-        return;
-    }
+    // publish 是服务端主动推送的，没有人等待回复, 只需要回调给监听者
     // 2. 广播给所有监听者
     if (topic_observers_.count(publish_msg->message_topic)) {
         std::unordered_map<int64_t, TopicCallback> cbs;

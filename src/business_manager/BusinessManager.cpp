@@ -16,7 +16,14 @@ void BusinessManager::Send(const std::string &msg) {
     }
     auto topic_message = std::make_shared<PublishTopicWrapper>();
     topic_message->FromJsonString(msg);
-    strong_topic_mgr->SendMessage(topic_message);
+    topic_message->need_replay = true;
+    strong_topic_mgr->SendMessage(topic_message, [](int err, std::shared_ptr<TopicMessageWrapper> msg)->void {
+        if (err != 0) {
+            NC_LOG_INFO("[BusinessManager] Send err: %d", err);
+            return;
+        }
+        NC_LOG_INFO("[BusinessManager] Send success: %s", msg->ToJsonString().c_str());
+    });
 }
 
 void BusinessManager::Observe(std::function<void(const std::string &)> callback) {

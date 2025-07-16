@@ -15,6 +15,7 @@ using TopicCallback = std::function<void(int err, std::shared_ptr<TopicMessageWr
 enum TopicManagerErrorCode {
     TopicManager_NoError = 0,
     TopicManager_ErrorNoWebsocket = -1,
+    TopicManager_ErrorTimeout = -2,
 };
 
 // 消息匹配
