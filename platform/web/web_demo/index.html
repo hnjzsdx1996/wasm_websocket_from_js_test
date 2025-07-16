@@ -26,6 +26,7 @@
         <input id="wsUrl" value="wss://echo.websocket.org" size="40" placeholder="输入WebSocket地址">
         <button onclick="connectWS()">连接</button>
         <button onclick="closeWS()">断开</button>
+        <button onclick="clearLog()">清除日志</button>
     </div>
     <div class="message-container">
         <div>发送消息:</div>
@@ -59,6 +60,9 @@
             const logDiv = document.getElementById('log');
             logDiv.innerHTML += msg + '<br>';
             // 移除自动滚动，让用户可以固定查看特定行
+        }
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
         }
         function connectWS() {
             const url = document.getElementById('wsUrl').value;

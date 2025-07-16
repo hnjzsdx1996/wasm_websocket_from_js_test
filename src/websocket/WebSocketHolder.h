@@ -22,15 +22,9 @@ public:
 
     // 当 setWebSocket 时，将所有 callback 设置到新的 WebSocketBase
     void setWebSocket(std::shared_ptr<WebSocketBase> ws);
+    void resetWebSocket();
 
-    // todo:sdk 干掉这个函数
-    WebSocketBase* getWebSocket() const {
-        if (ws_ == nullptr) {
-            return nullptr;
-        }
-        return ws_.get();
-    }
-
+    WebSocketBase* getWebSocket() const;
 
 private:
     std::atomic<int64_t> next_listen_id_{0};

@@ -12,6 +12,23 @@
 SDKManager::SDKManager() {
     nc_logger::init(plog::info, "notification_center_log.log");
 
+    // 用于测试多线程 Timer
+    worker_timer_ = std::make_shared<Timer>();
+    worker_timer_->SetDefaultExecutor(ThreadPoolExecutor::Worker());
+    worker_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
+        NC_LOG_INFO("[SDKManager] Worker timer");
+    });
+    io_timer_ = std::make_shared<Timer>();
+    io_timer_->SetDefaultExecutor(ThreadPoolExecutor::IO());
+    io_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
+        NC_LOG_INFO("[SDKManager] IO timer");
+    });
+    compute_timer_ = std::make_shared<Timer>();
+    compute_timer_->SetDefaultExecutor(ThreadPoolExecutor::Compute());
+    compute_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
+        NC_LOG_INFO("[SDKManager] Compute timer");
+    });
+
     NC_LOG_INFO("[SDKManager] ctor: %p", this);
     // 初始化TopicManager和BusinessManager
     // todo:sdk wsHolder_ 的构造，内部持有的 websocket 对象的使用重构

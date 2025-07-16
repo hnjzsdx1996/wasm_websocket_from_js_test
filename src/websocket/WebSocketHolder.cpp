@@ -45,4 +45,15 @@ void WebSocketHolder::setWebSocket(std::shared_ptr<WebSocketBase> ws) {
     ws_->setOnOpen(open_callback_);
     ws_->setOnClose(close_callback_);
     ws_->setOnError(error_callback_);
-} 
+}
+
+void WebSocketHolder::resetWebSocket() {
+    ws_.reset();
+}
+
+WebSocketBase *WebSocketHolder::getWebSocket() const {
+    if (ws_ == nullptr) {
+        return nullptr;
+    }
+    return ws_.get();
+}

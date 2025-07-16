@@ -4,6 +4,7 @@
 #include <string>
 
 // C++原生WebSocket实现（可以使用boost::beast或其他库）
+// todo:sdk 使用 libwebsockets 实现
 class CppWebSocket : public WebSocketBase {
 public:
     CppWebSocket();

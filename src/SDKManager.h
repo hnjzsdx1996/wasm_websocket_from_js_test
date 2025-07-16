@@ -13,10 +13,6 @@
 // BusinessManager: 业务逻辑处理
 class SDKManager {
 public:
-    using MessageCallback = std::function<void(const std::string&)>;
-    using OpenCallback = std::function<void()>;
-    using CloseCallback = std::function<void()>;
-    using ErrorCallback = std::function<void(const std::string&)>;
     SDKManager();
     ~SDKManager();
 
@@ -33,6 +29,16 @@ public:
     void setWebSocket(WebSocketBase* ws);
     std::weak_ptr<WebSocketHolder> getWebSocketHolder();
 
+    // todo:sdk 改成 weak_ptr
+    std::shared_ptr<TopicManager> GetTopicManager() {
+        return topic_manager_;
+    }
+
+    // todo:sdk 改成 weak_ptr
+    std::shared_ptr<BusinessManager> GetBusinessManager() {
+        return business_manager_;
+    }
+
     /**
      * 轮询主线程任务
      * 用户需要定期调用此方法来处理主线程任务
@@ -40,20 +46,12 @@ public:
      */
     size_t poll();
 
-    std::shared_ptr<BusinessManager> GetBusinessManager() {
-        return business_manager_;
-    }
-    
-    std::shared_ptr<TopicManager> GetTopicManager() {
-        return topic_manager_;
-    }
-
 private:
     std::shared_ptr<WebSocketHolder> wsHolder_;
-
-    // 测试Timer
-    std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();
-
-    std::shared_ptr<BusinessManager> business_manager_;
     std::shared_ptr<TopicManager> topic_manager_;
-};  
+    std::shared_ptr<BusinessManager> business_manager_;
+
+    std::shared_ptr<Timer> worker_timer_;
+    std::shared_ptr<Timer> io_timer_;
+    std::shared_ptr<Timer> compute_timer_;
+};
