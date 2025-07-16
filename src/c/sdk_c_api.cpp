@@ -19,22 +19,55 @@ void sdk_configure(sdk_handle h, const char* config_str) {
 
 void sdk_connect(sdk_handle h, const char* url) {
     if (!h) return;
-    static_cast<SDKManager*>(h)->connect(std::string(url));
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_connect: strong_ws_holder is nullptr");
+        return;
+    }
+    const auto ws = strong_ws_holder->getWebSocket();
+    if (ws == nullptr) {
+        return;
+    }
+    ws->connect(std::string(url));
 }
 
 void sdk_send(sdk_handle h, const char* msg) {
     if (!h) return;
-    static_cast<SDKManager*>(h)->send(std::string(msg));
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_send: strong_ws_holder is nullptr");
+        return;
+    }
+    const auto ws = strong_ws_holder->getWebSocket();
+    if (ws == nullptr) {
+        return;
+    }
+    ws->send(std::string(msg));
 }
 
 void sdk_close(sdk_handle h) {
     if (!h) return;
-    static_cast<SDKManager*>(h)->close();
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_send: strong_ws_holder is nullptr");
+        return;
+    }
+    const auto ws = strong_ws_holder->getWebSocket();
+    if (ws == nullptr) {
+        return;
+    }
+    ws->close();
 }
 
 void sdk_set_websocket(sdk_handle h, websocket_handle ws) {
     if (!h) return;
-    static_cast<SDKManager*>(h)->setWebSocket(static_cast<WebSocketBase*>(ws));
+    auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();
+    if (strong_ws_holder == nullptr) {
+        NC_LOG_INFO("[C API] sdk_set_websocket: strong_ws_holder is nullptr");
+        return;
+    }
+    const std::shared_ptr<WebSocketBase> sp_ws(static_cast<WebSocketBase*>(ws));
+    strong_ws_holder->setWebSocket(sp_ws);
 }
 
 size_t sdk_poll(sdk_handle h) {

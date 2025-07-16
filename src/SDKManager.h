@@ -19,23 +19,17 @@ public:
     // sdk 配置
     void configure(const std::string& config);
 
-    // websocket 管理
-    // todo:sdk websocket 原始接口不应该暴露出去，需要封装
-    void connect(const std::string& url);
-    void send(const std::string& message);
-    void close();
-
     // 注入 websocket 能力
     void setWebSocket(WebSocketBase* ws);
     std::weak_ptr<WebSocketHolder> getWebSocketHolder();
 
     // todo:sdk 改成 weak_ptr
-    std::shared_ptr<TopicManager> GetTopicManager() {
+    std::shared_ptr<TopicManager> getTopicManager() {
         return topic_manager_;
     }
 
     // todo:sdk 改成 weak_ptr
-    std::shared_ptr<BusinessManager> GetBusinessManager() {
+    std::shared_ptr<BusinessManager> getBusinessManager() {
         return business_manager_;
     }
 
@@ -47,11 +41,13 @@ public:
     size_t poll();
 
 private:
+    void initExecutors();
+
     std::shared_ptr<WebSocketHolder> wsHolder_;
     std::shared_ptr<TopicManager> topic_manager_;
     std::shared_ptr<BusinessManager> business_manager_;
 
-    std::shared_ptr<Timer> worker_timer_;
-    std::shared_ptr<Timer> io_timer_;
-    std::shared_ptr<Timer> compute_timer_;
+    // std::shared_ptr<Timer> worker_timer_;
+    // std::shared_ptr<Timer> io_timer_;
+    // std::shared_ptr<Timer> compute_timer_;
 };
