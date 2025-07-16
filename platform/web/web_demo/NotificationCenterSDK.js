@@ -5998,6 +5998,7 @@ async function createWasm() {
   
       return ret;
     };
+
 PThread.init();;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
@@ -6050,6 +6051,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   Module['stringToUTF8'] = stringToUTF8;
   Module['lengthBytesUTF8'] = lengthBytesUTF8;
   Module['intArrayFromString'] = intArrayFromString;
+  Module['FS'] = FS;
   var missingLibrarySymbols = [
   'writeI53ToI64',
   'writeI53ToI64Clamped',
@@ -6386,7 +6388,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_createPath',
   'FS_createDevice',
   'FS_readFile',
-  'FS',
   'FS_root',
   'FS_mounts',
   'FS_devices',

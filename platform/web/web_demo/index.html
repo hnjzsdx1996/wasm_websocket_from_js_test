@@ -27,7 +27,9 @@
         <button onclick="connectWS()">连接</button>
         <button onclick="closeWS()">断开</button>
         <button onclick="clearLog()">清除日志</button>
+        <button onclick="showWasmFiles()">显示WASM文件列表</button>
     </div>
+    <div id="wasmFileList" style="margin-top:1em;"></div>
     <div class="message-container">
         <div>发送消息:</div>
         <textarea id="msgInput" placeholder="输入要发送的消息">{"timestamp":1752374563734,"topic":"subscribe","data":[{"sn":"drone_001","topic_list":["topic1"]}],"uuid":"54c56d3c-6fbd-4c0b-b236-b2107e85d30f"}</textarea>
@@ -116,6 +118,54 @@
             }, 16); // 约60FPS
             
             log('开始轮询主线程任务 (60FPS)');
+        }
+
+        function showWasmFiles() {
+            if (!sdk || !sdk.FS) {
+                alert('WASM未加载完成或FS不可用');
+                return;
+            }
+            let files = listAllFiles('/');
+            let html = '<b>WASM虚拟文件系统文件列表：</b><ul>';
+            files.forEach(f => {
+                html += `<li>${f} <button onclick=\"downloadWasmFile('${f}')\">下载</button></li>`;
+            });
+            html += '</ul>';
+            document.getElementById('wasmFileList').innerHTML = html;
+        }
+
+        function listAllFiles(path) {
+            let result = [];
+            function walk(dir) {
+                let entries = [];
+                try { entries = sdk.FS.readdir(dir); } catch(e) { return; }
+                entries.forEach(entry => {
+                    if (entry === '.' || entry === '..') return;
+                    let fullPath = dir === '/' ? '/' + entry : dir + '/' + entry;
+                    let stat = null;
+                    try { stat = sdk.FS.stat(fullPath); } catch(e) { return; }
+                    if (sdk.FS.isDir(stat.mode)) {
+                        walk(fullPath);
+                    } else {
+                        result.push(fullPath);
+                    }
+                });
+            }
+            walk(path);
+            return result;
+        }
+
+        function downloadWasmFile(path) {
+            try {
+                let data = sdk.FS.readFile(path);
+                let blob = new Blob([data], { type: 'application/octet-stream' });
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = path.split('/').pop();
+                a.click();
+            } catch (e) {
+                alert('无法下载文件: ' + e);
+            }
         }
 
         window.addEventListener('load', function() {

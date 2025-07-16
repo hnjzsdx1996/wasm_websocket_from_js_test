@@ -62,7 +62,7 @@ if(EMSCRIPTEN)
         "SHELL:-sINITIAL_MEMORY=32MB"
         "SHELL:-sMAXIMUM_MEMORY=512MB"
         "SHELL:-sALLOW_TABLE_GROWTH=1"
-        "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','intArrayFromString','UTF8ToString','stringToUTF8','lengthBytesUTF8','addFunction']"
+        "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','intArrayFromString','UTF8ToString','stringToUTF8','lengthBytesUTF8','addFunction','FS']"
         "SHELL:--bind"
         # 多线程支持
         "SHELL:-pthread"
