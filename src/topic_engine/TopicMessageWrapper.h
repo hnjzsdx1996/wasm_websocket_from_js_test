@@ -10,6 +10,23 @@ class TopicMessageWrapper {
 public:
     virtual ~TopicMessageWrapper() = default;
 
+    virtual bool isValid() {
+        if (message_type.empty()) {
+            return false;
+        }
+        if (message_type != "subscribe" &&
+            message_type != "unsubscribe" &&
+            message_type != "publish" &&
+            message_type != "ping" &&
+            message_type != "pong") {
+            return false;
+        }
+        if (message_id.empty()) {
+            return false;
+        }
+        return true;
+    }
+
     std::string message_type; // subscribe/unsubscribe/publish/ping/pong
     std::string message_id; // uuid, 用于消息匹配
     uint64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -31,6 +48,15 @@ public:
 
 class PublishTopicWrapper : public TopicMessageWrapper {
 public:
+    bool isValid() override {
+        if (TopicMessageWrapper::isValid() == false) {
+            return false;
+        }
+        if (message_topic.empty()) {
+            return false;
+        }
+        return true;
+    }
 
     std::string message_topic;
 
@@ -54,7 +80,7 @@ public:
     explicit PingTopicWrapper() {
         message_type = "ping";
         message_id = generate_uuid_v4();
-        need_replay = false; // pong 消息不需要回复
+        need_replay = true; // ping 消息需要回复
         version = "1"; // 当前版本先写死为 1
     }
 };
@@ -68,5 +94,8 @@ public:
         timestamp = ping->timestamp; // 填 ping 包的时间戳，ping 包发送方可以计算 RTT
         need_replay = false; // pong 消息不需要回复
         version = ping->version;
+    }
+    explicit PongTopicWrapper(const std::string& json) {
+        TopicMessageWrapper::FromJsonString(json);
     }
 };

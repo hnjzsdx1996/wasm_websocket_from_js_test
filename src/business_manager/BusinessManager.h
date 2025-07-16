@@ -10,6 +10,10 @@ class BusinessManager {
 public:
     explicit BusinessManager(std::weak_ptr<TopicManager> topic_mgr);
 
+    // 调试用接口
+    void Send(const std::string& msg);
+    void Observe(std::function<void(const std::string&)> callback);
+
     void CancelObserve(int64_t listen_id);
 
     int64_t ObserveDeviceOsd(const std::function<void(const std::shared_ptr<DeviceOsdTopic>&)>& cb);

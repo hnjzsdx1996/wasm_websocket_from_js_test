@@ -62,9 +62,9 @@ int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, T
             pending_requests_[msg->message_id] = std::move(cb);
         }
         strong_ws_holder->getWebSocket()->send(msg->ToJsonString());
-        return 0;
+        return TopicManager_NoError;
     }
-    return -1;
+    return TopicManager_ErrorNoWebsocket;
 }
 
 void TopicManager::OnWebSocketMessage(const std::string& json) {
@@ -76,7 +76,8 @@ void TopicManager::OnWebSocketMessage(const std::string& json) {
     // 这里只处理device_osd，其他topic可按需扩展
     auto msg = std::make_shared<TopicMessageWrapper>();
     msg->FromJsonString(json);
-    NC_LOG_INFO("[TopicManager] OnWebSocketMessage Wrapper: %s", msg->ToJsonString().c_str());
+    // NC_LOG_INFO("[TopicManager] OnWebSocketMessage raw: %s", json.c_str());
+    // NC_LOG_INFO("[TopicManager] OnWebSocketMessage Wrapper: %s", msg->ToJsonString().c_str());
 
     if (msg->message_type == "subscribe") {
         OnSubscribe(json);
@@ -88,6 +89,10 @@ void TopicManager::OnWebSocketMessage(const std::string& json) {
     }
     if (msg->message_type == "ping") {
         OnPing(json);
+        return;
+    }
+    if (msg->message_type == "pong") {
+        OnPong(json);
         return;
     }
     if (msg->message_type == "publish") {
@@ -111,21 +116,49 @@ void TopicManager::OnUnSubscribe(const std::string &json) {
 }
 
 void TopicManager::OnPublish(const std::string &json) {
-    // todo:sdk 完善收到推送消息的逻辑
-    // std::lock_guard<std::mutex> lock(mtx_);
-    // // 1. 响应回调
-    // if (msg && !msg->message_id.empty() && pending_requests_.count(msg->message_id)) {
-    //     auto cb = pending_requests_[msg->message_id];
-    //     cb(0, msg);
-    //     pending_requests_.erase(msg->message_id);
-    //     return;
-    // }
-    // // 2. 广播给所有监听者
-    // if (msg && topic_observers_.count(msg->message_topic)) {
-    //     for (auto& [id, cb] : topic_observers_[msg->message_topic]) {
-    //         cb(TopicManager_NoError, msg);
-    //     }
-    // }
+    auto publish_msg = std::make_shared<PublishTopicWrapper>();
+    publish_msg->FromJsonString(json);
+
+    NC_LOG_ERROR("[TopicManager] OnPublish publish_msg: %s", publish_msg->ToJsonString().c_str());
+
+    if (publish_msg->isValid() == false) {
+        NC_LOG_ERROR("[TopicManager] OnPublish unknown: %s", json.c_str());
+        return;
+    }
+
+    // 1. 响应回调
+    if (pending_requests_.count(publish_msg->message_id)) {
+        TopicCallback cb;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            cb = pending_requests_[publish_msg->message_id];
+            pending_requests_.erase(publish_msg->message_id);
+        }
+        cb(TopicManager_NoError, publish_msg);
+        return;
+    }
+    // 2. 广播给所有监听者
+    if (topic_observers_.count(publish_msg->message_topic)) {
+        std::unordered_map<int64_t, TopicCallback> cbs;
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            cbs = topic_observers_[publish_msg->message_topic];
+        }
+        for (auto& [_, cb] : cbs) {
+            cb(TopicManager_NoError, publish_msg);
+        }
+    }
+
+    // 全量消息的监听者
+    std::unordered_map<int64_t, TopicCallback> cbs;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        cbs = all_topic_observers_;
+    }
+    for (auto& [_, cb] : cbs) {
+        cb(TopicManager_NoError, publish_msg);
+    }
+
 }
 
 void TopicManager::OnPing(const std::string &json) {
@@ -139,4 +172,14 @@ void TopicManager::OnPing(const std::string &json) {
     if (ret != TopicManager_NoError) {
         NC_LOG_ERROR("[TopicManager] OnPing, pong error: %d", ret);
     }
+}
+
+void TopicManager::OnPong(const std::string &json) {
+    auto pong_msg = std::make_shared<PongTopicWrapper>(json);
+    pong_msg->FromJsonString(json);
+
+    auto time_now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto time_diff = time_now - pong_msg->timestamp;
+
+    NC_LOG_INFO("[TopicManager] OnPong, uuid: %s, rtt: %llu(ms)", pong_msg->message_id.c_str(), time_diff);
 }

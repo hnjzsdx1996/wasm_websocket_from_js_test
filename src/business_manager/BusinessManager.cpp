@@ -1,9 +1,39 @@
 #include "BusinessManager.h"
 
+#include <utility>
+
 #include "logger.h"
 
 BusinessManager::BusinessManager(std::weak_ptr<TopicManager> topic_mgr) : topic_mgr_(std::move(topic_mgr)) {
     NC_LOG_INFO("[BusinessManager] ctor");
+}
+
+void BusinessManager::Send(const std::string &msg) {
+    auto strong_topic_mgr = topic_mgr_.lock();
+    if (strong_topic_mgr == nullptr) {
+        NC_LOG_INFO("[BusinessManager] Send failed");
+        return;
+    }
+    auto topic_message = std::make_shared<PublishTopicWrapper>();
+    topic_message->FromJsonString(msg);
+    strong_topic_mgr->SendMessage(topic_message);
+}
+
+void BusinessManager::Observe(std::function<void(const std::string &)> callback) {
+    auto strong_topic_mgr = topic_mgr_.lock();
+    if (strong_topic_mgr == nullptr) {
+        NC_LOG_INFO("[BusinessManager] Send failed");
+        return;
+    }
+    strong_topic_mgr->ObserveAll([cb = std::move(callback)](int err, std::shared_ptr<TopicMessageWrapper> topic_message)->void {
+        if (err != 0) {
+            NC_LOG_INFO("[BusinessManager] Observe err: %d");
+            return;
+        }
+        if (cb && topic_message) {
+            cb(topic_message->ToJsonString());
+        }
+    });
 }
 
 int64_t BusinessManager::ObserveDeviceOsd(const std::function<void(const std::shared_ptr<DeviceOsdTopic>&)>& cb) {

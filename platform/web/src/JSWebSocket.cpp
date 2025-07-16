@@ -21,7 +21,7 @@ static std::mutex g_wsMapMutex;
 // 导出给JavaScript的回调函数
 extern "C" {
     EMSCRIPTEN_KEEPALIVE void js_websocket_on_open(void* wsPtr) {
-        NC_LOG_INFO("JSWebSocket: 连接已打开 (wsPtr: %p)", wsPtr);
+        // NC_LOG_INFO("JSWebSocket: 连接已打开 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -30,7 +30,7 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE void js_websocket_on_message(void* wsPtr, const char* message) {
-        NC_LOG_INFO("JSWebSocket: 收到消息 %s (wsPtr: %p)", message, wsPtr);
+        // NC_LOG_INFO("JSWebSocket: 收到消息 %s (wsPtr: %p)", message, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -39,7 +39,7 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE void js_websocket_on_close(void* wsPtr) {
-        NC_LOG_INFO("JSWebSocket: 连接已关闭 (wsPtr: %p)", wsPtr);
+        // NC_LOG_INFO("JSWebSocket: 连接已关闭 (wsPtr: %p)", wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
@@ -48,7 +48,7 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE void js_websocket_on_error(void* wsPtr, const char* error) {
-        NC_LOG_INFO("JSWebSocket: 发生错误 %s (wsPtr: %p)", error, wsPtr);
+        // NC_LOG_INFO("JSWebSocket: 发生错误 %s (wsPtr: %p)", error, wsPtr);
         std::lock_guard<std::mutex> lock(g_wsMapMutex);
         auto it = g_wsPtr2Instance.find(wsPtr);
         if (it != g_wsPtr2Instance.end() && it->second) {
