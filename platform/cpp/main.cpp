@@ -35,39 +35,7 @@ int main() {
     SDKManager sdk;
     sdk.configure(R"({"sn":"1234567890","ping_pong_interval":100})");
 
-    // 注册回调
-    auto strong_websocket_holder = sdk.getWebSocketHolder().lock();
-    if (strong_websocket_holder == nullptr) {
-        return -1;
-    }
-    strong_websocket_holder->setOnMessage(on_message);
-    strong_websocket_holder->setOnOpen(on_open);
-    strong_websocket_holder->setOnClose(on_close);
-    strong_websocket_holder->setOnError(on_error);
 
-    // 连接 WebSocket 服务器
-    std::string url = "wss://echo.websocket.org";
-    std::cout << "连接到: " << url << std::endl;
-    sdk.connect(url);
 
-    // 等待连接建立
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    // 发送一条消息
-    std::string msg = "Hello from C++ SDK!";
-    std::cout << "发送消息: " << msg << std::endl;
-    sdk.send(msg);
-
-    // 等待消息回显
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    // 关闭连接
-    std::cout << "关闭连接..." << std::endl;
-    sdk.close();
-
-    // 等待关闭回调
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    std::cout << "=== 示例结束 ===" << std::endl;
     return 0;
 } 

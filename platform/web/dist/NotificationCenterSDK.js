@@ -5716,6 +5716,17 @@ async function createWasm() {
       ws.send(messageStr);
     }
 
+  function _random_get(buffer, size) {
+  try {
+  
+      randomFill(HEAPU8.subarray(buffer, buffer + size));
+      return 0;
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return e.errno;
+  }
+  }
+
   var getCFunc = (ident) => {
       var func = Module['_' + ident]; // closure exported function
       assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
@@ -6763,7 +6774,9 @@ function assignWasmExports(wasmExports) {
     /** @export */
     js_websocket_send: _js_websocket_send,
     /** @export */
-    memory: wasmMemory
+    memory: wasmMemory,
+    /** @export */
+    random_get: _random_get
   };
   }
   var wasmExports = await createWasm();

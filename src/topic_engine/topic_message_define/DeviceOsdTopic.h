@@ -9,11 +9,8 @@ public:
     AIGC_JSON_HELPER(velocity);
 };
 
-class DeviceOsdTopic : public TopicMessageWrapper {
+class DeviceOsdTopic : public PublishTopicWrapper {
 public:
-    DeviceOsdTopic() {
-        message_topic = "device_osd";
-    }
 
     DeviceOsdMessage message_data;
     AIGC_JSON_HELPER(message_data);
