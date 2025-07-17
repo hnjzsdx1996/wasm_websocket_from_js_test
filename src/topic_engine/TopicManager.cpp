@@ -24,7 +24,7 @@ void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder> &hold
     });
 }
 
-int64_t TopicManager::Observe(const std::string& topic, TopicCallback cb) {
+int64_t TopicManager::Observe(const std::string& topic, PublishTopicCallback cb) {
     int64_t id;
     {
         std::lock_guard<std::mutex> lock(mtx_);
@@ -34,7 +34,7 @@ int64_t TopicManager::Observe(const std::string& topic, TopicCallback cb) {
     return id;
 }
 
-int64_t TopicManager::ObserveAll(TopicCallback cb) {
+int64_t TopicManager::ObserveAll(PublishTopicCallback cb) {
     std::lock_guard<std::mutex> lock(mtx_);
     int64_t id = next_listen_id_++;
     all_topic_observers_[id] = std::move(cb);
@@ -49,7 +49,7 @@ void TopicManager::CancelObserve(int64_t listen_id) {
     all_topic_observers_.erase(listen_id);
 }
 
-int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, TopicCallback cb) {
+int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, SendTopicCallback cb) {
     NC_LOG_INFO("[TopicManager] SendMessage: %s", msg->ToJsonString().c_str());
     auto strong_ws_holder = ws_holder_.lock();
     if (strong_ws_holder == nullptr) {
@@ -130,7 +130,7 @@ void TopicManager::OnSubscribe(const std::string &json) {
     // subscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
     // 1. 响应回调
     if (pending_requests_.count(subscribe_msg->message_id)) {
-        TopicCallback cb;
+        SendTopicCallback cb;
         {
             std::lock_guard<std::mutex> lock(mtx_);
             cb = pending_requests_[subscribe_msg->message_id];
@@ -157,7 +157,7 @@ void TopicManager::OnUnSubscribe(const std::string &json) {
     // unsubscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
     // 1. 响应回调
     if (pending_requests_.count(unsubscribe_msg->message_id)) {
-        TopicCallback cb;
+        SendTopicCallback cb;
         {
             std::lock_guard<std::mutex> lock(mtx_);
             cb = pending_requests_[unsubscribe_msg->message_id];
@@ -172,7 +172,10 @@ void TopicManager::OnPublish(const std::string &json) {
     auto publish_msg = std::make_shared<PublishTopicWrapper>();
     publish_msg->FromJsonString(json);
 
-    NC_LOG_ERROR("[TopicManager] OnPublish publish_msg: %s", publish_msg->ToJsonString().c_str());
+    NC_LOG_ERROR("[TopicManager] OnPublish publish_msg: %s", json.c_str());
+
+    // todo:sdk 解析出 message_data字符串
+    publish_msg->message_data = "";
 
     if (publish_msg->isValid() == false) {
         NC_LOG_ERROR("[TopicManager] OnPublish unknown: %s", json.c_str());
@@ -182,7 +185,7 @@ void TopicManager::OnPublish(const std::string &json) {
     // publish 是服务端主动推送的，没有人等待回复, 只需要回调给监听者
     // 2. 广播给所有监听者
     if (topic_observers_.count(publish_msg->message_topic)) {
-        std::unordered_map<int64_t, TopicCallback> cbs;
+        std::unordered_map<int64_t, PublishTopicCallback> cbs;
         {
             std::lock_guard<std::mutex> lock(mtx_);
             cbs = topic_observers_[publish_msg->message_topic];
@@ -193,7 +196,7 @@ void TopicManager::OnPublish(const std::string &json) {
     }
 
     // 全量消息的监听者
-    std::unordered_map<int64_t, TopicCallback> cbs;
+    std::unordered_map<int64_t, PublishTopicCallback> cbs;
     {
         std::lock_guard<std::mutex> lock(mtx_);
         cbs = all_topic_observers_;

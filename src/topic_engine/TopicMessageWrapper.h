@@ -119,6 +119,8 @@ public:
 
     std::string message_topic;
 
+    std::string message_data; // 这个保存原始的数据，不进行 json 操作, 交给用户进行解析
+
     AIGC_JSON_HELPER(message_topic);
 
     AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
