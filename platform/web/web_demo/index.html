@@ -35,6 +35,7 @@
         <textarea id="msgInput" placeholder="输入要发送的消息">{"timestamp":1752374563734,"topic":"subscribe","data":[{"sn":"drone_001","topic_list":["topic1"]}],"uuid":"54c56d3c-6fbd-4c0b-b236-b2107e85d30f"}</textarea>
         <div style="margin-top: 0.5em;">
             <button onclick="sendMsg()">发送</button>
+            <button onclick="listenAircraftLocation()">监听飞机位置</button>
         </div>
     </div>
     <div id="log"></div>
@@ -119,6 +120,14 @@
                 alert('无法下载文件: ' + e);
             }
         }
+        function listenAircraftLocation() {
+            NotifycationSDKManager.listenAircraftLocation(
+                'drone_001',
+                1,
+                function(msg) { log('飞机位置消息: ' + msg); },
+                function(result) { log('订阅结果: ' + result); }
+            );
+        }
         // SDK加载与初始化
         window.addEventListener('load', function() {
             NotifycationSDKManager.setLogger(log);
@@ -130,13 +139,6 @@
                     },
                     onOpen: function() {
                         log('连接已打开');
-                        // 监听飞机位置
-                        NotifycationSDKManager.listenAircraftLocation(
-                            'drone_001',
-                            1,
-                            function(msg) { log('飞机位置消息: ' + msg); },
-                            function(result) { log('订阅结果: ' + result); }
-                        );
                     },
                     onClose: function() {
                         log('连接已关闭');
