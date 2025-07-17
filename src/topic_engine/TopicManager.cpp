@@ -1,5 +1,4 @@
 #include "TopicManager.h"
-#include "topic_message_define/DeviceOsdTopic.h"
 #include <memory>
 #include <string>
 #include <utility>
@@ -172,13 +171,18 @@ void TopicManager::OnPublish(const std::string &json) {
     auto publish_msg = std::make_shared<PublishTopicWrapper>();
     publish_msg->FromJsonString(json);
 
-    NC_LOG_ERROR("[TopicManager] OnPublish publish_msg: %s", json.c_str());
-
-    // todo:sdk 解析出 message_data字符串
-    publish_msg->message_data = "";
+    NC_LOG_INFO("[TopicManager] OnPublish publish_msg: %s", json.c_str());
 
     if (publish_msg->isValid() == false) {
+        // 收到非法 publish 消息
         NC_LOG_ERROR("[TopicManager] OnPublish unknown: %s", json.c_str());
+        return;
+    }
+
+    publish_msg->message_data = aigc::JsonHelper::Get<std::string>(json, "", {"message_data"});
+    if (publish_msg->message_data.empty()) {
+        // publish 消息中没有 message_data 数据
+        NC_LOG_ERROR("[TopicManager] OnPublish message_data in publish_msg empty: %s", json.c_str());
         return;
     }
 

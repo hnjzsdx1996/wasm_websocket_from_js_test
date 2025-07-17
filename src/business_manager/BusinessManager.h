@@ -3,7 +3,6 @@
 #include <memory>
 #include "BusinessManagerDefine.h"
 #include "../topic_engine/TopicManager.h"
-#include "../topic_engine/topic_message_define/DeviceOsdTopic.h"
 
 // 业务逻辑：消息订阅/取消订阅，处理业务逻辑，提供接口
 class BusinessManager : public AsyncCaptureProtect{

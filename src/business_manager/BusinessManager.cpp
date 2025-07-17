@@ -4,7 +4,7 @@
 
 #include "logger.h"
 
-#include "topic_engine/topic_message_all_define.h"
+#include "topic_message_all_define.h"
 
 BusinessManager::BusinessManager(std::weak_ptr<TopicManager> topic_mgr) : topic_mgr_(std::move(topic_mgr)) {
     NC_LOG_INFO("[BusinessManager] ctor");
@@ -66,14 +66,17 @@ ListenId BusinessManager::ListenAircraftLocation(const OnSubscribeMessageCallbac
     auto subscribe_topic_msg = std::make_shared<SubscribeTopicWrapper>(device_sn, "aircraft_location", freq);
     NC_LOG_INFO("[BusinessManager] ListenAircraftLocation subscribe: %s", subscribe_topic_msg->ToJsonString().c_str());
     WeakDummy(weak_ptr);
-    auto listen_id = strong_topic_mgr->Observe(subscribe_topic_msg->items[0].topics[0], [this, weak_ptr, on_msg_cb = on_messages_callback](int err, const std::shared_ptr<PublishTopicWrapper>& message)->void {
+    auto listen_id = strong_topic_mgr->Observe(subscribe_topic_msg->items[0].topics[0], [this, weak_ptr, on_msg_cb = on_messages_callback, sn = device_sn](int err, const std::shared_ptr<PublishTopicWrapper>& message)->void {
         WeakDummyReturn(weak_ptr);
         if (err != TopicManager_NoError) {
             return;
         }
-        // todo:根据 sn 过滤消息
+        // 根据 sn 过滤消息
+        if (sn != message->device_sn) {
+            NC_LOG_WARN("[BusinessManager] ListenAircraftLocation observe unknown sn, need: %s, recv: %s", sn.c_str(), message->device_sn.c_str());
+            return;
+        }
         if (on_msg_cb && message) {
-            // todo:sdk 转换成对应的数据结构
             auto msg = std::make_shared<PublishAircraftLocationTopic>(message);
             NC_LOG_INFO("[BusinessManager] ListenAircraftLocation observe: %s", message->ToJsonString().c_str());
             on_msg_cb(message->ToJsonString());
