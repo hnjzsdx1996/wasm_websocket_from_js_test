@@ -143,4 +143,13 @@ int sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on_me
     return business_mgr->ListenAircraftLocation(msg_cb, result_cb, device_sn, static_cast<NotifactionFrequency>(freq));
 }
 
+// 新增：取消监听接口
+void sdk_cancel_observe(sdk_handle h, int64_t listen_id) {
+    if (!h) return;
+    SDKManager* mgr = reinterpret_cast<SDKManager*>(h);
+    auto business_mgr = mgr->getBusinessManager();
+    if (!business_mgr) return;
+    business_mgr->CancelObserve(listen_id);
+}
+
 }

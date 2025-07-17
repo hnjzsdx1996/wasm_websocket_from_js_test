@@ -74,4 +74,9 @@ int js_sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on
     return ::sdk_listen_aircraft_location(h, on_messages_callback, msg_user_data, on_result_callback, result_user_data, device_sn, freq);
 }
 
+EMSCRIPTEN_KEEPALIVE
+void js_sdk_cancel_observe(sdk_handle h, int64_t listen_id) {
+    ::sdk_cancel_observe(h, listen_id);
+}
+
 } 

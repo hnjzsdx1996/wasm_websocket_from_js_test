@@ -46,6 +46,8 @@ void TopicManager::CancelObserve(int64_t listen_id) {
         observers.erase(listen_id);
     }
     all_topic_observers_.erase(listen_id);
+    // todo:sdk 如果没有人监听这个 topic 了，取消监听
+    // 这个 sn 和 topic 无人监听了，取消监听
 }
 
 int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, SendTopicCallback cb) {

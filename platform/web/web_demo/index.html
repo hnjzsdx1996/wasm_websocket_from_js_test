@@ -37,6 +37,10 @@
             <button onclick="sendMsg()">发送</button>
             <button onclick="listenAircraftLocation()">监听飞机位置</button>
         </div>
+        <div style="margin-top: 0.5em;">
+            <input id="listenIdInput" type="number" placeholder="输入ListenId" style="width:160px;">
+            <button onclick="cancelObserve()">取消监听</button>
+        </div>
     </div>
     <div id="log"></div>
     <script>
@@ -121,12 +125,21 @@
             }
         }
         function listenAircraftLocation() {
-            NotifycationSDKManager.listenAircraftLocation(
+            const listenId = NotifycationSDKManager.listenAircraftLocation(
                 'drone_001',
                 1,
                 function(msg) { log('飞机位置消息: ' + msg); },
                 function(result) { log('订阅结果: ' + result); }
             );
+            log('listenAircraftLocation 监听ID: ' + listenId);
+        }
+        function cancelObserve() {
+            const listenId = parseInt(document.getElementById('listenIdInput').value);
+            if (isNaN(listenId)) {
+                log('请输入有效的ListenId');
+                return;
+            }
+            NotifycationSDKManager.cancelObserve(listenId);
         }
         // SDK加载与初始化
         window.addEventListener('load', function() {
@@ -135,6 +148,7 @@
                 { sn: "1234567890", ping_pong_interval: 100 },
                 {
                     onMessage: function(msg) {
+                        // todo:sdk 后续将会取消此接口，消息监听通过订阅进行，不可以监听全量消息
                         log('收到: ' + msg);
                     },
                     onOpen: function() {

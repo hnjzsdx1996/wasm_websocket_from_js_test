@@ -35,11 +35,12 @@ const NotifycationSDKManager = (function() {
                 sdk._js_sdk_set_websocket(sdkHandle, wsHandle);
                 // 注册回调
                 if (callbacks.onMessage) {
-                    sdk._js_sdk_set_message_callback(sdkHandle, sdk.addFunction(function(msgPtr, userData) {
-                        const msg = sdk.UTF8ToString(msgPtr);
-                        callbacks.onMessage(msg);
-                        sdk._free(msgPtr);
-                    }, 'vii'), 0);
+                    // 通过接口调用获取数据，不再提供通用的全量消息回调
+                    // sdk._js_sdk_set_message_callback(sdkHandle, sdk.addFunction(function(msgPtr, userData) {
+                    //     const msg = sdk.UTF8ToString(msgPtr);
+                    //     callbacks.onMessage(msg);
+                    //     sdk._free(msgPtr);
+                    // }, 'vii'), 0);
                 }
                 if (callbacks.onOpen) {
                     sdk._js_sdk_set_open_callback(sdkHandle, sdk.addFunction(function(userData) {
@@ -125,8 +126,20 @@ const NotifycationSDKManager = (function() {
         const deviceSnLen = sdk.lengthBytesUTF8(deviceSn) + 1;
         const deviceSnPtr = sdk._malloc(deviceSnLen);
         sdk.stringToUTF8(deviceSn, deviceSnPtr, deviceSnLen);
-        sdk._js_sdk_listen_aircraft_location(sdkHandle, msgCbPtr, 0, resultCbPtr, 0, deviceSnPtr, freq);
+        // 调用并获取listenId
+        const listenId = sdk._js_sdk_listen_aircraft_location(sdkHandle, msgCbPtr, 0, resultCbPtr, 0, deviceSnPtr, freq);
         sdk._free(deviceSnPtr);
+        log('监听ID: ' + listenId);
+        return listenId;
+    }
+
+    function cancelObserve(listenId) {
+        if (!sdk || !sdkHandle) {
+            log('WASM未加载完成');
+            return;
+        }
+        sdk._js_sdk_cancel_observe(sdkHandle, BigInt(listenId));
+        log('已请求取消监听: ' + listenId);
     }
 
     // 文件系统相关
@@ -144,6 +157,7 @@ const NotifycationSDKManager = (function() {
         close,
         startPolling,
         listenAircraftLocation,
+        cancelObserve,
         getFS,
         getSDK,
         getSDKHandle
