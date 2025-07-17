@@ -6,7 +6,7 @@
 #include "../topic_engine/topic_message_define/DeviceOsdTopic.h"
 
 // 业务逻辑：消息订阅/取消订阅，处理业务逻辑，提供接口
-class BusinessManager {
+class BusinessManager : public AsyncCaptureProtect{
 public:
     explicit BusinessManager(std::weak_ptr<TopicManager> topic_mgr);
 
@@ -15,8 +15,6 @@ public:
     void Observe(std::function<void(const std::string&)> callback);
 
     void CancelObserve(int64_t listen_id);
-
-    int64_t ObserveDeviceOsd(const std::function<void(const std::shared_ptr<DeviceOsdTopic>&)>& cb);
 
     // 接口范式
     /**
@@ -28,7 +26,7 @@ public:
     * @param freq                  消息推送频率，详见 NotifactionFrequency 枚举定义
     * @return NotificationCenterErrorCode  返回错误码，成功为 ListenId，失败返回对应错误类型
     */
-    NotificationCenterErrorCode ListenAircraftLocation(OnSubscribeMessageCallback on_messages_callback, OnSubscribeResultCallback on_result_callback, std::string device_sn, NotifactionFrequency freq);
+    ListenId ListenAircraftLocation(const OnSubscribeMessageCallback& on_messages_callback, const OnSubscribeResultCallback& on_result_callback, const std::string& device_sn, NotifactionFrequency freq);
 
 private:
     std::weak_ptr<TopicManager> topic_mgr_;

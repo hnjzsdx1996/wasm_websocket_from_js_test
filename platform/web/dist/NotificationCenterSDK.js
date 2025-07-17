@@ -6627,6 +6627,7 @@ var _js_sdk_set_open_callback = Module['_js_sdk_set_open_callback'] = makeInvali
 var _js_sdk_set_close_callback = Module['_js_sdk_set_close_callback'] = makeInvalidEarlyAccess('_js_sdk_set_close_callback');
 var _js_sdk_set_error_callback = Module['_js_sdk_set_error_callback'] = makeInvalidEarlyAccess('_js_sdk_set_error_callback');
 var _js_sdk_poll = Module['_js_sdk_poll'] = makeInvalidEarlyAccess('_js_sdk_poll');
+var _js_sdk_listen_aircraft_location = Module['_js_sdk_listen_aircraft_location'] = makeInvalidEarlyAccess('_js_sdk_listen_aircraft_location');
 var __emscripten_tls_init = makeInvalidEarlyAccess('__emscripten_tls_init');
 var __emscripten_thread_init = makeInvalidEarlyAccess('__emscripten_thread_init');
 var __emscripten_thread_crashed = makeInvalidEarlyAccess('__emscripten_thread_crashed');
@@ -6668,6 +6669,7 @@ function assignWasmExports(wasmExports) {
   Module['_js_sdk_set_close_callback'] = _js_sdk_set_close_callback = createExportWrapper('js_sdk_set_close_callback', 3);
   Module['_js_sdk_set_error_callback'] = _js_sdk_set_error_callback = createExportWrapper('js_sdk_set_error_callback', 3);
   Module['_js_sdk_poll'] = _js_sdk_poll = createExportWrapper('js_sdk_poll', 1);
+  Module['_js_sdk_listen_aircraft_location'] = _js_sdk_listen_aircraft_location = createExportWrapper('js_sdk_listen_aircraft_location', 7);
   __emscripten_tls_init = createExportWrapper('_emscripten_tls_init', 0);
   __emscripten_thread_init = createExportWrapper('_emscripten_thread_init', 6);
   __emscripten_thread_crashed = createExportWrapper('_emscripten_thread_crashed', 0);

@@ -43,23 +43,6 @@ void BusinessManager::Observe(std::function<void(const std::string &)> callback)
     });
 }
 
-int64_t BusinessManager::ObserveDeviceOsd(const std::function<void(const std::shared_ptr<DeviceOsdTopic>&)>& cb) {
-    auto strong_topic_mgr = topic_mgr_.lock();
-    if (strong_topic_mgr == nullptr) {
-        NC_LOG_INFO("[BusinessManager] ObserveDeviceOsd failed");
-        return -1;
-    }
-
-    return strong_topic_mgr->Observe("device_osd", [cb](int err, const std::shared_ptr<TopicMessageWrapper>& msg) {
-        if (err == 0 && msg) {
-            auto osd_msg = std::dynamic_pointer_cast<DeviceOsdTopic>(msg);
-            if (osd_msg) {
-                cb(osd_msg);
-            }
-        }
-    });
-}
-
 void BusinessManager::CancelObserve(int64_t listen_id) {
     auto strong_topic_mgr = topic_mgr_.lock();
     if (strong_topic_mgr == nullptr) {
@@ -70,8 +53,51 @@ void BusinessManager::CancelObserve(int64_t listen_id) {
     strong_topic_mgr->CancelObserve(listen_id);
 }
 
-NotificationCenterErrorCode BusinessManager::ListenAircraftLocation(OnSubscribeMessageCallback on_messages_callback,
-    OnSubscribeResultCallback on_result_callback, std::string device_sn, NotifactionFrequency freq) {
-    // todo:sdk
-    return NotificationCenterErrorCode_NoError;
+ListenId BusinessManager::ListenAircraftLocation(const OnSubscribeMessageCallback &on_messages_callback, const OnSubscribeResultCallback &on_result_callback, const std::string &device_sn, NotifactionFrequency freq) {
+    auto strong_topic_mgr = topic_mgr_.lock();
+    if (strong_topic_mgr == nullptr) {
+        NC_LOG_INFO("[BusinessManager] ListenAircraftLocation failed, no topic_mgr_");
+        return NotificationCenterErrorCode_NotConnected;
+    }
+
+    // 1.先监听上此 topic 消息
+    auto subscribe_topic_msg = std::make_shared<SubscribeTopicWrapper>(device_sn, "aircraft_location", freq);
+    NC_LOG_INFO("[BusinessManager] ListenAircraftLocation subscribe: %s", subscribe_topic_msg->ToJsonString().c_str());
+    WeakDummy(weak_ptr);
+    auto listen_id = strong_topic_mgr->Observe(subscribe_topic_msg->items[0].topics[0], [this, weak_ptr, on_msg_cb = on_messages_callback](int err, const std::shared_ptr<TopicMessageWrapper>& message)->void {
+        WeakDummyReturn(weak_ptr);
+        if (err != TopicManager_NoError) {
+            return;
+        }
+        // todo:根据 sn 过滤消息
+        if (on_msg_cb && message) {
+            // todo:sdk 转换成对应的数据结构
+            NC_LOG_INFO("[BusinessManager] ListenAircraftLocation observe: %s", message->ToJsonString().c_str());
+            on_msg_cb(message->ToJsonString());
+        }
+    });
+
+
+    // 2.发起订阅
+    // todo:sdk 如果是已经成功订阅的消息，不需要再次订阅
+    auto ret = strong_topic_mgr->SendMessage(subscribe_topic_msg, [this, weak_ptr, listen_id, on_result_cb = on_result_callback](int err, const std::shared_ptr<TopicMessageWrapper>& message)->void {
+        WeakDummyReturn(weak_ptr);
+        if (err == TopicManager_NoError) {
+            // 订阅成功
+            on_result_cb(NotificationCenterErrorCode_NoError);
+            return;
+        }
+        auto strong_topic_mgr = topic_mgr_.lock();
+        if (strong_topic_mgr == nullptr) {
+            NC_LOG_INFO("[BusinessManager] ListenAircraftLocation subscribe error, no topic_mgr_");
+            return;
+        }
+        strong_topic_mgr->CancelObserve(listen_id);
+        on_result_cb(NotificationCenterErrorCode_SubscribeError);
+    });
+
+    if (ret != TopicManager_NoError) {
+        return NotificationCenterErrorCode_SendError;
+    }
+    return listen_id;
 }

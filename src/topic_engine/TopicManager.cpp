@@ -31,7 +31,6 @@ int64_t TopicManager::Observe(const std::string& topic, TopicCallback cb) {
         id = next_listen_id_++;
         topic_observers_[topic][id] = std::move(cb);
     }
-    // todo:sdk observe 时需要向服务器发起订阅消息
     return id;
 }
 
@@ -71,8 +70,6 @@ int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, T
                     ThreadPoolExecutor::Main().post([this, weak_ptr, cb = callback]()->void {
                         cb(TopicManager_ErrorTimeout, nullptr);
                     });
-                } else {
-                    NC_LOG_INFO("[TopicManager] SendMessage, 收到回调");
                 }
             }, std::chrono::milliseconds(3000));
         }
@@ -129,6 +126,7 @@ void TopicManager::OnSubscribe(const std::string &json) {
         NC_LOG_ERROR("[TopicManager] OnSubscribe unknown: %s", json.c_str());
         return;
     }
+    // todo:sdk 判断订阅是否成功，现在是只要服务端返回数据就说明订阅成功
     // subscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
     // 1. 响应回调
     if (pending_requests_.count(subscribe_msg->message_id)) {

@@ -123,4 +123,24 @@ void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void *user_data
     );
 }
 
+int sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on_messages_callback, void* msg_user_data, sdk_listen_result_callback on_result_callback, void* result_user_data, const char* device_sn, int freq) {
+    if (!h) return -1;
+    SDKManager* mgr = reinterpret_cast<SDKManager*>(h);
+    auto business_mgr = mgr->getBusinessManager();
+    if (!business_mgr) return -2;
+    // 适配回调，分配新内存，确保生命周期
+    auto msg_cb = [on_messages_callback, msg_user_data](const std::string& msg) {
+        if (on_messages_callback) {
+            char* buf = (char*)malloc(msg.size() + 1);
+            memcpy(buf, msg.c_str(), msg.size() + 1);
+            on_messages_callback(buf, msg_user_data);
+            free(buf);
+        }
+    };
+    auto result_cb = [on_result_callback, result_user_data](int result) {
+        if (on_result_callback) on_result_callback(result, result_user_data);
+    };
+    return business_mgr->ListenAircraftLocation(msg_cb, result_cb, device_sn, static_cast<NotifactionFrequency>(freq));
+}
+
 }

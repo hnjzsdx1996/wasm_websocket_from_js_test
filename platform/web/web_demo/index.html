@@ -195,6 +195,24 @@
                 }, 'vii'), 0);
                 sdk._js_sdk_set_open_callback(sdkHandle, sdk.addFunction(function(userData) {
                     log('连接已打开');
+                    // 调用监听飞机位置消息接口
+                    const deviceSn = 'drone_001';
+                    const freq = 1; // 频率示例
+                    // 消息回调
+                    const msgCb = sdk.addFunction(function(msgPtr, userData) {
+                        const msg = sdk.UTF8ToString(msgPtr);
+                        log('飞机位置消息: ' + msg);
+                    }, 'vii');
+                    // 结果回调
+                    const resultCb = sdk.addFunction(function(result, userData) {
+                        log('订阅结果: ' + result);
+                    }, 'vii');
+                    // 正确分配和传递 deviceSn
+                    const deviceSnLen = sdk.lengthBytesUTF8(deviceSn) + 1;
+                    const deviceSnPtr = sdk._malloc(deviceSnLen);
+                    sdk.stringToUTF8(deviceSn, deviceSnPtr, deviceSnLen);
+                    sdk._js_sdk_listen_aircraft_location(sdkHandle, msgCb, 0, resultCb, 0, deviceSnPtr, freq);
+                    sdk._free(deviceSnPtr);
                 }, 'vi'), 0);
                 sdk._js_sdk_set_close_callback(sdkHandle, sdk.addFunction(function(userData) {
                     log('连接已关闭');

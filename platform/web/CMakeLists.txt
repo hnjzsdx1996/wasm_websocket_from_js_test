@@ -71,7 +71,7 @@ if(EMSCRIPTEN)
         "SHELL:-matomics"
         "SHELL:-mbulk-memory"
         # 导出所有 C API 和 glue code 回调
-        "SHELL:-sEXPORTED_FUNCTIONS=['_js_sdk_create','_js_sdk_destroy','_js_sdk_configure','_js_sdk_connect','_js_sdk_send','_js_sdk_close','_js_sdk_set_websocket','_js_sdk_set_message_callback','_js_sdk_set_open_callback','_js_sdk_set_close_callback','_js_sdk_set_error_callback','_js_sdk_poll','_js_sdk_create_js_websocket','_malloc','_free','_js_websocket_on_open','_js_websocket_on_message','_js_websocket_on_close','_js_websocket_on_error']"
+        "SHELL:-sEXPORTED_FUNCTIONS=['_js_sdk_create','_js_sdk_destroy','_js_sdk_configure','_js_sdk_connect','_js_sdk_send','_js_sdk_close','_js_sdk_set_websocket','_js_sdk_set_message_callback','_js_sdk_set_open_callback','_js_sdk_set_close_callback','_js_sdk_set_error_callback','_js_sdk_poll','_js_sdk_create_js_websocket','_malloc','_free','_js_websocket_on_open','_js_websocket_on_message','_js_websocket_on_close','_js_websocket_on_error','_js_sdk_listen_aircraft_location']"
         # 用 --js-library 注入 glue code
         "SHELL:--js-library=${CMAKE_CURRENT_LIST_DIR}/js_glue/NotificationCenterSDK_glue.js"
     )
