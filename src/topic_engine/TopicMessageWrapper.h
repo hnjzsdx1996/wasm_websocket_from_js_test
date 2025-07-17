@@ -105,6 +105,42 @@ public:
     }
 };
 
+class UnSubscribeTopicWrapper : public TopicMessageWrapper {
+public:
+
+    explicit UnSubscribeTopicWrapper(const std::string& sn, const std::string& topic) {
+        message_type = "unsubscribe";
+        need_replay = true;
+        version = "1";
+        items.push_back({
+            .device_sn = sn,
+            .topics = {topic},
+        });
+    }
+
+    bool isValid() override {
+        if (TopicMessageWrapper::isValid() == false) {
+            return false;
+        }
+        return true;
+    }
+
+    std::vector<SubscribeItems> items;
+
+    AIGC_JSON_HELPER(items);
+    AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
+
+    std::string ToJsonString() override {
+        std::string err, json_string;
+        aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
+        return json_string;
+    }
+    void FromJsonString(const std::string& json) override {
+        std::string err;
+        aigc::JsonHelper::JsonToObject(*this, json, {}, &err);
+    }
+};
+
 class PublishTopicWrapper : public TopicMessageWrapper {
 public:
     bool isValid() override {

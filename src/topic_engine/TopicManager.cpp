@@ -23,12 +23,12 @@ void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder> &hold
     });
 }
 
-int64_t TopicManager::Observe(const std::string& topic, PublishTopicCallback cb) {
+int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, PublishTopicCallback cb) {
     int64_t id;
     {
         std::lock_guard<std::mutex> lock(mtx_);
         id = next_listen_id_++;
-        topic_observers_[topic][id] = std::move(cb);
+        topic_observers_[tuple][id] = std::move(cb);
     }
     return id;
 }
@@ -41,13 +41,15 @@ int64_t TopicManager::ObserveAll(PublishTopicCallback cb) {
 }
 
 void TopicManager::CancelObserve(int64_t listen_id) {
-    std::lock_guard<std::mutex> lock(mtx_);
-    for (auto& [topic, observers] : topic_observers_) {
-        observers.erase(listen_id);
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        for (auto& [tuple, observers] : topic_observers_) {
+            observers.erase(listen_id);
+        }
+        all_topic_observers_.erase(listen_id);
     }
-    all_topic_observers_.erase(listen_id);
-    // todo:sdk 如果没有人监听这个 topic 了，取消监听
-    // 这个 sn 和 topic 无人监听了，取消监听
+    // 如果没有人监听这个 sn+topic 了，取消监听
+    UnsubscribeUnlistened();
 }
 
 int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, SendTopicCallback cb) {
@@ -188,13 +190,17 @@ void TopicManager::OnPublish(const std::string &json) {
         return;
     }
 
-    // publish 是服务端主动推送的，没有人等待回复, 只需要回调给监听者
+    // 构造订阅二元组key
+    SubscribeTopicTuple tuple;
+    tuple.sn = publish_msg->device_sn;
+    tuple.topic = publish_msg->message_topic;
+
     // 2. 广播给所有监听者
-    if (topic_observers_.count(publish_msg->message_topic)) {
+    if (topic_observers_.count(tuple)) {
         std::unordered_map<int64_t, PublishTopicCallback> cbs;
         {
             std::lock_guard<std::mutex> lock(mtx_);
-            cbs = topic_observers_[publish_msg->message_topic];
+            cbs = topic_observers_[tuple];
         }
         for (auto& [_, cb] : cbs) {
             cb(TopicManager_NoError, publish_msg);
@@ -210,7 +216,6 @@ void TopicManager::OnPublish(const std::string &json) {
     for (auto& [_, cb] : cbs) {
         cb(TopicManager_NoError, publish_msg);
     }
-
 }
 
 void TopicManager::OnPing(const std::string &json) {
@@ -234,4 +239,41 @@ void TopicManager::OnPong(const std::string &json) {
     auto time_diff = time_now - pong_msg->timestamp;
 
     NC_LOG_INFO("[TopicManager] OnPong, uuid: %s, rtt: %llu(ms)", pong_msg->message_id.c_str(), time_diff);
+}
+
+void TopicManager::UnsubscribeUnlistened() {
+    std::vector<SubscribeTopicTuple> need_unsubscribe;
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        for (const auto& [topic_tuple, listeners]: topic_observers_) {
+            if (listeners.empty()) {
+                NC_LOG_INFO("[TopicManager] UnsubscribeUnlistened, nobody listen sn: %s, topic： %s", topic_tuple.sn.c_str(), topic_tuple.topic.c_str());
+                need_unsubscribe.push_back(topic_tuple);
+            }
+        }
+        for (const auto& topic_tuple : need_unsubscribe) {
+            topic_observers_.erase(topic_tuple);
+        }
+    }
+    // 发起取消订阅
+    for (const auto& topic_tuple: need_unsubscribe) {
+        SendUnsubscribe(topic_tuple);
+    }
+}
+
+void TopicManager::SendUnsubscribe(const SubscribeTopicTuple &topic_tuple) {
+    auto unsubscribe_msg = std::make_shared<UnSubscribeTopicWrapper>(topic_tuple.sn, topic_tuple.topic);
+    WeakDummy(weak_ptr);
+    auto ret = SendMessage(unsubscribe_msg, [this, weak_ptr](int err, const std::shared_ptr<TopicMessageWrapper>& unsubscribe_reply)->void {
+        WeakDummyReturn(weak_ptr);
+        if (err != TopicManager_NoError) {
+            // todo:sdk 取消订阅识别怎么处理?
+            NC_LOG_ERROR("[TopicManager] SendUnsubscribe reply error: %d", err);
+            return;
+        }
+        NC_LOG_INFO("[TopicManager] SendUnsubscribe success");
+    });
+    if (ret != TopicManager_NoError) {
+        NC_LOG_ERROR("[TopicManager] SendUnsubscribe error: %d", ret);
+    }
 }
