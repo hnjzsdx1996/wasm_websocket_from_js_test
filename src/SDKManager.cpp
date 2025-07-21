@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <utility>
+
+#include "CppWebSocket.h"
 #include "base/async/main_thread_executor.h"
 #include "message_define/common.h"
 #include "base/logger/logger.h"
@@ -18,6 +20,9 @@ SDKManager::SDKManager() {
 
     // 初始化TopicManager和BusinessManager
     wsHolder_ = std::make_shared<WebSocketHolder>();
+#ifdef ENABLE_LIBWEBSOCKETS
+    wsHolder_->setWebSocket(std::make_shared<CppWebSocket>());
+#endif
     topic_manager_ = std::make_shared<TopicManager>();
     business_manager_ = std::make_shared<BusinessManager>(topic_manager_);
     topic_manager_->setWebSocketHolder(wsHolder_);
@@ -35,9 +40,13 @@ void SDKManager::configure(const std::string& config) {
 }
 
 void SDKManager::setWebSocket(WebSocketBase* ws) {
+#ifdef ENABLE_LIBWEBSOCKETS
+    NC_LOG_INFO("[SDKManager] setWebSocket, but ENABLE_LIBWEBSOCKETS");
+#else
     NC_LOG_INFO("[SDKManager] setWebSocket: %p", ws);
     std::shared_ptr<WebSocketBase> sp_ws(ws);
     wsHolder_->setWebSocket(sp_ws);
+#endif
 }
 
 std::weak_ptr<WebSocketHolder> SDKManager::getWebSocketHolder() {

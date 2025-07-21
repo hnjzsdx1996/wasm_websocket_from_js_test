@@ -4,3 +4,6 @@
 [submodule "src/third_party/plog"]
 	path = src/third_party/plog
 	url = https://github.com/SergiusTheBest/plog
+[submodule "src/third_party/libwebsockets"]
+	path = src/third_party/libwebsockets
+	url = https://github.com/warmcat/libwebsockets.git

@@ -31,7 +31,7 @@ cd "$BUILD_DIR"
 
 # 配置和编译
 echo "配置CMake..."
-cmake "$SRC_DIR"
+cmake "$SRC_DIR" -DUSE_LIBWEBSOCKETS=ON
 
 echo "开始并行编译 (使用 $CPU_CORES 个核心)..."
 cmake --build . --parallel $CPU_CORES

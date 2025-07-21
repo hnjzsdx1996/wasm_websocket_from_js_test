@@ -2,9 +2,9 @@
 #include "WebSocketBase.h"
 #include <memory>
 #include <string>
+#include <thread>
 
-// C++原生WebSocket实现（可以使用boost::beast或其他库）
-// todo:sdk 使用 libwebsockets 实现
+// C++原生WebSocket实现, 使用 libwebsockets 实现
 class CppWebSocket : public WebSocketBase {
 public:
     CppWebSocket();
@@ -15,6 +15,10 @@ public:
     void close() override;
     bool isOpen() const override;
 private:
+#ifdef ENABLE_LIBWEBSOCKETS
     class Impl;
     std::unique_ptr<Impl> pImpl;
+#else
+    void* pImpl;
+#endif
 };
