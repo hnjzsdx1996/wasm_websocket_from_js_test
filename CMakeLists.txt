@@ -13,3 +13,6 @@ add_subdirectory(platform/cpp)
 # Web 平台（如需 emscripten 构建，可取消注释）
 # add_subdirectory(platform/web)
 
+# java平台
+add_subdirectory(platform/java)
+

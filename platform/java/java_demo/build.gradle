@@ -1,0 +1,35 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Add the dependency on our own SDK jar
+    implementation files('../dist/NotificationCenterSDK-1.0-SNAPSHOT.jar')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+mainClassName = 'com.example.Main'
+
+run {
+    // find the jni lib from the dist dir
+    def jniPath = file('../dist').absolutePath
+    systemProperty 'java.library.path', jniPath
+} 

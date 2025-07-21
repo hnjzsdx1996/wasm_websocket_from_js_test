@@ -1,0 +1,31 @@
+apply plugin: 'java-library'
+
+group 'com.example.notificationcentersdk'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // No external dependencies for the core SDK library
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+// Ensure the project builds a JAR
+jar {
+    archiveBaseName.set('NotificationCenterSDK')
+    archiveVersion.set(project.version)
+} 

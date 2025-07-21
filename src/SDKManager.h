@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
-#include "base/async/timer.h"
 #include <string>
 
+#include "WebsocketEvent.h"
 #include "business_manager/BusinessManager.h"
 #include "websocket/WebSocketHolder.h"
 #include "topic_engine/TopicManager.h"
@@ -18,6 +18,12 @@ public:
 
     // sdk 配置
     void configure(const std::string& config);
+
+    // The connect method should only take a URL
+    void connect(const std::string& url);
+
+    // A separate method to set the event listener
+    void setWebsocketEventListener(const std::shared_ptr<WebsocketEvent>& listener);
 
     // 注入 websocket 能力
     void setWebSocket(WebSocketBase* ws);
@@ -43,6 +49,7 @@ public:
 private:
     void initExecutors();
 
+    std::shared_ptr<WebsocketEvent> websocket_event_listener_;
     std::shared_ptr<WebSocketHolder> wsHolder_;
     std::shared_ptr<TopicManager> topic_manager_;
     std::shared_ptr<BusinessManager> business_manager_;

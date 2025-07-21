@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE SOURCES 
     "*.cpp"
     "*.c"
+    websocket/WebSocketHolder.cpp
+    websocket/WebsocketEvent.cpp
 )
 
 # 排除第三方库文件（如果有的话）
