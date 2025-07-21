@@ -63,21 +63,4 @@ void SDKManager::initExecutors() {
     ThreadPoolExecutor::Worker();
     ThreadPoolExecutor::IO();
     ThreadPoolExecutor::Compute();
-
-    // // 用于测试多线程 Timer
-    // worker_timer_ = std::make_shared<Timer>();
-    // worker_timer_->SetDefaultExecutor(ThreadPoolExecutor::Worker());
-    // worker_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] Worker timer");
-    // });
-    // io_timer_ = std::make_shared<Timer>();
-    // io_timer_->SetDefaultExecutor(ThreadPoolExecutor::IO());
-    // io_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] IO timer");
-    // });
-    // compute_timer_ = std::make_shared<Timer>();
-    // compute_timer_->SetDefaultExecutor(ThreadPoolExecutor::Compute());
-    // compute_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] Compute timer");
-    // });
 }

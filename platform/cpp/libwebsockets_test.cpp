@@ -6,6 +6,8 @@
 #include <csignal>
 #include <atomic>
 
+#include "async/thread_pool_executor.h"
+
 std::atomic<bool> interrupted(false);
 
 void signal_handler(int signal) {
@@ -49,6 +51,7 @@ int main() {
             ws.send(msg);
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        ThreadPoolExecutor::Main().poll();
     }
 
     // 关闭连接
