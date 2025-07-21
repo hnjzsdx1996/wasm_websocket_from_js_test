@@ -64,10 +64,7 @@ target_include_directories(libwebsockets_test PRIVATE
 # 链接 openssl 和 libwebsockets
 find_package(OpenSSL REQUIRED)
 target_include_directories(libwebsockets_test PRIVATE ${OPENSSL_INCLUDE_DIR})
-
 file(REAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/libwebsockets/build/lib/libwebsockets.a" LIBWEBSOCKETS_ABS_PATH)
-message(STATUS "libwebsockets.a absolute path: ${LIBWEBSOCKETS_ABS_PATH}")
-
 target_link_libraries(libwebsockets_test
     NotificationCenterSDK
     ${OPENSSL_LIBRARIES}
