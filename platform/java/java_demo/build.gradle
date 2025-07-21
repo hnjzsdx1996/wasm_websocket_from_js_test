@@ -1,35 +1,27 @@
-apply plugin: 'java'
 apply plugin: 'application'
-
-group 'com.example'
-version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // Add the dependency on our own SDK jar
-    implementation files('../dist/NotificationCenterSDK-1.0-SNAPSHOT.jar')
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
-        }
-        resources {
-            srcDirs = ['src/main/resources']
-        }
-    }
-}
 
 mainClassName = 'com.example.Main'
 
+dependencies {
+    // Depend on our swig-generated sdk
+    implementation project(':sdk')
+}
+
+// Configure the run task to load the JNI library
 run {
-    // find the jni lib from the dist dir
-    def jniPath = file('../dist').absolutePath
-    systemProperty 'java.library.path', jniPath
+    // Pass the absolute path of the dist directory as a system property.
+    // rootProject.projectDir refers to platform/java, where settings.gradle is.
+    def distDir = new File(rootProject.projectDir, 'dist')
+    systemProperty 'notificationcenter.dist.path', distDir.absolutePath
+}
+
+// Help the IDE find the SWIG-generated sources
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            // Include the generated files from the 'sdk' subproject
+            srcDir project(':sdk').sourceSets.main.java.srcDirs
+        }
+    }
 } 

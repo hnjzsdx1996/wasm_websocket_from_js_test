@@ -1,0 +1,23 @@
+﻿L/T/[2025-07-21 21:34:58.183] INFO [0x16f6cf000:Main      ] [SDKManager::SDKManager@16] [SDKManager] ctor: 0x124f2b1c0
+[2025-07-21 21:34:58.183] INFO [0x16f6cf000:Main      ] [SDKManager::initExecutors@96] [SDKManager] initExecutors
+[2025-07-21 21:34:58.183] INFO [0x16f6cf000:Main      ] [SDKManager::SDKManager@27] [SDKManager] ctor ENABLE_LIBWEBSOCKETS = false
+[2025-07-21 21:34:58.183] INFO [0x16f6cf000:Main      ] [BusinessManager::BusinessManager@10] [BusinessManager] ctor
+[2025-07-21 21:35:24.735] INFO [0x16d10b000:Main      ] [SDKManager::SDKManager@16] [SDKManager] ctor: 0x11e90c990
+[2025-07-21 21:35:24.735] INFO [0x16d10b000:Main      ] [SDKManager::initExecutors@96] [SDKManager] initExecutors
+[2025-07-21 21:35:24.735] INFO [0x16d10b000:Main      ] [SDKManager::SDKManager@24] [SDKManager] ctor ENABLE_LIBWEBSOCKETS = true
+[2025-07-21 21:35:24.736] INFO [0x16d10b000:Main      ] [BusinessManager::BusinessManager@10] [BusinessManager] ctor
+[2025-07-21 21:35:24.736] INFO [0x16d10b000:Main      ] [CppWebSocket::connect@260] CppWebSocket: 连接 ws://127.0.0.1:8080
+[2025-07-21 21:35:24.777] INFO [0x16f1ef000:IO        ] [CppWebSocket::Impl::lwsCallback@196] CppWebSocket: 连接出错
+[2025-07-21 21:36:52.528] INFO [0x16bbd7000:Main      ] [SDKManager::SDKManager@16] [SDKManager] ctor: 0x10a3082a0
+[2025-07-21 21:36:52.528] INFO [0x16bbd7000:Main      ] [SDKManager::initExecutors@96] [SDKManager] initExecutors
+[2025-07-21 21:36:52.529] INFO [0x16bbd7000:Main      ] [SDKManager::SDKManager@24] [SDKManager] ctor ENABLE_LIBWEBSOCKETS = true
+[2025-07-21 21:36:52.529] INFO [0x16bbd7000:Main      ] [BusinessManager::BusinessManager@10] [BusinessManager] ctor
+[2025-07-21 21:36:52.529] INFO [0x16bbd7000:Main      ] [CppWebSocket::connect@260] CppWebSocket: 连接 ws://127.0.0.1:8080
+[2025-07-21 21:36:52.542] INFO [0x16dd47000:IO        ] [CppWebSocket::Impl::lwsCallback@196] CppWebSocket: 连接出错
+[2025-07-21 21:38:10.633] INFO [0x16de13000:Main      ] [SDKManager::SDKManager@16] [SDKManager] ctor: 0x108309a40
+[2025-07-21 21:38:10.633] INFO [0x16de13000:Main      ] [SDKManager::initExecutors@96] [SDKManager] initExecutors
+[2025-07-21 21:38:10.633] INFO [0x16de13000:Main      ] [SDKManager::SDKManager@24] [SDKManager] ctor ENABLE_LIBWEBSOCKETS = true
+[2025-07-21 21:38:10.633] INFO [0x16de13000:Main      ] [BusinessManager::BusinessManager@10] [BusinessManager] ctor
+[2025-07-21 21:38:10.633] INFO [0x16de13000:Main      ] [CppWebSocket::connect@260] CppWebSocket: 连接 ws://echo.websocket.events
+[2025-07-21 21:38:12.180] INFO [0x16fef7000:IO        ] [CppWebSocket::Impl::lwsCallback@142] CppWebSocket: 连接已建立
+[2025-07-21 21:38:12.180] INFO [0x16fef7000:IO        ] [CppWebSocket::Impl::lwsCallback@150] CppWebSocket: 收到消息: echo.websocket.events sponsored by Lob.com

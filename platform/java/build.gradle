@@ -1,31 +1,22 @@
-apply plugin: 'java-library'
+// This file configures the multi-project build.
 
-group 'com.example.notificationcentersdk'
-version '1.0-SNAPSHOT'
+// Settings common to all projects (including the root).
+allprojects {
+    group 'com.example'
+    version = '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // No external dependencies for the core SDK library
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
-        }
-        resources {
-            srcDirs = ['src/main/resources']
-        }
+    repositories {
+        mavenCentral()
     }
 }
 
-// Ensure the project builds a JAR
-jar {
-    archiveBaseName.set('NotificationCenterSDK')
-    archiveVersion.set(project.version)
+// Settings common to all subprojects (sdk, java_demo).
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+
+    dependencies {
+        // A common test dependency for all subprojects.
+        testImplementation 'junit:junit:4.13.2'
+    }
 } 

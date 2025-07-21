@@ -1,86 +1,74 @@
 package com.example;
 
-import com.example.notificationcentersdk.SDKManager;
-import com.example.notificationcentersdk.BusinessManager;
-import com.example.notificationcentersdk.ConnectionListener;
+import com.example.notificationcentersdk.*;
+
+// 1. Create a class that extends the SWIG-generated listener.
+// This is how we handle callbacks from C++.
+class MyConnectionListener extends ConnectionListener {
+    public void onOpen() {
+        System.out.println("[Java] Connection opened.");
+    }
+
+    public void onClose(String reason) {
+        System.out.println("[Java] Connection closed. Reason: " + reason);
+    }
+
+    public void onError(String error) {
+        System.out.println("[Java] An error occurred: " + error);
+    }
+
+    public void onMessage(String message) {
+        System.out.println("[Java] Received message: " + message);
+    }
+}
 
 public class Main {
+
+    static {
+        // 2. Load the JNI library using an absolute path passed as a system property.
+        try {
+            String distPath = System.getProperty("notificationcenter.dist.path");
+            if (distPath == null) {
+                throw new UnsatisfiedLinkError("System property 'notificationcenter.dist.path' is not set.");
+            }
+            // On macOS, the library is named lib<name>.jnilib
+            String libPath = distPath + "/libnotificationcenter.jnilib";
+            System.load(libPath);
+            System.out.println("[Java] JNI library loaded successfully from: " + libPath);
+        } catch (UnsatisfiedLinkError e) {
+            System.err.println("[Java] Native code library failed to load.\n" + e);
+            System.exit(1);
+        }
+    }
+
     public static void main(String[] args) {
-        System.out.println("Hello from Java Demo!");
+        System.out.println("[Java] Starting NotificationCenterSDK Demo...");
 
-        // 1. Initialize SDKManager
+        // 3. Create an instance of our listener.
+        MyConnectionListener listener = new MyConnectionListener();
+
+        // 4. Create and configure the SDKManager.
         SDKManager sdkManager = new SDKManager();
-        System.out.println("SDKManager created.");
+        System.out.println("[Java] SDKManager created.");
 
-        // 2. Set up connection listener
-        sdkManager.setConnectionListener(new ConnectionListener() {
-            @Override
-            public void onOpen() {
-                System.out.println(">>> WebSocket connected!");
-            }
+        // We need to set the listener on the manager.
+        sdkManager.setWebsocketEventListener(listener);
+        System.out.println("[Java] Websocket event listener set.");
 
-            @Override
-            public void onClose() {
-                System.out.println(">>> WebSocket disconnected!");
-            }
+        String url = "ws://echo.websocket.events";
+        System.out.println("[Java] Connecting to " + url + "...");
+        sdkManager.connect(url);
 
-            @Override
-            public void onError(String error) {
-                System.err.println(">>> WebSocket error: " + error);
-            }
-
-            @Override
-            public void onMessage(String message) {
-                System.out.println(">>> Received message: " + message);
-            }
-        });
-
-        // 3. Connect WebSocket
-        String wsUrl = "ws://echo.websocket.events";
-        System.out.println("Connecting to WebSocket: " + wsUrl);
-        sdkManager.connect(wsUrl);
-
-        // 4. 配置 SDK（如有需要）
-        // sdkManager.configure("{...}");
-
-        // 5. Get BusinessManager
-        BusinessManager businessManager = sdkManager.getBusinessManager();
-        System.out.println("Got BusinessManager.");
-
-        // 6. Subscribe to a topic
-        String deviceSn = "123456789";
-        int frequency = 1; // Example frequency
-        System.out.println("Subscribing to aircraft location for SN: " + deviceSn);
-        long listenId = businessManager.listenAircraftLocation(deviceSn, frequency);
-
-        if (listenId > 0) {
-            System.out.println("Successfully subscribed with listenId: " + listenId);
-        } else {
-            System.err.println("Failed to subscribe.");
-            sdkManager.destroy();
-            return;
+        // Keep the application running to receive messages/events.
+        try {
+            System.out.println("[Java] Waiting for events for 10 seconds...");
+            Thread.sleep(10000); // 10 seconds
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        // 7. Poll for messages in a loop
-        System.out.println("Starting to poll for events...");
-        for (int i = 0; i < 20; i++) {
-            sdkManager.poll();
-            try {
-                // Poll every 500ms
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        // 8. Clean up
-        System.out.println("Cleaning up resources...");
-        businessManager.cancelObserve(listenId);
-        System.out.println("Cancelled observation for listenId: " + listenId);
-        
-        sdkManager.destroy();
-        System.out.println("SDKManager destroyed.");
-
-        System.out.println("Java Demo finished.");
+        System.out.println("[Java] Demo finished.");
+        // 资源释放（如果 SWIG 生成了 delete 方法，可以调用）
+        // sdkManager.delete();
     }
 } 

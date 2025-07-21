@@ -30,11 +30,6 @@ public:
     std::weak_ptr<WebSocketHolder> getWebSocketHolder();
 
     // todo:sdk 改成 weak_ptr
-    std::shared_ptr<TopicManager> getTopicManager() {
-        return topic_manager_;
-    }
-
-    // todo:sdk 改成 weak_ptr
     std::shared_ptr<BusinessManager> getBusinessManager() {
         return business_manager_;
     }
