@@ -48,3 +48,7 @@ include_directories(${THIRD_PARTIES_SRC_DIR}/AIGCJson/include/rapidjson/internal
 # ------------------------- plog ------------------------- #
 include_directories(${THIRD_PARTIES_SRC_DIR}/plog/include) 
 
+# ------------------------- libwebsockets ------------------------- #
+include_directories(${THIRD_PARTIES_SRC_DIR}/libwebsockets/build/include)
+include_directories(${THIRD_PARTIES_SRC_DIR}/libwebsockets/build/libwebsockets/include)
+

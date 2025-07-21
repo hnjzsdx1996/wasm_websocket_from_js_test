@@ -15,6 +15,13 @@ list(FILTER SOURCES EXCLUDE REGEX "third_party/.*")
 # 使用 third_party
 include(${CMAKE_CURRENT_SOURCE_DIR}/third_party/ThirdParty.cmake)
 
+# 由外部传入 USE_LIBWEBSOCKETS 宏，不在 CMakeLists.txt 内部定义
+if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
+    # 查找 OpenSSL
+    find_package(OpenSSL REQUIRED)
+    add_definitions(-DENABLE_LIBWEBSOCKETS)
+endif()
+
 # 生成库
 add_library(NotificationCenterSDK STATIC ${SOURCES})
 add_library(NotificationCenterSDKShared SHARED ${SOURCES})
@@ -49,4 +56,18 @@ target_include_directories(NotificationCenterSDKShared PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/AIGCJson/include/rapidjson>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/AIGCJson/include/rapidjson/error>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/AIGCJson/include/rapidjson/internal>
-) 
+)
+
+if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
+    target_include_directories(NotificationCenterSDK PUBLIC ${OPENSSL_INCLUDE_DIR})
+endif()
+
+if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
+    target_include_directories(NotificationCenterSDKShared PUBLIC ${OPENSSL_INCLUDE_DIR})
+endif()
+
+# 仅在启用 libwebsockets 时链接
+if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
+    target_link_libraries(NotificationCenterSDK PUBLIC ${OPENSSL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a)
+    target_link_libraries(NotificationCenterSDKShared PUBLIC ${OPENSSL_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a)
+endif()

@@ -25,7 +25,7 @@ echo "检测到 $CPU_CORES 个CPU核心，将使用并行编译"
 echo "编译静态库..."
 mkdir -p "$LIB_BUILD_DIR"
 cd "$LIB_BUILD_DIR"
-cmake "$ROOT_DIR/src"
+cmake "$ROOT_DIR/src" -DUSE_LIBWEBSOCKETS=ON
 cmake --build . --parallel $CPU_CORES
 
 # 再编译 C++ 示例

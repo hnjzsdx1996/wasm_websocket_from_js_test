@@ -46,8 +46,4 @@ private:
     std::shared_ptr<WebSocketHolder> wsHolder_;
     std::shared_ptr<TopicManager> topic_manager_;
     std::shared_ptr<BusinessManager> business_manager_;
-
-    // std::shared_ptr<Timer> worker_timer_;
-    // std::shared_ptr<Timer> io_timer_;
-    // std::shared_ptr<Timer> compute_timer_;
 };

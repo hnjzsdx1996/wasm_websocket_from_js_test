@@ -2,6 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <utility>
+
+#include "CppWebSocket.h"
 #include "base/async/main_thread_executor.h"
 #include "message_define/common.h"
 #include "base/logger/logger.h"
@@ -18,6 +20,9 @@ SDKManager::SDKManager() {
 
     // 初始化TopicManager和BusinessManager
     wsHolder_ = std::make_shared<WebSocketHolder>();
+#ifdef ENABLE_LIBWEBSOCKETS
+    wsHolder_->setWebSocket(std::make_shared<CppWebSocket>());
+#endif
     topic_manager_ = std::make_shared<TopicManager>();
     business_manager_ = std::make_shared<BusinessManager>(topic_manager_);
     topic_manager_->setWebSocketHolder(wsHolder_);
@@ -35,9 +40,13 @@ void SDKManager::configure(const std::string& config) {
 }
 
 void SDKManager::setWebSocket(WebSocketBase* ws) {
+#ifdef ENABLE_LIBWEBSOCKETS
+    NC_LOG_INFO("[SDKManager] setWebSocket, but ENABLE_LIBWEBSOCKETS");
+#else
     NC_LOG_INFO("[SDKManager] setWebSocket: %p", ws);
     std::shared_ptr<WebSocketBase> sp_ws(ws);
     wsHolder_->setWebSocket(sp_ws);
+#endif
 }
 
 std::weak_ptr<WebSocketHolder> SDKManager::getWebSocketHolder() {
@@ -54,21 +63,4 @@ void SDKManager::initExecutors() {
     ThreadPoolExecutor::Worker();
     ThreadPoolExecutor::IO();
     ThreadPoolExecutor::Compute();
-
-    // // 用于测试多线程 Timer
-    // worker_timer_ = std::make_shared<Timer>();
-    // worker_timer_->SetDefaultExecutor(ThreadPoolExecutor::Worker());
-    // worker_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] Worker timer");
-    // });
-    // io_timer_ = std::make_shared<Timer>();
-    // io_timer_->SetDefaultExecutor(ThreadPoolExecutor::IO());
-    // io_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] IO timer");
-    // });
-    // compute_timer_ = std::make_shared<Timer>();
-    // compute_timer_->SetDefaultExecutor(ThreadPoolExecutor::Compute());
-    // compute_timer_->PostRepeating(std::chrono::milliseconds(1000), std::chrono::milliseconds(60000), []()->void {
-    //     NC_LOG_INFO("[SDKManager] Compute timer");
-    // });
 }
