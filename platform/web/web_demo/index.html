@@ -26,26 +26,36 @@
         <input id="wsUrl" value="wss://echo.websocket.org" size="40" placeholder="输入WebSocket地址">
         <button onclick="connectWS()">连接</button>
         <button onclick="closeWS()">断开</button>
+        <button onclick="clearLog()">清除日志</button>
+        <button onclick="showWasmFiles()">显示WASM文件列表</button>
     </div>
+    <div id="wasmFileList" style="margin-top:1em;"></div>
     <div class="message-container">
         <div>发送消息:</div>
         <textarea id="msgInput" placeholder="输入要发送的消息">{"timestamp":1752374563734,"topic":"subscribe","data":[{"sn":"drone_001","topic_list":["topic1"]}],"uuid":"54c56d3c-6fbd-4c0b-b236-b2107e85d30f"}</textarea>
         <div style="margin-top: 0.5em;">
             <button onclick="sendMsg()">发送</button>
+            <button onclick="listenAircraftLocation()">监听飞机位置</button>
+        </div>
+        <div style="margin-top: 0.5em;">
+            <input id="listenIdInput" type="number" placeholder="输入ListenId" style="width:160px;">
+            <button onclick="cancelObserve()">取消监听</button>
         </div>
     </div>
     <div id="log"></div>
     <script>
-        let sdk = null;
-        let sdkHandle = null;
-        let pollingInterval = null;
-        let isPolling = false;
-        
+        // 只保留页面相关逻辑，SDK相关全部通过NotifycationSDKManager调用
+        let log = function(msg) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += msg + '<br>';
+        };
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
         function updateUrlInput() {
             const select = document.getElementById('wsUrlSelect');
             const input = document.getElementById('wsUrl');
             const selectedValue = select.value;
-            
             if (selectedValue === 'custom') {
                 input.value = '';
                 input.placeholder = '请输入自定义WebSocket地址';
@@ -55,106 +65,108 @@
                 input.placeholder = '输入WebSocket地址';
             }
         }
-        function log(msg) {
-            const logDiv = document.getElementById('log');
-            logDiv.innerHTML += msg + '<br>';
-            // 移除自动滚动，让用户可以固定查看特定行
-        }
         function connectWS() {
             const url = document.getElementById('wsUrl').value;
-            if (!sdk || !sdkHandle) {
-                log('WASM未加载完成');
-                return;
-            }
-            // 分配内存并拷贝字符串
-            const urlPtr = sdk._malloc(sdk.lengthBytesUTF8(url) + 1);
-            sdk.stringToUTF8(url, urlPtr, sdk.lengthBytesUTF8(url) + 1);
-            sdk._js_sdk_connect(sdkHandle, urlPtr);
-            sdk._free(urlPtr);
-            log('已请求连接: ' + url);
+            NotifycationSDKManager.connect(url);
         }
         function sendMsg() {
             const msg = document.getElementById('msgInput').value;
-            if (!sdk || !sdkHandle) {
-                log('WASM未加载完成');
-                return;
-            }
-            // 分配内存并拷贝字符串
-            const msgPtr = sdk._malloc(sdk.lengthBytesUTF8(msg) + 1);
-            sdk.stringToUTF8(msg, msgPtr, sdk.lengthBytesUTF8(msg) + 1);
-            sdk._js_sdk_send(sdkHandle, msgPtr);
-            sdk._free(msgPtr);
-            log('发送: ' + msg);
+            NotifycationSDKManager.sendMsg(msg);
         }
         function closeWS() {
-            if (sdk && sdkHandle) sdk._js_sdk_close(sdkHandle);
-            log('已请求断开');
+            NotifycationSDKManager.close();
         }
-        
-        function startPolling() {
-            if (!sdk || !sdkHandle) {
-                log('WASM未加载完成');
+        function showWasmFiles() {
+            const sdkFS = NotifycationSDKManager.getFS();
+            if (!sdkFS) {
+                alert('WASM未加载完成或FS不可用');
                 return;
             }
-            
-            if (isPolling) {
-                log('轮询已在运行中');
+            let files = listAllFiles('/');
+            let html = '<b>WASM虚拟文件系统文件列表：</b><ul>';
+            files.forEach(f => {
+                html += `<li>${f} <button onclick=\"downloadWasmFile('${f}')\">下载</button></li>`;
+            });
+            html += '</ul>';
+            document.getElementById('wasmFileList').innerHTML = html;
+        }
+        function listAllFiles(path) {
+            const sdkFS = NotifycationSDKManager.getFS();
+            let result = [];
+            function walk(dir) {
+                let entries = [];
+                try { entries = sdkFS.readdir(dir); } catch(e) { return; }
+                entries.forEach(entry => {
+                    if (entry === '.' || entry === '..') return;
+                    let fullPath = dir === '/' ? '/' + entry : dir + '/' + entry;
+                    let stat = null;
+                    try { stat = sdkFS.stat(fullPath); } catch(e) { return; }
+                    if (sdkFS.isDir(stat.mode)) {
+                        walk(fullPath);
+                    } else {
+                        result.push(fullPath);
+                    }
+                });
+            }
+            walk(path);
+            return result;
+        }
+        function downloadWasmFile(path) {
+            const sdkFS = NotifycationSDKManager.getFS();
+            try {
+                let data = sdkFS.readFile(path);
+                let blob = new Blob([data], { type: 'application/octet-stream' });
+                let a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = path.split('/').pop();
+                a.click();
+            } catch (e) {
+                alert('无法下载文件: ' + e);
+            }
+        }
+        function listenAircraftLocation() {
+            const listenId = NotifycationSDKManager.listenAircraftLocation(
+                'drone_001',
+                1,
+                function(msg) { log('飞机位置消息: ' + msg); },
+                function(result) { log('订阅结果: ' + result); }
+            );
+            log('listenAircraftLocation 监听ID: ' + listenId);
+        }
+        function cancelObserve() {
+            const listenId = parseInt(document.getElementById('listenIdInput').value);
+            if (isNaN(listenId)) {
+                log('请输入有效的ListenId');
                 return;
             }
-            
-            isPolling = true;
-
-            pollingInterval = setInterval(() => {
-                const executedTasks = sdk._js_sdk_poll(sdkHandle);
-                if (executedTasks > 0) {
-                    // log(`主线程执行器: 执行了 ${executedTasks} 个任务`);
-                }
-            }, 16); // 约60FPS
-            
-            log('开始轮询主线程任务 (60FPS)');
+            NotifycationSDKManager.cancelObserve(listenId);
         }
-
+        // SDK加载与初始化
         window.addEventListener('load', function() {
-            if (typeof NotificationCenterSDK !== 'function') {
-                log('NotificationCenterSDK 工厂函数未加载');
-                return;
-            }
-            NotificationCenterSDK().then(function(ModuleInstance) {
-                sdk = ModuleInstance;
-                sdkHandle = sdk._js_sdk_create();
-                // 配置参数
-                const configObj = { sn: "1234567890", ping_pong_interval: 100 };
-                const configStr = JSON.stringify(configObj);
-                // 分配内存并拷贝字符串
-                const configPtr = sdk._malloc(sdk.lengthBytesUTF8(configStr) + 1);
-                sdk.stringToUTF8(configStr, configPtr, sdk.lengthBytesUTF8(configStr) + 1);
-                sdk._js_sdk_configure(sdkHandle, configPtr);
-                sdk._free(configPtr);
-                // 创建 JSWebSocket 并注入
-                const wsHandle = sdk._js_sdk_create_js_websocket();
-                sdk._js_sdk_set_websocket(sdkHandle, wsHandle);
-                // 注册回调
-                sdk._js_sdk_set_message_callback(sdkHandle, sdk.addFunction(function(msgPtr, userData) {
-                    const msg = sdk.UTF8ToString(msgPtr);
-                    log('收到: ' + msg);
-                    sdk._free(msgPtr); // 用完后释放
-                }, 'vii'), 0);
-                sdk._js_sdk_set_open_callback(sdkHandle, sdk.addFunction(function(userData) {
-                    log('连接已打开');
-                }, 'vi'), 0);
-                sdk._js_sdk_set_close_callback(sdkHandle, sdk.addFunction(function(userData) {
-                    log('连接已关闭');
-                }, 'vi'), 0);
-                sdk._js_sdk_set_error_callback(sdkHandle, sdk.addFunction(function(errPtr, userData) {
-                    const err = sdk.UTF8ToString(errPtr);
-                    log('发生错误: ' + err);
-                    sdk._free(errPtr); // 用完后释放
-                }, 'vii'), 0);
-                log('WASM加载完成, 可操作WebSocket');
-                startPolling();
+            NotifycationSDKManager.setLogger(log);
+            NotifycationSDKManager.loadAndInit(
+                { sn: "1234567890", ping_pong_interval: 100 },
+                {
+                    onMessage: function(msg) {
+                        // todo:sdk 后续将会取消此接口，消息监听通过订阅进行，不可以监听全量消息
+                        log('收到: ' + msg);
+                    },
+                    onOpen: function() {
+                        log('连接已打开');
+                    },
+                    onClose: function() {
+                        log('连接已关闭');
+                    },
+                    onError: function(err) {
+                        log('发生错误: ' + err);
+                    }
+                }
+            ).then(function() {
+                NotifycationSDKManager.startPolling();
             });
         });
     </script>
     <script src="NotificationCenterSDK.js"></script>
+    <script src="notifycation-sdk.js"></script>
 </body>
 </html> 

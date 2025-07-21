@@ -5716,6 +5716,17 @@ async function createWasm() {
       ws.send(messageStr);
     }
 
+  function _random_get(buffer, size) {
+  try {
+  
+      randomFill(HEAPU8.subarray(buffer, buffer + size));
+      return 0;
+    } catch (e) {
+    if (typeof FS == 'undefined' || !(e.name === 'ErrnoError')) throw e;
+    return e.errno;
+  }
+  }
+
   var getCFunc = (ident) => {
       var func = Module['_' + ident]; // closure exported function
       assert(func, 'Cannot call unknown function ' + ident + ', make sure it is exported');
@@ -5998,6 +6009,7 @@ async function createWasm() {
   
       return ret;
     };
+
 PThread.init();;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
@@ -6050,6 +6062,7 @@ if (Module['wasmBinary']) wasmBinary = Module['wasmBinary'];
   Module['stringToUTF8'] = stringToUTF8;
   Module['lengthBytesUTF8'] = lengthBytesUTF8;
   Module['intArrayFromString'] = intArrayFromString;
+  Module['FS'] = FS;
   var missingLibrarySymbols = [
   'writeI53ToI64',
   'writeI53ToI64Clamped',
@@ -6386,7 +6399,6 @@ missingLibrarySymbols.forEach(missingLibrarySymbol)
   'FS_createPath',
   'FS_createDevice',
   'FS_readFile',
-  'FS',
   'FS_root',
   'FS_mounts',
   'FS_devices',
@@ -6615,6 +6627,8 @@ var _js_sdk_set_open_callback = Module['_js_sdk_set_open_callback'] = makeInvali
 var _js_sdk_set_close_callback = Module['_js_sdk_set_close_callback'] = makeInvalidEarlyAccess('_js_sdk_set_close_callback');
 var _js_sdk_set_error_callback = Module['_js_sdk_set_error_callback'] = makeInvalidEarlyAccess('_js_sdk_set_error_callback');
 var _js_sdk_poll = Module['_js_sdk_poll'] = makeInvalidEarlyAccess('_js_sdk_poll');
+var _js_sdk_listen_aircraft_location = Module['_js_sdk_listen_aircraft_location'] = makeInvalidEarlyAccess('_js_sdk_listen_aircraft_location');
+var _js_sdk_cancel_observe = Module['_js_sdk_cancel_observe'] = makeInvalidEarlyAccess('_js_sdk_cancel_observe');
 var __emscripten_tls_init = makeInvalidEarlyAccess('__emscripten_tls_init');
 var __emscripten_thread_init = makeInvalidEarlyAccess('__emscripten_thread_init');
 var __emscripten_thread_crashed = makeInvalidEarlyAccess('__emscripten_thread_crashed');
@@ -6656,6 +6670,8 @@ function assignWasmExports(wasmExports) {
   Module['_js_sdk_set_close_callback'] = _js_sdk_set_close_callback = createExportWrapper('js_sdk_set_close_callback', 3);
   Module['_js_sdk_set_error_callback'] = _js_sdk_set_error_callback = createExportWrapper('js_sdk_set_error_callback', 3);
   Module['_js_sdk_poll'] = _js_sdk_poll = createExportWrapper('js_sdk_poll', 1);
+  Module['_js_sdk_listen_aircraft_location'] = _js_sdk_listen_aircraft_location = createExportWrapper('js_sdk_listen_aircraft_location', 7);
+  Module['_js_sdk_cancel_observe'] = _js_sdk_cancel_observe = createExportWrapper('js_sdk_cancel_observe', 2);
   __emscripten_tls_init = createExportWrapper('_emscripten_tls_init', 0);
   __emscripten_thread_init = createExportWrapper('_emscripten_thread_init', 6);
   __emscripten_thread_crashed = createExportWrapper('_emscripten_thread_crashed', 0);
@@ -6762,7 +6778,9 @@ function assignWasmExports(wasmExports) {
     /** @export */
     js_websocket_send: _js_websocket_send,
     /** @export */
-    memory: wasmMemory
+    memory: wasmMemory,
+    /** @export */
+    random_get: _random_get
   };
   }
   var wasmExports = await createWasm();

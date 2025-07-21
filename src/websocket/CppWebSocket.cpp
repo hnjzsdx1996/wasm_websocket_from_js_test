@@ -16,7 +16,7 @@ CppWebSocket::~CppWebSocket() {}
 void CppWebSocket::connect(const std::string& url) {
     NC_LOG_INFO("CppWebSocket: 连接 %s", url.c_str());
     // ... 连接逻辑 ...
-    if (onOpen_) onOpen_();
+    callOnOpen();
 }
 
 void CppWebSocket::send(const std::string& message) {
@@ -27,28 +27,16 @@ void CppWebSocket::send(const std::string& message) {
 void CppWebSocket::close() {
     NC_LOG_INFO("CppWebSocket: 关闭连接");
     // ... 关闭逻辑 ...
-    if (onClose_) onClose_();
+    callOnClose();
 }
 
 bool CppWebSocket::isOpen() const {
     // ... 判断逻辑 ...
-    return true;
+    return connected;
 }
 
-void CppWebSocket::setOnMessage(MessageCallback cb) {
-    onMessage_ = std::move(cb);
-}
-void CppWebSocket::setOnOpen(OpenCallback cb) {
-    onOpen_ = std::move(cb);
-}
-void CppWebSocket::setOnClose(CloseCallback cb) {
-    onClose_ = std::move(cb);
-}
-void CppWebSocket::setOnError(ErrorCallback cb) {
-    onError_ = std::move(cb);
-}
 // 在收到消息/事件的地方调用：
 // if (onMessage_) onMessage_(msg);
 // if (onOpen_) onOpen_();
 // if (onClose_) onClose_();
-// if (onError_) onError_(errMsg); 
+// if (onError_) onError_(errMsg);

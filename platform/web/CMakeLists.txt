@@ -12,6 +12,9 @@ set(ALL_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../src/SDKManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/CppWebSocket.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/WebSocketHolder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/websocket/WebSocketBase.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/topic_engine/TopicManager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../src/business_manager/BusinessManager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/c/sdk_c_api.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../src/base/logger/thread_info.cpp
     # Web 平台特定源文件
@@ -45,13 +48,21 @@ if(EMSCRIPTEN)
         OUTPUT_NAME "NotificationCenterSDK"
         SUFFIX ".js"
     )
+    target_compile_options(NotificationCenterSDKWeb PRIVATE
+        -g
+        -gsource-map
+        -O0
+    )
     target_link_options(NotificationCenterSDKWeb PRIVATE
+        "SHELL:-g"
+        "SHELL:-gsource-map"
+        "SHELL:-O0"
         "SHELL:-sMODULARIZE=1"
         "SHELL:-sEXPORT_NAME=NotificationCenterSDK"
         "SHELL:-sINITIAL_MEMORY=32MB"
         "SHELL:-sMAXIMUM_MEMORY=512MB"
         "SHELL:-sALLOW_TABLE_GROWTH=1"
-        "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','intArrayFromString','UTF8ToString','stringToUTF8','lengthBytesUTF8','addFunction']"
+        "SHELL:-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','intArrayFromString','UTF8ToString','stringToUTF8','lengthBytesUTF8','addFunction','FS']"
         "SHELL:--bind"
         # 多线程支持
         "SHELL:-pthread"
@@ -60,7 +71,7 @@ if(EMSCRIPTEN)
         "SHELL:-matomics"
         "SHELL:-mbulk-memory"
         # 导出所有 C API 和 glue code 回调
-        "SHELL:-sEXPORTED_FUNCTIONS=['_js_sdk_create','_js_sdk_destroy','_js_sdk_configure','_js_sdk_connect','_js_sdk_send','_js_sdk_close','_js_sdk_set_websocket','_js_sdk_set_message_callback','_js_sdk_set_open_callback','_js_sdk_set_close_callback','_js_sdk_set_error_callback','_js_sdk_poll','_js_sdk_create_js_websocket','_malloc','_free','_js_websocket_on_open','_js_websocket_on_message','_js_websocket_on_close','_js_websocket_on_error']"
+        "SHELL:-sEXPORTED_FUNCTIONS=['_js_sdk_create','_js_sdk_destroy','_js_sdk_configure','_js_sdk_connect','_js_sdk_send','_js_sdk_close','_js_sdk_set_websocket','_js_sdk_set_message_callback','_js_sdk_set_open_callback','_js_sdk_set_close_callback','_js_sdk_set_error_callback','_js_sdk_poll','_js_sdk_create_js_websocket','_malloc','_free','_js_websocket_on_open','_js_websocket_on_message','_js_websocket_on_close','_js_websocket_on_error','_js_sdk_listen_aircraft_location']"
         # 用 --js-library 注入 glue code
         "SHELL:--js-library=${CMAKE_CURRENT_LIST_DIR}/js_glue/NotificationCenterSDK_glue.js"
     )

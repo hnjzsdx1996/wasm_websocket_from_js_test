@@ -2,33 +2,36 @@
 #include <memory>
 #include "base/async/timer.h"
 #include <string>
-#include "websocket/WebSocketHolder.h"
 
+#include "business_manager/BusinessManager.h"
+#include "websocket/WebSocketHolder.h"
+#include "topic_engine/TopicManager.h"
+
+// 整个 SDK 的管理器，一条 websocket 链路创建一个 SDKManager 实例
+// WebSocketHolder: 管理 websocket 连接
+// TopicManager: 在 WebSocketHolder 基础上实现消息收发的匹配，解析消息内容
+// BusinessManager: 业务逻辑处理
 class SDKManager {
 public:
-    using MessageCallback = std::function<void(const std::string&)>;
-    using OpenCallback = std::function<void()>;
-    using CloseCallback = std::function<void()>;
-    using ErrorCallback = std::function<void(const std::string&)>;
     SDKManager();
     ~SDKManager();
 
     // sdk 配置
     void configure(const std::string& config);
 
-    // websocket 管理
-    void connect(const std::string& url);
-    void send(const std::string& message);
-    void close();
-
     // 注入 websocket 能力
     void setWebSocket(WebSocketBase* ws);
+    std::weak_ptr<WebSocketHolder> getWebSocketHolder();
 
-    // 设置回调
-    void setMessageCallback(MessageCallback cb);
-    void setOpenCallback(OpenCallback cb);
-    void setCloseCallback(CloseCallback cb);
-    void setErrorCallback(ErrorCallback cb);
+    // todo:sdk 改成 weak_ptr
+    std::shared_ptr<TopicManager> getTopicManager() {
+        return topic_manager_;
+    }
+
+    // todo:sdk 改成 weak_ptr
+    std::shared_ptr<BusinessManager> getBusinessManager() {
+        return business_manager_;
+    }
 
     /**
      * 轮询主线程任务
@@ -37,15 +40,14 @@ public:
      */
     size_t poll();
 
-    WebSocketHolder& getWebSocketHolder();
-
 private:
-    WebSocketHolder wsHolder_;
-    MessageCallback messageCallback_;
-    OpenCallback openCallback_;
-    CloseCallback closeCallback_;
-    ErrorCallback errorCallback_;
+    void initExecutors();
 
-    // 测试Timer
-    std::unique_ptr<Timer> timer_ = std::make_unique<Timer>();
-};  
+    std::shared_ptr<WebSocketHolder> wsHolder_;
+    std::shared_ptr<TopicManager> topic_manager_;
+    std::shared_ptr<BusinessManager> business_manager_;
+
+    // std::shared_ptr<Timer> worker_timer_;
+    // std::shared_ptr<Timer> io_timer_;
+    // std::shared_ptr<Timer> compute_timer_;
+};

@@ -63,8 +63,8 @@ private:
         }
     };
     
-    mutable std::mutex mutex_;
-    std::queue<Task> immediate_tasks_;
-    std::priority_queue<DelayedTask> delayed_tasks_;
+    mutable std::mutex mutex_{};
+    std::queue<Task> immediate_tasks_{};
+    std::priority_queue<DelayedTask> delayed_tasks_{};
     std::atomic<size_t> task_count_{0};
 }; 

@@ -51,6 +51,7 @@ size_t MainThreadExecutor::poll() {
     
     // 执行任务（在锁外执行，避免死锁）
     for (auto& task : tasks_to_execute) {
+        // todo:sdk 禁用异常
         try {
             task();
             executed_count++;
