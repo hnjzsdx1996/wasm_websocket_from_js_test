@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 
-#include "WebsocketEvent.h"
+#include "websocket/WebsocketEvent.h"
 #include "base/async/timer.h"
 #include "business_manager/BusinessManager.h"
 #include "message_define/common.h"
@@ -24,8 +24,6 @@ public:
     void setWebSocket(WebSocketBase* ws); // 注入 websocket 能力 (ENABLE_LIBWEBSOCKETS 为 false 时使用)
     void setWebsocketEventListener(const std::shared_ptr<WebsocketEvent>& listener); // 设置链接事件回调
     void connect(const std::string& url); // websocket 连接
-
-    std::weak_ptr<WebSocketHolder> getWebSocketHolder(); // todo:sdk 删除此接口
 
     // todo:sdk 改成 weak_ptr
     std::shared_ptr<BusinessManager> getBusinessManager() {

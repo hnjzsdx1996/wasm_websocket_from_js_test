@@ -9,13 +9,8 @@ class BusinessManager : public AsyncCaptureProtect{
 public:
     explicit BusinessManager(std::weak_ptr<TopicManager> topic_mgr);
 
-    // 调试用接口
-    [[deprecated]] void Send(const std::string& msg);
-    [[deprecated]] void Observe(std::function<void(const std::string&)> callback);
-
     void CancelObserve(int64_t listen_id);
 
-    // 接口范式
     /**
     * @brief 订阅飞机位置消息
     * 

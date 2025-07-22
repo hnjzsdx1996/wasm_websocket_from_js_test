@@ -83,10 +83,6 @@ void SDKManager::setWebSocket(WebSocketBase* ws) {
 #endif
 }
 
-std::weak_ptr<WebSocketHolder> SDKManager::getWebSocketHolder() {
-    return wsHolder_;
-}
-
 size_t SDKManager::poll() {
     // 轮询主线程任务
     return ThreadPoolExecutor::Main().poll();
