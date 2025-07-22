@@ -91,11 +91,15 @@ if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
     target_link_libraries(NotificationCenterSDK PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
         ${OPENSSL_LIBRARIES}
+        ssl
+        crypto
         Threads::Threads
     )
     target_link_libraries(NotificationCenterSDKShared PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
         ${OPENSSL_LIBRARIES}
+        ssl
+        crypto
         Threads::Threads
     )
 else()
