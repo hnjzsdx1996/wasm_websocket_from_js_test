@@ -40,8 +40,8 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     fi
     
     # 获取 OpenSSL 路径
-    OPENSSL_INCLUDE_DIR=$(pkg-config --cflags-only-I openssl | sed 's/-I//')
-    OPENSSL_LIBRARY_DIR=$(pkg-config --libs-only-L openssl | sed 's/-L//')
+    OPENSSL_INCLUDE_DIR="/usr/include"
+    OPENSSL_LIBRARY_DIR="/usr/lib/x86_64-linux-gnu"
     
     echo "OpenSSL include dir: $OPENSSL_INCLUDE_DIR"
     echo "OpenSSL library dir: $OPENSSL_LIBRARY_DIR"
