@@ -182,13 +182,6 @@ void TopicManager::OnPublish(const std::string &json) {
         return;
     }
 
-    publish_msg->message_data = aigc::JsonHelper::Get<std::string>(json, "", {"message_data"});
-    if (publish_msg->message_data.empty()) {
-        // publish 消息中没有 message_data 数据
-        NC_LOG_ERROR("[TopicManager] OnPublish message_data in publish_msg empty: %s", json.c_str());
-        return;
-    }
-
     // 构造订阅二元组key
     SubscribeTopicTuple tuple;
     tuple.sn = publish_msg->device_sn;
