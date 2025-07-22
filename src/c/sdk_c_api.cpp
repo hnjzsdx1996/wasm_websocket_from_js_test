@@ -118,32 +118,7 @@ void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void *user_data
     );
 }
 
-int sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on_messages_callback, void* msg_user_data, sdk_listen_result_callback on_result_callback, void* result_user_data, const char* device_sn, int freq) {
-    if (!h) return -1;
-    SDKManager* mgr = reinterpret_cast<SDKManager*>(h);
-    auto business_mgr = mgr->getBusinessManager();
-    if (!business_mgr) return -2;
-    
-    // 适配回调，将AircraftLocationMsg转换为字符串
-    auto msg_cb = [on_messages_callback, msg_user_data](const AircraftLocationMsg& msg) {
-        if (on_messages_callback) {
-            // 将AircraftLocationMsg转换为JSON字符串
-            std::string json_str = "{\"x\":" + std::to_string(msg.x) + 
-                                  ",\"y\":" + std::to_string(msg.y) + 
-                                  ",\"z\":" + std::to_string(msg.z) + "}";
-            char* buf = (char*)malloc(json_str.size() + 1);
-            memcpy(buf, json_str.c_str(), json_str.size() + 1);
-            on_messages_callback(buf, msg_user_data);
-            free(buf);
-        }
-    };
-    
-    auto result_cb = [on_result_callback, result_user_data](const NotificationCenterErrorCode& error_code) {
-        if (on_result_callback) on_result_callback(static_cast<int>(error_code), result_user_data);
-    };
-    
-    return business_mgr->ListenAircraftLocation(msg_cb, result_cb, device_sn, static_cast<NotifactionFrequency>(freq));
-}
+
 
 // 新增：取消监听接口
 void sdk_cancel_observe(sdk_handle h, int64_t listen_id) {

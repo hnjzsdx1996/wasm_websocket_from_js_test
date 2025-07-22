@@ -850,12 +850,14 @@ template <typename T> T SwigValueInit() {
 
 class AircraftLocation {
 public:
-    int x;
-    int y;
-    int z;
+    double height;    // 椭球高度
+    double elevation; // 相对起飞点高度
+    double longitude; // 经度
+    double latitude;  // 纬度
     
-    AircraftLocation() : x(0), y(0), z(0) {}
-    AircraftLocation(int x, int y, int z) : x(x), y(y), z(z) {}
+    AircraftLocation() : height(0.0), elevation(0.0), longitude(0.0), latitude(0.0) {}
+    AircraftLocation(double height, double elevation, double longitude, double latitude) 
+        : height(height), elevation(elevation), longitude(longitude), latitude(latitude) {}
 };
 
 class AircraftLocationCallback {
@@ -890,7 +892,7 @@ SWIGINTERN long BusinessManager_listenAircraftLocationJava(BusinessManager *self
         auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
             if (msg_callback) {
                 // 将AircraftLocationMsg转换为AircraftLocation
-                AircraftLocation aircraft_location(msg.x, msg.y, msg.z);
+                AircraftLocation aircraft_location(msg.height, msg.elevation, msg.longitude, msg.latitude);
                 msg_callback->onMessage(aircraft_location);
             }
         };
@@ -1173,86 +1175,114 @@ void SwigDirector_ConnectionListener::swig_connect_director(JNIEnv *jenv, jobjec
 extern "C" {
 #endif
 
-SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1x_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1height_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int arg2 ;
+  double arg2 ;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  arg2 = (int)jarg2; 
-  if (arg1) (arg1)->x = arg2;
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->height = arg2;
 }
 
 
-SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1x_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
-  jint jresult = 0 ;
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1height_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int result;
+  double result;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  result = (int) ((arg1)->x);
-  jresult = (jint)result; 
+  result = (double) ((arg1)->height);
+  jresult = (jdouble)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1y_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1elevation_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int arg2 ;
+  double arg2 ;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  arg2 = (int)jarg2; 
-  if (arg1) (arg1)->y = arg2;
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->elevation = arg2;
 }
 
 
-SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1y_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
-  jint jresult = 0 ;
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1elevation_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int result;
+  double result;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  result = (int) ((arg1)->y);
-  jresult = (jint)result; 
+  result = (double) ((arg1)->elevation);
+  jresult = (jdouble)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1z_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1longitude_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int arg2 ;
+  double arg2 ;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  arg2 = (int)jarg2; 
-  if (arg1) (arg1)->z = arg2;
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->longitude = arg2;
 }
 
 
-SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1z_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
-  jint jresult = 0 ;
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1longitude_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
   AircraftLocation *arg1 = (AircraftLocation *) 0 ;
-  int result;
+  double result;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
   arg1 = *(AircraftLocation **)&jarg1; 
-  result = (int) ((arg1)->z);
-  jresult = (jint)result; 
+  result = (double) ((arg1)->longitude);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1latitude_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  AircraftLocation *arg1 = (AircraftLocation *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftLocation **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->latitude = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_AircraftLocation_1latitude_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  AircraftLocation *arg1 = (AircraftLocation *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftLocation **)&jarg1; 
+  result = (double) ((arg1)->latitude);
+  jresult = (jdouble)result; 
   return jresult;
 }
 
@@ -1269,19 +1299,21 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_notificationcenterJN
 }
 
 
-SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_new_1AircraftLocation_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1, jint jarg2, jint jarg3) {
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_notificationcenterJNI_new_1AircraftLocation_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jdouble jarg1, jdouble jarg2, jdouble jarg3, jdouble jarg4) {
   jlong jresult = 0 ;
-  int arg1 ;
-  int arg2 ;
-  int arg3 ;
+  double arg1 ;
+  double arg2 ;
+  double arg3 ;
+  double arg4 ;
   AircraftLocation *result = 0 ;
   
   (void)jenv;
   (void)jcls;
-  arg1 = (int)jarg1; 
-  arg2 = (int)jarg2; 
-  arg3 = (int)jarg3; 
-  result = (AircraftLocation *)new AircraftLocation(arg1,arg2,arg3);
+  arg1 = (double)jarg1; 
+  arg2 = (double)jarg2; 
+  arg3 = (double)jarg3; 
+  arg4 = (double)jarg4; 
+  result = (AircraftLocation *)new AircraftLocation(arg1,arg2,arg3,arg4);
   *(AircraftLocation **)&jresult = result; 
   return jresult;
 }

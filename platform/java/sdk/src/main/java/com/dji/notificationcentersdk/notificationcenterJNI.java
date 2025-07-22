@@ -9,14 +9,16 @@
 package com.dji.notificationcentersdk;
 
 public class notificationcenterJNI {
-  public final static native void AircraftLocation_x_set(long jarg1, AircraftLocation jarg1_, int jarg2);
-  public final static native int AircraftLocation_x_get(long jarg1, AircraftLocation jarg1_);
-  public final static native void AircraftLocation_y_set(long jarg1, AircraftLocation jarg1_, int jarg2);
-  public final static native int AircraftLocation_y_get(long jarg1, AircraftLocation jarg1_);
-  public final static native void AircraftLocation_z_set(long jarg1, AircraftLocation jarg1_, int jarg2);
-  public final static native int AircraftLocation_z_get(long jarg1, AircraftLocation jarg1_);
+  public final static native void AircraftLocation_height_set(long jarg1, AircraftLocation jarg1_, double jarg2);
+  public final static native double AircraftLocation_height_get(long jarg1, AircraftLocation jarg1_);
+  public final static native void AircraftLocation_elevation_set(long jarg1, AircraftLocation jarg1_, double jarg2);
+  public final static native double AircraftLocation_elevation_get(long jarg1, AircraftLocation jarg1_);
+  public final static native void AircraftLocation_longitude_set(long jarg1, AircraftLocation jarg1_, double jarg2);
+  public final static native double AircraftLocation_longitude_get(long jarg1, AircraftLocation jarg1_);
+  public final static native void AircraftLocation_latitude_set(long jarg1, AircraftLocation jarg1_, double jarg2);
+  public final static native double AircraftLocation_latitude_get(long jarg1, AircraftLocation jarg1_);
   public final static native long new_AircraftLocation__SWIG_0();
-  public final static native long new_AircraftLocation__SWIG_1(int jarg1, int jarg2, int jarg3);
+  public final static native long new_AircraftLocation__SWIG_1(double jarg1, double jarg2, double jarg3, double jarg4);
   public final static native void delete_AircraftLocation(long jarg1);
   public final static native void delete_AircraftLocationCallback(long jarg1);
   public final static native void AircraftLocationCallback_onMessage(long jarg1, AircraftLocationCallback jarg1_, long jarg2, AircraftLocation jarg2_);

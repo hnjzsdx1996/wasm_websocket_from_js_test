@@ -49,12 +49,14 @@
 %inline %{
 class AircraftLocation {
 public:
-    int x;
-    int y;
-    int z;
+    double height;    // 椭球高度
+    double elevation; // 相对起飞点高度
+    double longitude; // 经度
+    double latitude;  // 纬度
     
-    AircraftLocation() : x(0), y(0), z(0) {}
-    AircraftLocation(int x, int y, int z) : x(x), y(y), z(z) {}
+    AircraftLocation() : height(0.0), elevation(0.0), longitude(0.0), latitude(0.0) {}
+    AircraftLocation(double height, double elevation, double longitude, double latitude) 
+        : height(height), elevation(elevation), longitude(longitude), latitude(latitude) {}
 };
 
 class AircraftLocationCallback {
@@ -85,7 +87,7 @@ public:
         auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
             if (msg_callback) {
                 // 将AircraftLocationMsg转换为AircraftLocation
-                AircraftLocation aircraft_location(msg.x, msg.y, msg.z);
+                AircraftLocation aircraft_location(msg.height, msg.elevation, msg.longitude, msg.latitude);
                 msg_callback->onMessage(aircraft_location);
             }
         };

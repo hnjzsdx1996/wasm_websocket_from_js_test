@@ -31,9 +31,10 @@ class MyAircraftLocationCallback extends AircraftLocationCallback {
     @Override
     public void onMessage(AircraftLocation msg) {
         System.out.println("[Java] Received aircraft location message:");
-        System.out.println("  - X: " + msg.getX());
-        System.out.println("  - Y: " + msg.getY());
-        System.out.println("  - Z: " + msg.getZ());
+        System.out.println("  - Height (椭球高度): " + msg.getHeight());
+        System.out.println("  - Elevation (相对起飞点高度): " + msg.getElevation());
+        System.out.println("  - Longitude (经度): " + msg.getLongitude());
+        System.out.println("  - Latitude (纬度): " + msg.getLatitude());
     }
 }
 

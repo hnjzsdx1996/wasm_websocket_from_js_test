@@ -48,36 +48,44 @@ public class AircraftLocation {
     }
   }
 
-  public void setX(int value) {
-    notificationcenterJNI.AircraftLocation_x_set(swigCPtr, this, value);
+  public void setHeight(double value) {
+    notificationcenterJNI.AircraftLocation_height_set(swigCPtr, this, value);
   }
 
-  public int getX() {
-    return notificationcenterJNI.AircraftLocation_x_get(swigCPtr, this);
+  public double getHeight() {
+    return notificationcenterJNI.AircraftLocation_height_get(swigCPtr, this);
   }
 
-  public void setY(int value) {
-    notificationcenterJNI.AircraftLocation_y_set(swigCPtr, this, value);
+  public void setElevation(double value) {
+    notificationcenterJNI.AircraftLocation_elevation_set(swigCPtr, this, value);
   }
 
-  public int getY() {
-    return notificationcenterJNI.AircraftLocation_y_get(swigCPtr, this);
+  public double getElevation() {
+    return notificationcenterJNI.AircraftLocation_elevation_get(swigCPtr, this);
   }
 
-  public void setZ(int value) {
-    notificationcenterJNI.AircraftLocation_z_set(swigCPtr, this, value);
+  public void setLongitude(double value) {
+    notificationcenterJNI.AircraftLocation_longitude_set(swigCPtr, this, value);
   }
 
-  public int getZ() {
-    return notificationcenterJNI.AircraftLocation_z_get(swigCPtr, this);
+  public double getLongitude() {
+    return notificationcenterJNI.AircraftLocation_longitude_get(swigCPtr, this);
+  }
+
+  public void setLatitude(double value) {
+    notificationcenterJNI.AircraftLocation_latitude_set(swigCPtr, this, value);
+  }
+
+  public double getLatitude() {
+    return notificationcenterJNI.AircraftLocation_latitude_get(swigCPtr, this);
   }
 
   public AircraftLocation() {
     this(notificationcenterJNI.new_AircraftLocation__SWIG_0(), true);
   }
 
-  public AircraftLocation(int x, int y, int z) {
-    this(notificationcenterJNI.new_AircraftLocation__SWIG_1(x, y, z), true);
+  public AircraftLocation(double height, double elevation, double longitude, double latitude) {
+    this(notificationcenterJNI.new_AircraftLocation__SWIG_1(height, elevation, longitude, latitude), true);
   }
 
 }
