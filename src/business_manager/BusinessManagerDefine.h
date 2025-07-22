@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <functional>
-#include "topic_message_define/PublishAircraftLocationTopic.h"
+#include "topic_message_all_define.h"
 
 using ListenId = int64_t;
 
@@ -26,8 +26,9 @@ enum NotificationServerErrorCode {
 using OnSubscribeMessageCallback = std::function<void(const std::string& message)>;
 using OnSubscribeResultCallback = std::function<void(const NotificationCenterErrorCode& error_code)>;
 
-// 飞机位置消息回调
+using AircraftAttitudeMsgCallback = std::function<void(const AircraftAttitudeMsg& msg)>;
 using AircraftLocationMsgCallback = std::function<void(const AircraftLocationMsg& msg)>;
+using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
 
 
 

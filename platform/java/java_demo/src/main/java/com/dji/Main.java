@@ -38,7 +38,28 @@ class MyAircraftLocationMessageCallback extends AircraftLocationCallback {
     }
 }
 
-// 3. 创建订阅结果回调类
+// 3. 创建飞机姿态消息回调类
+class MyAircraftAttitudeMessageCallback extends AircraftAttitudeCallback {
+    @Override
+    public void invoke(AircraftAttitude message) {
+        System.out.println("[Java] Received aircraft attitude message:");
+        System.out.println("  - Attitude Head (机头朝向角度): " + message.getAttitude_head());
+        System.out.println("  - Attitude Pitch (俯仰轴角度): " + message.getAttitude_pitch());
+        System.out.println("  - Attitude Roll (横滚轴角度): " + message.getAttitude_roll());
+    }
+}
+
+// 4. 创建飞机速度消息回调类
+class MyAircraftSpeedMessageCallback extends AircraftSpeedCallback {
+    @Override
+    public void invoke(AircraftSpeed message) {
+        System.out.println("[Java] Received aircraft speed message:");
+        System.out.println("  - Horizontal Speed (水平速度 m/s): " + message.getHorizontal_speed());
+        System.out.println("  - Vertical Speed (垂直速度 m/s): " + message.getVertical_speed());
+    }
+}
+
+// 5. 创建订阅结果回调类
 class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
@@ -58,6 +79,30 @@ class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
             } else {
                 System.out.println("[Java] Error: Unknown error");
             }
+        }
+    }
+}
+
+// 6. 创建飞机姿态订阅结果回调类
+class MyAircraftAttitudeResultCallback extends SDKSubscribeResultCallback {
+    @Override
+    public void invoke(NotificationCenterErrorCode errorCode) {
+        if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+            System.out.println("[Java] Aircraft attitude subscription successful.");
+        } else {
+            System.out.println("[Java] Aircraft attitude subscription failed. Error code: " + errorCode);
+        }
+    }
+}
+
+// 7. 创建飞机速度订阅结果回调类
+class MyAircraftSpeedResultCallback extends SDKSubscribeResultCallback {
+    @Override
+    public void invoke(NotificationCenterErrorCode errorCode) {
+        if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+            System.out.println("[Java] Aircraft speed subscription successful.");
+        } else {
+            System.out.println("[Java] Aircraft speed subscription failed. Error code: " + errorCode);
         }
     }
 }
@@ -91,7 +136,7 @@ public class Main {
         System.out.println("[Java] Waiting for connection to establish...");
         Thread.sleep(2000); // 等待2秒让连接建立
 
-        // 6. 获取BusinessManager并演示监听飞机位置功能
+        // 6. 获取BusinessManager并演示监听功能
         BusinessManager businessManager = sdk.getBusinessManager();
         if (businessManager == null) {
             System.err.println("[Java] Failed to get BusinessManager - it is null!");
@@ -100,8 +145,14 @@ public class Main {
         System.out.println("[Java] BusinessManager obtained successfully.");
 
         // 7. 创建回调对象
-        MyAircraftLocationMessageCallback messageCallback = new MyAircraftLocationMessageCallback();
-        MyAircraftLocationResultCallback resultCallback = new MyAircraftLocationResultCallback();
+        MyAircraftLocationMessageCallback locationMessageCallback = new MyAircraftLocationMessageCallback();
+        MyAircraftLocationResultCallback locationResultCallback = new MyAircraftLocationResultCallback();
+        
+        MyAircraftAttitudeMessageCallback attitudeMessageCallback = new MyAircraftAttitudeMessageCallback();
+        MyAircraftAttitudeResultCallback attitudeResultCallback = new MyAircraftAttitudeResultCallback();
+        
+        MyAircraftSpeedMessageCallback speedMessageCallback = new MyAircraftSpeedMessageCallback();
+        MyAircraftSpeedResultCallback speedResultCallback = new MyAircraftSpeedResultCallback();
 
         // 8. 演示监听飞机位置消息
         System.out.println("[Java] Starting aircraft location monitoring...");
@@ -110,24 +161,58 @@ public class Main {
         String deviceSN = "TEST001";
         NotificationFrequency frequency = NotificationFrequency.ANY;
         
-        long listenId = businessManager.ListenAircraftLocation(
-            messageCallback, 
-            resultCallback, 
+        long locationListenId = businessManager.ListenAircraftLocation(
+            locationMessageCallback, 
+            locationResultCallback, 
             deviceSN, 
             frequency
         );
         
-        System.out.println("[Java] Started monitoring device " + deviceSN + 
+        System.out.println("[Java] Started monitoring aircraft location for device " + deviceSN + 
                          " with frequency " + frequency + 
-                         " (Listen ID: " + listenId + ")");
+                         " (Listen ID: " + locationListenId + ")");
         
-        // 10. 等待一段时间让自动poll处理消息
+        // 10. 演示监听飞机姿态消息
+        System.out.println("[Java] Starting aircraft attitude monitoring...");
+        
+        long attitudeListenId = businessManager.ListenAircraftAttitude(
+            attitudeMessageCallback, 
+            attitudeResultCallback, 
+            deviceSN, 
+            frequency
+        );
+        
+        System.out.println("[Java] Started monitoring aircraft attitude for device " + deviceSN + 
+                         " with frequency " + frequency + 
+                         " (Listen ID: " + attitudeListenId + ")");
+        
+        // 11. 演示监听飞机速度消息
+        System.out.println("[Java] Starting aircraft speed monitoring...");
+        
+        long speedListenId = businessManager.ListenAircraftSpeed(
+            speedMessageCallback, 
+            speedResultCallback, 
+            deviceSN, 
+            frequency
+        );
+        
+        System.out.println("[Java] Started monitoring aircraft speed for device " + deviceSN + 
+                         " with frequency " + frequency + 
+                         " (Listen ID: " + speedListenId + ")");
+        
+        // 12. 等待一段时间让自动poll处理消息
         System.out.println("[Java] Waiting for messages (auto-poll is running)...");
         Thread.sleep(10000); // 等待10秒
         
         // 取消订阅
-        businessManager.cancelObserve((int)listenId);
-        System.out.println("[Java] Cancelled monitoring for device " + deviceSN);
+        businessManager.cancelObserve((int)locationListenId);
+        System.out.println("[Java] Cancelled location monitoring for device " + deviceSN);
+        
+        businessManager.cancelObserve((int)attitudeListenId);
+        System.out.println("[Java] Cancelled attitude monitoring for device " + deviceSN);
+        
+        businessManager.cancelObserve((int)speedListenId);
+        System.out.println("[Java] Cancelled speed monitoring for device " + deviceSN);
 
         // 继续等待一段时间
         System.out.println("[Java] Continuing to wait for cleanup...");

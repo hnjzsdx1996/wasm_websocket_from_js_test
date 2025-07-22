@@ -20,11 +20,37 @@ public class notificationcenterJNI {
   public final static native long new_AircraftLocation__SWIG_0();
   public final static native long new_AircraftLocation__SWIG_1(double jarg1, double jarg2, double jarg3, double jarg4);
   public final static native void delete_AircraftLocation(long jarg1);
+  public final static native void AircraftAttitude_attitude_head_set(long jarg1, AircraftAttitude jarg1_, double jarg2);
+  public final static native double AircraftAttitude_attitude_head_get(long jarg1, AircraftAttitude jarg1_);
+  public final static native void AircraftAttitude_attitude_pitch_set(long jarg1, AircraftAttitude jarg1_, double jarg2);
+  public final static native double AircraftAttitude_attitude_pitch_get(long jarg1, AircraftAttitude jarg1_);
+  public final static native void AircraftAttitude_attitude_roll_set(long jarg1, AircraftAttitude jarg1_, double jarg2);
+  public final static native double AircraftAttitude_attitude_roll_get(long jarg1, AircraftAttitude jarg1_);
+  public final static native long new_AircraftAttitude__SWIG_0();
+  public final static native long new_AircraftAttitude__SWIG_1(double jarg1, double jarg2, double jarg3);
+  public final static native void delete_AircraftAttitude(long jarg1);
+  public final static native void AircraftSpeed_horizontal_speed_set(long jarg1, AircraftSpeed jarg1_, double jarg2);
+  public final static native double AircraftSpeed_horizontal_speed_get(long jarg1, AircraftSpeed jarg1_);
+  public final static native void AircraftSpeed_vertical_speed_set(long jarg1, AircraftSpeed jarg1_, double jarg2);
+  public final static native double AircraftSpeed_vertical_speed_get(long jarg1, AircraftSpeed jarg1_);
+  public final static native long new_AircraftSpeed__SWIG_0();
+  public final static native long new_AircraftSpeed__SWIG_1(double jarg1, double jarg2);
+  public final static native void delete_AircraftSpeed(long jarg1);
   public final static native void delete_AircraftLocationCallback(long jarg1);
   public final static native void AircraftLocationCallback_invoke(long jarg1, AircraftLocationCallback jarg1_, long jarg2, AircraftLocation jarg2_);
   public final static native long new_AircraftLocationCallback();
   public final static native void AircraftLocationCallback_director_connect(AircraftLocationCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void AircraftLocationCallback_change_ownership(AircraftLocationCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftAttitudeCallback(long jarg1);
+  public final static native void AircraftAttitudeCallback_invoke(long jarg1, AircraftAttitudeCallback jarg1_, long jarg2, AircraftAttitude jarg2_);
+  public final static native long new_AircraftAttitudeCallback();
+  public final static native void AircraftAttitudeCallback_director_connect(AircraftAttitudeCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftAttitudeCallback_change_ownership(AircraftAttitudeCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftSpeedCallback(long jarg1);
+  public final static native void AircraftSpeedCallback_invoke(long jarg1, AircraftSpeedCallback jarg1_, long jarg2, AircraftSpeed jarg2_);
+  public final static native long new_AircraftSpeedCallback();
+  public final static native void AircraftSpeedCallback_director_connect(AircraftSpeedCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftSpeedCallback_change_ownership(AircraftSpeedCallback obj, long cptr, boolean take_or_release);
   public final static native void delete_SDKSubscribeResultCallback(long jarg1);
   public final static native void SDKSubscribeResultCallback_invoke(long jarg1, SDKSubscribeResultCallback jarg1_, int jarg2);
   public final static native long new_SDKSubscribeResultCallback();
@@ -47,11 +73,13 @@ public class notificationcenterJNI {
   public final static native long SDKManager_getBusinessManager(long jarg1, SDKManager jarg1_);
   public final static native long SDKManager_poll();
   public final static native long new_BusinessManager(long jarg1);
-  public final static native void BusinessManager_Send(long jarg1, BusinessManager jarg1_, String jarg2);
-  public final static native void BusinessManager_Observe(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native void BusinessManager_CancelObserve(long jarg1, BusinessManager jarg1_, long jarg2);
+  public final static native long BusinessManager_ListenAircraftAttitude__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftLocation__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftSpeed__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native int BusinessManager_ListenAircraftLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftLocationCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftAttitude__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftAttitudeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftSpeed__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftSpeedCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserve(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -65,6 +93,12 @@ public class notificationcenterJNI {
 
   public static void SwigDirector_AircraftLocationCallback_invoke(AircraftLocationCallback jself, long message) {
     jself.invoke(new AircraftLocation(message, false));
+  }
+  public static void SwigDirector_AircraftAttitudeCallback_invoke(AircraftAttitudeCallback jself, long message) {
+    jself.invoke(new AircraftAttitude(message, false));
+  }
+  public static void SwigDirector_AircraftSpeedCallback_invoke(AircraftSpeedCallback jself, long message) {
+    jself.invoke(new AircraftSpeed(message, false));
   }
   public static void SwigDirector_SDKSubscribeResultCallback_invoke(SDKSubscribeResultCallback jself, int result) {
     jself.invoke(NotificationCenterErrorCode.swigToEnum(result));
