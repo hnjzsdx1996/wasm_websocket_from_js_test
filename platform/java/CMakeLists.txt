@@ -12,10 +12,10 @@ find_package(SWIG REQUIRED)
 
 include(UseSWIG)
 
-set(CMAKE_SWIG_FLAGS "-c++" "-package" "com.dji.notificationcentersdk")
+set(CMAKE_SWIG_FLAGS "-c++" "-package" "com.dji.notificationcentersdk.generated")
 
 set(SWIG_MODULE_NAME notificationcenter)
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/sdk/src/main/java/com/dji/notificationcentersdk)
+set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR}/sdk/src/main/java/com/dji/notificationcentersdk/generated)
 set(CMAKE_SWIG_OUT_PREFIX "")
 
 # Interface files

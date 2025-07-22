@@ -1,6 +1,7 @@
 package com.dji;
 
-import com.dji.notificationcentersdk.*;
+import com.dji.notificationcentersdk.generated.*;
+import com.dji.notificationcentersdk.core.NotificationCenterSDK;
 
 // 1. Create a class that extends the SWIG-generated listener.
 // This is how we handle callbacks from C++.
@@ -161,5 +162,18 @@ public class Main {
         }
 
         System.out.println("[Java] Demo finished.");
+        
+        // 清理资源并退出
+        System.out.println("[Java] Cleaning up resources...");
+        try {
+            // 删除SDK管理器（这会调用析构函数）
+            sdkManager.delete();
+            System.out.println("[Java] SDKManager cleaned up.");
+        } catch (Exception e) {
+            System.err.println("[Java] Error during cleanup: " + e.getMessage());
+        }
+        
+        System.out.println("[Java] Exiting...");
+        System.exit(0);
     }
 } 

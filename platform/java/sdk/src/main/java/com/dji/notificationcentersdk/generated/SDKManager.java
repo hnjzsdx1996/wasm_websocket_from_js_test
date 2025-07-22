@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.dji.notificationcentersdk;
+package com.dji.notificationcentersdk.generated;
 
 public class SDKManager {
   private transient long swigCPtr;

@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.dji.notificationcentersdk;
+package com.dji.notificationcentersdk.generated;
 
 public class SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t {
   private transient long swigCPtr;
