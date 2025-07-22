@@ -41,36 +41,55 @@
 %ignore SDKManager::getTopicManager;
 %ignore SDKManager::getWebSocketHolder;
 
-// Create Java-friendly callback interfaces with different names
-%feature("director") AircraftLocationCallback;
-%feature("director") ResultCallback;
-
-// 手动定义AircraftLocation类，避免宏问题
+// 定义新的AircraftLocation类
 %inline %{
 class AircraftLocation {
 public:
     double height;    // 椭球高度
     double elevation; // 相对起飞点高度
-    double longitude; // 经度
     double latitude;  // 纬度
+    double longitude; // 经度
     
-    AircraftLocation() : height(0.0), elevation(0.0), longitude(0.0), latitude(0.0) {}
-    AircraftLocation(double height, double elevation, double longitude, double latitude) 
-        : height(height), elevation(elevation), longitude(longitude), latitude(latitude) {}
+    AircraftLocation() : height(0.0), elevation(0.0), latitude(0.0), longitude(0.0) {}
+    AircraftLocation(double height, double elevation, double latitude, double longitude) 
+        : height(height), elevation(elevation), latitude(latitude), longitude(longitude) {}
 };
 
-class AircraftLocationCallback {
-public:
-    virtual ~AircraftLocationCallback() {}
-    virtual void onMessage(const AircraftLocation& msg) = 0;
+// 定义通知频率枚举
+enum NotificationFrequency {
+    ANY = 0,
+    ON_CHANGED = 1,
+    PUSH_1S = 1000,
+    PUSH_2S = 2000,
+    PUSH_3S = 3000,
+    PUSH_4S = 4000,
+    PUSH_5S = 5000,
+    PUSH_10S = 10000,
+    PUSH_20S = 20000,
+    PUSH_30S = 30000
 };
 
-class ResultCallback {
+// 定义回调接口
+template<typename T>
+class JavaMessageCallback {
 public:
-    virtual ~ResultCallback() {}
-    virtual void onResult(long result) = 0;
+    virtual ~JavaMessageCallback() {}
+    virtual void invoke(const T& message) = 0;
+};
+
+class JavaResultCallback {
+public:
+    virtual ~JavaResultCallback() {}
+    virtual void invoke(const NotificationCenterErrorCode& result) = 0;
 };
 %}
+
+// Create Java-friendly callback interfaces and data structures
+%feature("director") JavaMessageCallback;
+%feature("director") JavaResultCallback;
+
+// 为特定的模板实例化创建具体的Java类
+%template(JavaMessageCallbackAircraftLocation) JavaMessageCallback<AircraftLocation>;
 
 // Include the type definitions and enums
 %include "message_define/common.h"
@@ -83,41 +102,51 @@ public:
 
 // Add Java-friendly wrapper methods to BusinessManager
 %extend BusinessManager {
-    long listenAircraftLocationJava(AircraftLocationCallback* msg_callback, ResultCallback* result_callback, const std::string& device_sn, int freq) {
-        auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
-            if (msg_callback) {
+    long ListenAircraftLocation(
+        JavaMessageCallback<AircraftLocation>* onSubscribeMessageCallback,
+        JavaResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftLocationMsg& msg) {
+            if (onSubscribeMessageCallback) {
                 // 将AircraftLocationMsg转换为AircraftLocation
-                AircraftLocation aircraft_location(msg.height, msg.elevation, msg.longitude, msg.latitude);
-                msg_callback->onMessage(aircraft_location);
+                AircraftLocation aircraft_location(
+                    msg.height,
+                    msg.elevation,
+                    msg.latitude,
+                    msg.longitude
+                );
+                onSubscribeMessageCallback->invoke(aircraft_location);
             }
         };
         
-        auto result_cb = [result_callback](const NotificationCenterErrorCode& error_code) {
-            if (result_callback) {
-                result_callback->onResult(static_cast<long>(error_code));
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
             }
         };
         
-        // Convert freq to NotifactionFrequency enum
+        // Convert NotificationFrequency to NotifactionFrequency enum
         NotifactionFrequency notify_freq;
-        switch (freq) {
-            case 0: notify_freq = NotifactionFrequency_Any; break;
-            case 1: notify_freq = NotifactionFrequency_OnChanged; break;
-            case 1000: notify_freq = NotifactionFrequency_Push_1s; break;
-            case 2000: notify_freq = NotifactionFrequency_Push_2s; break;
-            case 3000: notify_freq = NotifactionFrequency_Push_3s; break;
-            case 4000: notify_freq = NotifactionFrequency_Push_4s; break;
-            case 5000: notify_freq = NotifactionFrequency_Push_5s; break;
-            case 10000: notify_freq = NotifactionFrequency_Push_10s; break;
-            case 20000: notify_freq = NotifactionFrequency_Push_20s; break;
-            case 30000: notify_freq = NotifactionFrequency_Push_30s; break;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
             default: notify_freq = NotifactionFrequency_Any; break;
         }
         
-        return static_cast<long>($self->ListenAircraftLocation(msg_cb, result_cb, device_sn, notify_freq));
+        return $self->ListenAircraftLocation(msg_cb, result_cb, sn, notify_freq);
     }
     
-    void cancelObserveJava(long listen_id) {
+    void cancelObserve(long listen_id) {
         $self->CancelObserve(listen_id);
     }
 }

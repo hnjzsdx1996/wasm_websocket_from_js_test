@@ -64,14 +64,6 @@ public class AircraftLocation {
     return notificationcenterJNI.AircraftLocation_elevation_get(swigCPtr, this);
   }
 
-  public void setLongitude(double value) {
-    notificationcenterJNI.AircraftLocation_longitude_set(swigCPtr, this, value);
-  }
-
-  public double getLongitude() {
-    return notificationcenterJNI.AircraftLocation_longitude_get(swigCPtr, this);
-  }
-
   public void setLatitude(double value) {
     notificationcenterJNI.AircraftLocation_latitude_set(swigCPtr, this, value);
   }
@@ -80,12 +72,20 @@ public class AircraftLocation {
     return notificationcenterJNI.AircraftLocation_latitude_get(swigCPtr, this);
   }
 
+  public void setLongitude(double value) {
+    notificationcenterJNI.AircraftLocation_longitude_set(swigCPtr, this, value);
+  }
+
+  public double getLongitude() {
+    return notificationcenterJNI.AircraftLocation_longitude_get(swigCPtr, this);
+  }
+
   public AircraftLocation() {
     this(notificationcenterJNI.new_AircraftLocation__SWIG_0(), true);
   }
 
-  public AircraftLocation(double height, double elevation, double longitude, double latitude) {
-    this(notificationcenterJNI.new_AircraftLocation__SWIG_1(height, elevation, longitude, latitude), true);
+  public AircraftLocation(double height, double elevation, double latitude, double longitude) {
+    this(notificationcenterJNI.new_AircraftLocation__SWIG_1(height, elevation, latitude, longitude), true);
   }
 
 }

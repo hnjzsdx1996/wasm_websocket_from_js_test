@@ -9,13 +9,13 @@
 #ifndef SWIG_notificationcenter_WRAP_H_
 #define SWIG_notificationcenter_WRAP_H_
 
-class SwigDirector_AircraftLocationCallback : public AircraftLocationCallback, public Swig::Director {
+class SwigDirector_JavaResultCallback : public JavaResultCallback, public Swig::Director {
 
 public:
     void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
-    SwigDirector_AircraftLocationCallback(JNIEnv *jenv);
-    virtual ~SwigDirector_AircraftLocationCallback();
-    virtual void onMessage(AircraftLocation const &msg);
+    SwigDirector_JavaResultCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_JavaResultCallback();
+    virtual void invoke(NotificationCenterErrorCode const &result);
 public:
     bool swig_overrides(int n) {
       return (n < 1 ? swig_override[n] : false);
@@ -24,13 +24,13 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
-class SwigDirector_ResultCallback : public ResultCallback, public Swig::Director {
+class SwigDirector_JavaMessageCallbackAircraftLocation : public JavaMessageCallback< AircraftLocation >, public Swig::Director {
 
 public:
     void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
-    SwigDirector_ResultCallback(JNIEnv *jenv);
-    virtual ~SwigDirector_ResultCallback();
-    virtual void onResult(long result);
+    SwigDirector_JavaMessageCallbackAircraftLocation(JNIEnv *jenv);
+    virtual ~SwigDirector_JavaMessageCallbackAircraftLocation();
+    virtual void invoke(AircraftLocation const &message);
 public:
     bool swig_overrides(int n) {
       return (n < 1 ? swig_override[n] : false);

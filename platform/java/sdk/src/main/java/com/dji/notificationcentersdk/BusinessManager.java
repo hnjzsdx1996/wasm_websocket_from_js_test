@@ -57,15 +57,15 @@ public class BusinessManager {
   }
 
   public SWIGTYPE_p_int64_t ListenAircraftLocation(SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
-    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftLocation(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
+    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftLocation__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
 
-  public int listenAircraftLocationJava(AircraftLocationCallback msg_callback, ResultCallback result_callback, String device_sn, int freq) {
-    return notificationcenterJNI.BusinessManager_listenAircraftLocationJava(swigCPtr, this, AircraftLocationCallback.getCPtr(msg_callback), msg_callback, ResultCallback.getCPtr(result_callback), result_callback, device_sn, freq);
+  public int ListenAircraftLocation(JavaMessageCallbackAircraftLocation onSubscribeMessageCallback, JavaResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
+    return notificationcenterJNI.BusinessManager_ListenAircraftLocation__SWIG_1(swigCPtr, this, JavaMessageCallbackAircraftLocation.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, JavaResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
   }
 
-  public void cancelObserveJava(int listen_id) {
-    notificationcenterJNI.BusinessManager_cancelObserveJava(swigCPtr, this, listen_id);
+  public void cancelObserve(int listen_id) {
+    notificationcenterJNI.BusinessManager_cancelObserve(swigCPtr, this, listen_id);
   }
 
 }

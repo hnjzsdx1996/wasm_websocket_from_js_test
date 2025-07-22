@@ -26,42 +26,36 @@ class MyConnectionListener extends ConnectionListener {
     }
 }
 
-// 2. Create callback classes for aircraft location monitoring
-class MyAircraftLocationCallback extends AircraftLocationCallback {
+// 2. Create callback classes for aircraft location monitoring using new interface
+class MyAircraftLocationMessageCallback extends JavaMessageCallbackAircraftLocation {
     @Override
-    public void onMessage(AircraftLocation msg) {
+    public void invoke(AircraftLocation message) {
         System.out.println("[Java] Received aircraft location message:");
-        System.out.println("  - Height (椭球高度): " + msg.getHeight());
-        System.out.println("  - Elevation (相对起飞点高度): " + msg.getElevation());
-        System.out.println("  - Longitude (经度): " + msg.getLongitude());
-        System.out.println("  - Latitude (纬度): " + msg.getLatitude());
+        System.out.println("  - Height (椭球高度): " + message.getHeight());
+        System.out.println("  - Elevation (相对起飞点高度): " + message.getElevation());
+        System.out.println("  - Latitude (纬度): " + message.getLatitude());
+        System.out.println("  - Longitude (经度): " + message.getLongitude());
     }
 }
 
-class MyResultCallback extends ResultCallback {
+class MyAircraftLocationResultCallback extends JavaResultCallback {
     @Override
-    public void onResult(int result) {
-        if (result > 0) {
-            System.out.println("[Java] Aircraft location subscription successful. Listen ID: " + result);
+    public void invoke(NotificationCenterErrorCode errorCode) {
+        if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+            System.out.println("[Java] Aircraft location subscription successful.");
         } else {
-            System.out.println("[Java] Aircraft location subscription failed. Error code: " + result);
+            System.out.println("[Java] Aircraft location subscription failed. Error code: " + errorCode);
             // 可以在这里处理不同的错误码
-            switch (result) {
-                case -1:
-                    System.out.println("[Java] Error: Invalid parameter");
-                    break;
-                case -2:
-                    System.out.println("[Java] Error: Not connected");
-                    break;
-                case -3:
-                    System.out.println("[Java] Error: Send error");
-                    break;
-                case -4:
-                    System.out.println("[Java] Error: Subscribe error");
-                    break;
-                default:
-                    System.out.println("[Java] Error: Unknown error");
-                    break;
+            if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter) {
+                System.out.println("[Java] Error: Invalid parameter");
+            } else if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NotConnected) {
+                System.out.println("[Java] Error: Not connected");
+            } else if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_SendError) {
+                System.out.println("[Java] Error: Send error");
+            } else if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_SubscribeError) {
+                System.out.println("[Java] Error: Subscribe error");
+            } else {
+                System.out.println("[Java] Error: Unknown error");
             }
         }
     }
@@ -117,17 +111,17 @@ public class Main {
         System.out.println("[Java] BusinessManager obtained successfully.");
 
         // 创建回调对象
-        MyAircraftLocationCallback messageCallback = new MyAircraftLocationCallback();
-        MyResultCallback resultCallback = new MyResultCallback();
+        MyAircraftLocationMessageCallback messageCallback = new MyAircraftLocationMessageCallback();
+        MyAircraftLocationResultCallback resultCallback = new MyAircraftLocationResultCallback();
 
         // 演示监听飞机位置消息
         System.out.println("[Java] Starting aircraft location monitoring...");
         
         // 监听单个设备
         String deviceSN = "TEST001";
-        int frequency = 0; // 对应不同的推送频率
+        NotificationFrequency frequency = NotificationFrequency.ANY; // 使用新的枚举类型
         
-        int listenId = businessManager.listenAircraftLocationJava(
+        long listenId = businessManager.ListenAircraftLocation(
             messageCallback, 
             resultCallback, 
             deviceSN, 
@@ -152,7 +146,7 @@ public class Main {
         }
         
         // 取消订阅
-        businessManager.cancelObserveJava(listenId);
+        businessManager.cancelObserve((int)listenId);
         System.out.println("[Java] Cancelled monitoring for device " + deviceSN);
 
         // 继续poll一段时间
