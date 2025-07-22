@@ -4,12 +4,15 @@ import com.dji.notificationcentersdk.generated.*;
 
 /**
  * NotificationCenter SDK 包装类
- * 提供自动JNI库加载功能
+ * 提供自动JNI库加载功能和自动poll
  */
 public class NotificationCenterSDK {
     
     private static boolean initialized = false;
     private SDKManager sdkManager;
+    private Thread pollThread;
+    private volatile boolean isRunning = false;
+    private static final long POLL_INTERVAL = 100; // 100ms
     
     /**
      * 私有构造函数，防止直接实例化
@@ -43,6 +46,8 @@ public class NotificationCenterSDK {
      */
     public void init(SdkInitializeInfo info) {
         sdkManager.init(info);
+        // 启动自动poll线程
+        startPollThread();
     }
     
     /**
@@ -73,21 +78,73 @@ public class NotificationCenterSDK {
         return sdkManager.getBusinessManager();
     }
     
-    /**
-     * 轮询事件（静态方法）
-     */
-    public static long poll() {
-        // 确保JNI库已加载
-        if (!JniLibraryLoader.isLibraryLoaded()) {
-            JniLibraryLoader.loadLibrary();
-        }
-        return SDKManager.poll();
-    }
+
     
     /**
      * 获取底层的SDK管理器实例
      */
     public SDKManager getSDKManager() {
         return sdkManager;
+    }
+    
+    /**
+     * 启动自动poll线程
+     */
+    private void startPollThread() {
+        if (pollThread != null && pollThread.isAlive()) {
+            return; // 已经运行了
+        }
+        
+        isRunning = true;
+        pollThread = new Thread(() -> {
+            while (isRunning) {
+                try {
+                    long taskCount = SDKManager.poll();
+                    if (taskCount > 0) {
+                        System.out.println("[SDK] Poll executed " + taskCount + " tasks");
+                    }
+                    Thread.sleep(POLL_INTERVAL);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    System.err.println("[SDK] Poll error: " + e.getMessage());
+                }
+            }
+        }, "NotificationCenterSDK-PollThread");
+        
+        pollThread.setDaemon(true);
+        pollThread.start();
+        System.out.println("[SDK] Auto-poll thread started");
+    }
+    
+    /**
+     * 停止自动poll线程
+     */
+    private void stopPollThread() {
+        isRunning = false;
+        if (pollThread != null) {
+            pollThread.interrupt();
+            try {
+                pollThread.join(1000); // 等待最多1秒
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            pollThread = null;
+            System.out.println("[SDK] Auto-poll thread stopped");
+        }
+    }
+    
+    /**
+     * 轮询事件（静态方法）- 保留用于兼容性，但不推荐使用
+     * @deprecated 使用自动poll，无需手动调用
+     */
+    @Deprecated
+    public static long poll() {
+        // 确保JNI库已加载
+        if (!JniLibraryLoader.isLibraryLoaded()) {
+            JniLibraryLoader.loadLibrary();
+        }
+        return SDKManager.poll();
     }
 } 

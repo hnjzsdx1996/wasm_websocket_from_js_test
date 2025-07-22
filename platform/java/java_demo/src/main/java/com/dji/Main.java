@@ -121,33 +121,17 @@ public class Main {
                          " with frequency " + frequency + 
                          " (Listen ID: " + listenId + ")");
         
-        // 10. 定时调用poll方法消费任务
-        System.out.println("[Java] Starting poll loop...");
-        long startTime = System.currentTimeMillis();
-        long pollInterval = 100; // 每100ms调用一次poll
-        
-        while (System.currentTimeMillis() - startTime < 10000) { // 运行10秒
-            long taskCount = NotificationCenterSDK.poll();
-            if (taskCount > 0) {
-                System.out.println("[Java] Poll executed " + taskCount + " tasks");
-            }
-            Thread.sleep(pollInterval);
-        }
+        // 10. 等待一段时间让自动poll处理消息
+        System.out.println("[Java] Waiting for messages (auto-poll is running)...");
+        Thread.sleep(10000); // 等待10秒
         
         // 取消订阅
         businessManager.cancelObserve((int)listenId);
         System.out.println("[Java] Cancelled monitoring for device " + deviceSN);
 
-        // 继续poll一段时间
-        System.out.println("[Java] Continuing poll for cleanup...");
-        startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 5000) { // 再运行5秒
-            long taskCount = NotificationCenterSDK.poll();
-            if (taskCount > 0) {
-                System.out.println("[Java] Poll executed " + taskCount + " tasks");
-            }
-            Thread.sleep(pollInterval);
-        }
+        // 继续等待一段时间
+        System.out.println("[Java] Continuing to wait for cleanup...");
+        Thread.sleep(5000); // 再等待5秒
 
         System.out.println("[Java] Demo finished.");
         
