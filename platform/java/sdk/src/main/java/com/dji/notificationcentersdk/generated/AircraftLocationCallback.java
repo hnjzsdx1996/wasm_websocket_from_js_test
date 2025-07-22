@@ -8,20 +8,20 @@
 
 package com.dji.notificationcentersdk.generated;
 
-public class JavaMessageCallbackAircraftLocation {
+public class AircraftLocationCallback {
   private transient long swigCPtr;
   protected transient boolean swigCMemOwn;
 
-  protected JavaMessageCallbackAircraftLocation(long cPtr, boolean cMemoryOwn) {
+  protected AircraftLocationCallback(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(JavaMessageCallbackAircraftLocation obj) {
+  protected static long getCPtr(AircraftLocationCallback obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(JavaMessageCallbackAircraftLocation obj) {
+  protected static long swigRelease(AircraftLocationCallback obj) {
     long ptr = 0;
     if (obj != null) {
       if (!obj.swigCMemOwn)
@@ -42,7 +42,7 @@ public class JavaMessageCallbackAircraftLocation {
     if (swigCPtr != 0) {
       if (swigCMemOwn) {
         swigCMemOwn = false;
-        notificationcenterJNI.delete_JavaMessageCallbackAircraftLocation(swigCPtr);
+        notificationcenterJNI.delete_AircraftLocationCallback(swigCPtr);
       }
       swigCPtr = 0;
     }
@@ -55,21 +55,21 @@ public class JavaMessageCallbackAircraftLocation {
 
   public void swigReleaseOwnership() {
     swigCMemOwn = false;
-    notificationcenterJNI.JavaMessageCallbackAircraftLocation_change_ownership(this, swigCPtr, false);
+    notificationcenterJNI.AircraftLocationCallback_change_ownership(this, swigCPtr, false);
   }
 
   public void swigTakeOwnership() {
     swigCMemOwn = true;
-    notificationcenterJNI.JavaMessageCallbackAircraftLocation_change_ownership(this, swigCPtr, true);
+    notificationcenterJNI.AircraftLocationCallback_change_ownership(this, swigCPtr, true);
   }
 
   public void invoke(AircraftLocation message) {
-    notificationcenterJNI.JavaMessageCallbackAircraftLocation_invoke(swigCPtr, this, AircraftLocation.getCPtr(message), message);
+    notificationcenterJNI.AircraftLocationCallback_invoke(swigCPtr, this, AircraftLocation.getCPtr(message), message);
   }
 
-  public JavaMessageCallbackAircraftLocation() {
-    this(notificationcenterJNI.new_JavaMessageCallbackAircraftLocation(), true);
-    notificationcenterJNI.JavaMessageCallbackAircraftLocation_director_connect(this, swigCPtr, true, true);
+  public AircraftLocationCallback() {
+    this(notificationcenterJNI.new_AircraftLocationCallback(), true);
+    notificationcenterJNI.AircraftLocationCallback_director_connect(this, swigCPtr, true, true);
   }
 
 }

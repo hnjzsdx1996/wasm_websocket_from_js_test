@@ -20,16 +20,16 @@ public class notificationcenterJNI {
   public final static native long new_AircraftLocation__SWIG_0();
   public final static native long new_AircraftLocation__SWIG_1(double jarg1, double jarg2, double jarg3, double jarg4);
   public final static native void delete_AircraftLocation(long jarg1);
-  public final static native void delete_JavaResultCallback(long jarg1);
-  public final static native void JavaResultCallback_invoke(long jarg1, JavaResultCallback jarg1_, int jarg2);
-  public final static native long new_JavaResultCallback();
-  public final static native void JavaResultCallback_director_connect(JavaResultCallback obj, long cptr, boolean mem_own, boolean weak_global);
-  public final static native void JavaResultCallback_change_ownership(JavaResultCallback obj, long cptr, boolean take_or_release);
-  public final static native void delete_JavaMessageCallbackAircraftLocation(long jarg1);
-  public final static native void JavaMessageCallbackAircraftLocation_invoke(long jarg1, JavaMessageCallbackAircraftLocation jarg1_, long jarg2, AircraftLocation jarg2_);
-  public final static native long new_JavaMessageCallbackAircraftLocation();
-  public final static native void JavaMessageCallbackAircraftLocation_director_connect(JavaMessageCallbackAircraftLocation obj, long cptr, boolean mem_own, boolean weak_global);
-  public final static native void JavaMessageCallbackAircraftLocation_change_ownership(JavaMessageCallbackAircraftLocation obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftLocationCallback(long jarg1);
+  public final static native void AircraftLocationCallback_invoke(long jarg1, AircraftLocationCallback jarg1_, long jarg2, AircraftLocation jarg2_);
+  public final static native long new_AircraftLocationCallback();
+  public final static native void AircraftLocationCallback_director_connect(AircraftLocationCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftLocationCallback_change_ownership(AircraftLocationCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_SubscribeResultCallback(long jarg1);
+  public final static native void SubscribeResultCallback_invoke(long jarg1, SubscribeResultCallback jarg1_, int jarg2);
+  public final static native long new_SubscribeResultCallback();
+  public final static native void SubscribeResultCallback_director_connect(SubscribeResultCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void SubscribeResultCallback_change_ownership(SubscribeResultCallback obj, long cptr, boolean take_or_release);
   public final static native void SdkInitializeInfo_log_path_set(long jarg1, SdkInitializeInfo jarg1_, String jarg2);
   public final static native String SdkInitializeInfo_log_path_get(long jarg1, SdkInitializeInfo jarg1_);
   public final static native void SdkInitializeInfo_log_level_set(long jarg1, SdkInitializeInfo jarg1_, int jarg2);
@@ -51,7 +51,7 @@ public class notificationcenterJNI {
   public final static native void BusinessManager_Observe(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native void BusinessManager_CancelObserve(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native long BusinessManager_ListenAircraftLocation__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
-  public final static native int BusinessManager_ListenAircraftLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, JavaMessageCallbackAircraftLocation jarg2_, long jarg3, JavaResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftLocationCallback jarg2_, long jarg3, SubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserve(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -63,11 +63,11 @@ public class notificationcenterJNI {
   public final static native void ConnectionListener_director_connect(ConnectionListener obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void ConnectionListener_change_ownership(ConnectionListener obj, long cptr, boolean take_or_release);
 
-  public static void SwigDirector_JavaResultCallback_invoke(JavaResultCallback jself, int result) {
-    jself.invoke(NotificationCenterErrorCode.swigToEnum(result));
-  }
-  public static void SwigDirector_JavaMessageCallbackAircraftLocation_invoke(JavaMessageCallbackAircraftLocation jself, long message) {
+  public static void SwigDirector_AircraftLocationCallback_invoke(AircraftLocationCallback jself, long message) {
     jself.invoke(new AircraftLocation(message, false));
+  }
+  public static void SwigDirector_SubscribeResultCallback_invoke(SubscribeResultCallback jself, int result) {
+    jself.invoke(NotificationCenterErrorCode.swigToEnum(result));
   }
   public static void SwigDirector_ConnectionListener_OnMessage(ConnectionListener jself, String message) {
     jself.OnMessage(message);

@@ -60,8 +60,8 @@ public class BusinessManager {
     return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftLocation__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
 
-  public int ListenAircraftLocation(JavaMessageCallbackAircraftLocation onSubscribeMessageCallback, JavaResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
-    return notificationcenterJNI.BusinessManager_ListenAircraftLocation__SWIG_1(swigCPtr, this, JavaMessageCallbackAircraftLocation.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, JavaResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
+  public int ListenAircraftLocation(AircraftLocationCallback onSubscribeMessageCallback, SubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
+    return notificationcenterJNI.BusinessManager_ListenAircraftLocation__SWIG_1(swigCPtr, this, AircraftLocationCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
   }
 
   public void cancelObserve(int listen_id) {

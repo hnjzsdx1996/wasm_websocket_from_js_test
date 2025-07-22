@@ -3,8 +3,7 @@ package com.dji;
 import com.dji.notificationcentersdk.generated.*;
 import com.dji.notificationcentersdk.core.NotificationCenterSDK;
 
-// 1. Create a class that extends the SWIG-generated listener.
-// This is how we handle callbacks from C++.
+// 1. 创建连接监听器类
 class MyConnectionListener extends ConnectionListener {
     @Override
     public void OnOpen() {
@@ -27,8 +26,8 @@ class MyConnectionListener extends ConnectionListener {
     }
 }
 
-// 2. Create callback classes for aircraft location monitoring using new interface
-class MyAircraftLocationMessageCallback extends JavaMessageCallbackAircraftLocation {
+// 2. 创建飞机位置消息回调类
+class MyAircraftLocationMessageCallback extends AircraftLocationCallback {
     @Override
     public void invoke(AircraftLocation message) {
         System.out.println("[Java] Received aircraft location message:");
@@ -39,7 +38,8 @@ class MyAircraftLocationMessageCallback extends JavaMessageCallbackAircraftLocat
     }
 }
 
-class MyAircraftLocationResultCallback extends JavaResultCallback {
+// 3. 创建订阅结果回调类
+class MyAircraftLocationResultCallback extends SubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
         if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
@@ -64,63 +64,51 @@ class MyAircraftLocationResultCallback extends JavaResultCallback {
 
 public class Main {
 
-    static {
-        // 3. Load the JNI library using an absolute path passed as a system property.
-        String distPath = System.getProperty("notificationcenter.dist.path");
-        if (distPath == null) {
-            throw new UnsatisfiedLinkError("System property 'notificationcenter.dist.path' is not set.");
-        }
-        // On macOS, the library is named lib<name>.jnilib
-        String libPath = distPath + "/libnotificationcenter.jnilib";
-        System.load(libPath);
-        System.out.println("[Java] JNI library loaded successfully from: " + libPath);
-    }
-
     public static void main(String[] args) throws InterruptedException {
         System.out.println("[Java] Starting NotificationCenterSDK Demo...");
 
-        // 4. Create an instance of our listener.
+        // 1. 获取SDK实例（自动加载JNI库）
+        NotificationCenterSDK sdk = NotificationCenterSDK.getInstance();
+        System.out.println("[Java] NotificationCenterSDK instance created.");
+
+        // 2. 创建连接监听器（在SDK初始化之后）
         MyConnectionListener listener = new MyConnectionListener();
 
-        // 5. Create and configure the SDKManager.
-        SDKManager sdkManager = new SDKManager();
-        System.out.println("[Java] SDKManager created.");
-
-        // 6. 初始化SDK
+        // 3. 初始化SDK
         SdkInitializeInfo initInfo = new SdkInitializeInfo("", SdkLogLevel.INFO);
-        sdkManager.init(initInfo);
+        sdk.init(initInfo);
         System.out.println("[Java] SDK initialized successfully.");
 
-        // We need to set the listener on the manager.
-        sdkManager.setWebsocketEventListener(listener);
+        // 4. 设置连接监听器
+        sdk.setWebsocketEventListener(listener);
         System.out.println("[Java] Websocket event listener set.");
 
         String url = "ws://localhost:3001";
         System.out.println("[Java] Connecting to " + url + "...");
-        sdkManager.connect(url);
+        sdk.connect(url);
 
-        // 7. 等待连接建立
+        // 5. 等待连接建立
         System.out.println("[Java] Waiting for connection to establish...");
         Thread.sleep(2000); // 等待2秒让连接建立
 
-        // 8. 获取BusinessManager并演示新的监听飞机位置功能
-        BusinessManager businessManager = sdkManager.getBusinessManager();
+        // 6. 获取BusinessManager并演示监听飞机位置功能
+        BusinessManager businessManager = sdk.getBusinessManager();
         if (businessManager == null) {
             System.err.println("[Java] Failed to get BusinessManager - it is null!");
             return;
         }
         System.out.println("[Java] BusinessManager obtained successfully.");
 
-        // 创建回调对象
+        // 7. 创建回调对象
         MyAircraftLocationMessageCallback messageCallback = new MyAircraftLocationMessageCallback();
         MyAircraftLocationResultCallback resultCallback = new MyAircraftLocationResultCallback();
 
-        // 演示监听飞机位置消息
+        // 8. 演示监听飞机位置消息
         System.out.println("[Java] Starting aircraft location monitoring...");
         
-        // 监听单个设备
+        // 9. 监听单个设备
         String deviceSN = "TEST001";
-        NotificationFrequency frequency = NotificationFrequency.ANY; // 使用新的枚举类型
+        NotificationFrequency frequency = NotificationFrequency.ANY;
         
         long listenId = businessManager.ListenAircraftLocation(
             messageCallback, 
@@ -133,13 +121,13 @@ public class Main {
                          " with frequency " + frequency + 
                          " (Listen ID: " + listenId + ")");
         
-        // 9. 定时调用poll方法消费任务
+        // 10. 定时调用poll方法消费任务
         System.out.println("[Java] Starting poll loop...");
         long startTime = System.currentTimeMillis();
         long pollInterval = 100; // 每100ms调用一次poll
         
         while (System.currentTimeMillis() - startTime < 10000) { // 运行10秒
-            long taskCount = SDKManager.poll();
+            long taskCount = NotificationCenterSDK.poll();
             if (taskCount > 0) {
                 System.out.println("[Java] Poll executed " + taskCount + " tasks");
             }
@@ -154,7 +142,7 @@ public class Main {
         System.out.println("[Java] Continuing poll for cleanup...");
         startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 5000) { // 再运行5秒
-            long taskCount = SDKManager.poll();
+            long taskCount = NotificationCenterSDK.poll();
             if (taskCount > 0) {
                 System.out.println("[Java] Poll executed " + taskCount + " tasks");
             }
@@ -166,9 +154,12 @@ public class Main {
         // 清理资源并退出
         System.out.println("[Java] Cleaning up resources...");
         try {
-            // 删除SDK管理器（这会调用析构函数）
-            sdkManager.delete();
-            System.out.println("[Java] SDKManager cleaned up.");
+            // 获取底层SDK管理器并清理
+            SDKManager sdkManager = sdk.getSDKManager();
+            if (sdkManager != null) {
+                sdkManager.delete();
+                System.out.println("[Java] SDKManager cleaned up.");
+            }
         } catch (Exception e) {
             System.err.println("[Java] Error during cleanup: " + e.getMessage());
         }

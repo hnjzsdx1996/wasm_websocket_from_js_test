@@ -7,12 +7,6 @@
 %feature("c++11");
 %feature("director");
 
-// Ignore problematic macros and specific lines
-%ignore AIGC_JSON_HELPER;
-%ignore AIGC_JSON_HELPER_BASE;
-%ignore PublishAircraftLocationTopic::AIGC_JSON_HELPER;
-%ignore PublishAircraftLocationTopic::AIGC_JSON_HELPER_BASE;
-
 %{
 #include "SDKManager.h"
 #include "BusinessManager.h"
@@ -69,27 +63,23 @@ enum NotificationFrequency {
     PUSH_30S = 30000
 };
 
-// 定义回调接口
-template<typename T>
-class JavaMessageCallback {
+// 定义具体的回调接口
+class AircraftLocationCallback {
 public:
-    virtual ~JavaMessageCallback() {}
-    virtual void invoke(const T& message) = 0;
+    virtual ~AircraftLocationCallback() {}
+    virtual void invoke(const AircraftLocation& message) = 0;
 };
 
-class JavaResultCallback {
+class SubscribeResultCallback {
 public:
-    virtual ~JavaResultCallback() {}
+    virtual ~SubscribeResultCallback() {}
     virtual void invoke(const NotificationCenterErrorCode& result) = 0;
 };
 %}
 
 // Create Java-friendly callback interfaces and data structures
-%feature("director") JavaMessageCallback;
-%feature("director") JavaResultCallback;
-
-// 为特定的模板实例化创建具体的Java类
-%template(JavaMessageCallbackAircraftLocation) JavaMessageCallback<AircraftLocation>;
+%feature("director") AircraftLocationCallback;
+%feature("director") SubscribeResultCallback;
 
 // Include the type definitions and enums
 %include "message_define/common.h"
@@ -103,8 +93,8 @@ public:
 // Add Java-friendly wrapper methods to BusinessManager
 %extend BusinessManager {
     long ListenAircraftLocation(
-        JavaMessageCallback<AircraftLocation>* onSubscribeMessageCallback,
-        JavaResultCallback* onSubscribeResultCallback,
+        AircraftLocationCallback* onSubscribeMessageCallback,
+        SubscribeResultCallback* onSubscribeResultCallback,
         const std::string& sn,
         NotificationFrequency notificationFrequency) {
         

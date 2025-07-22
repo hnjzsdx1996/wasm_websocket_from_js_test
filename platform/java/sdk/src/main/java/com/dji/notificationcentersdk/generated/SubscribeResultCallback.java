@@ -8,20 +8,20 @@
 
 package com.dji.notificationcentersdk.generated;
 
-public class JavaResultCallback {
+public class SubscribeResultCallback {
   private transient long swigCPtr;
   protected transient boolean swigCMemOwn;
 
-  protected JavaResultCallback(long cPtr, boolean cMemoryOwn) {
+  protected SubscribeResultCallback(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(JavaResultCallback obj) {
+  protected static long getCPtr(SubscribeResultCallback obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(JavaResultCallback obj) {
+  protected static long swigRelease(SubscribeResultCallback obj) {
     long ptr = 0;
     if (obj != null) {
       if (!obj.swigCMemOwn)
@@ -42,7 +42,7 @@ public class JavaResultCallback {
     if (swigCPtr != 0) {
       if (swigCMemOwn) {
         swigCMemOwn = false;
-        notificationcenterJNI.delete_JavaResultCallback(swigCPtr);
+        notificationcenterJNI.delete_SubscribeResultCallback(swigCPtr);
       }
       swigCPtr = 0;
     }
@@ -55,21 +55,21 @@ public class JavaResultCallback {
 
   public void swigReleaseOwnership() {
     swigCMemOwn = false;
-    notificationcenterJNI.JavaResultCallback_change_ownership(this, swigCPtr, false);
+    notificationcenterJNI.SubscribeResultCallback_change_ownership(this, swigCPtr, false);
   }
 
   public void swigTakeOwnership() {
     swigCMemOwn = true;
-    notificationcenterJNI.JavaResultCallback_change_ownership(this, swigCPtr, true);
+    notificationcenterJNI.SubscribeResultCallback_change_ownership(this, swigCPtr, true);
   }
 
   public void invoke(NotificationCenterErrorCode result) {
-    notificationcenterJNI.JavaResultCallback_invoke(swigCPtr, this, result.swigValue());
+    notificationcenterJNI.SubscribeResultCallback_invoke(swigCPtr, this, result.swigValue());
   }
 
-  public JavaResultCallback() {
-    this(notificationcenterJNI.new_JavaResultCallback(), true);
-    notificationcenterJNI.JavaResultCallback_director_connect(this, swigCPtr, true, true);
+  public SubscribeResultCallback() {
+    this(notificationcenterJNI.new_SubscribeResultCallback(), true);
+    notificationcenterJNI.SubscribeResultCallback_director_connect(this, swigCPtr, true, true);
   }
 
 }
