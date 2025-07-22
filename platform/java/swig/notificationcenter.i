@@ -42,25 +42,25 @@
 %ignore SDKManager::getWebSocketHolder;
 
 // Create Java-friendly callback interfaces with different names
-%feature("director") JavaAircraftLocationMsgCallback;
+%feature("director") AircraftLocationCallback;
 %feature("director") ResultCallback;
 
-// 手动定义JavaAircraftLocationMsg类，避免宏问题
+// 手动定义AircraftLocation类，避免宏问题
 %inline %{
-class JavaAircraftLocationMsg {
+class AircraftLocation {
 public:
     int x;
     int y;
     int z;
     
-    JavaAircraftLocationMsg() : x(0), y(0), z(0) {}
-    JavaAircraftLocationMsg(int x, int y, int z) : x(x), y(y), z(z) {}
+    AircraftLocation() : x(0), y(0), z(0) {}
+    AircraftLocation(int x, int y, int z) : x(x), y(y), z(z) {}
 };
 
-class JavaAircraftLocationMsgCallback {
+class AircraftLocationCallback {
 public:
-    virtual ~JavaAircraftLocationMsgCallback() {}
-    virtual void onMessage(const JavaAircraftLocationMsg& msg) = 0;
+    virtual ~AircraftLocationCallback() {}
+    virtual void onMessage(const AircraftLocation& msg) = 0;
 };
 
 class ResultCallback {
@@ -81,12 +81,12 @@ public:
 
 // Add Java-friendly wrapper methods to BusinessManager
 %extend BusinessManager {
-    long listenAircraftLocationJava(JavaAircraftLocationMsgCallback* msg_callback, ResultCallback* result_callback, const std::string& device_sn, int freq) {
+    long listenAircraftLocationJava(AircraftLocationCallback* msg_callback, ResultCallback* result_callback, const std::string& device_sn, int freq) {
         auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
             if (msg_callback) {
-                // 将AircraftLocationMsg转换为JavaAircraftLocationMsg
-                JavaAircraftLocationMsg java_msg(msg.x, msg.y, msg.z);
-                msg_callback->onMessage(java_msg);
+                // 将AircraftLocationMsg转换为AircraftLocation
+                AircraftLocation aircraft_location(msg.x, msg.y, msg.z);
+                msg_callback->onMessage(aircraft_location);
             }
         };
         

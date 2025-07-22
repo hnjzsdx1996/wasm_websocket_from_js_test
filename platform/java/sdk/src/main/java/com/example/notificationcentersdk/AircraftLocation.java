@@ -8,20 +8,20 @@
 
 package com.example.notificationcentersdk;
 
-public class JavaAircraftLocationMsg {
+public class AircraftLocation {
   private transient long swigCPtr;
   protected transient boolean swigCMemOwn;
 
-  protected JavaAircraftLocationMsg(long cPtr, boolean cMemoryOwn) {
+  protected AircraftLocation(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(JavaAircraftLocationMsg obj) {
+  protected static long getCPtr(AircraftLocation obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(JavaAircraftLocationMsg obj) {
+  protected static long swigRelease(AircraftLocation obj) {
     long ptr = 0;
     if (obj != null) {
       if (!obj.swigCMemOwn)
@@ -42,42 +42,42 @@ public class JavaAircraftLocationMsg {
     if (swigCPtr != 0) {
       if (swigCMemOwn) {
         swigCMemOwn = false;
-        notificationcenterJNI.delete_JavaAircraftLocationMsg(swigCPtr);
+        notificationcenterJNI.delete_AircraftLocation(swigCPtr);
       }
       swigCPtr = 0;
     }
   }
 
   public void setX(int value) {
-    notificationcenterJNI.JavaAircraftLocationMsg_x_set(swigCPtr, this, value);
+    notificationcenterJNI.AircraftLocation_x_set(swigCPtr, this, value);
   }
 
   public int getX() {
-    return notificationcenterJNI.JavaAircraftLocationMsg_x_get(swigCPtr, this);
+    return notificationcenterJNI.AircraftLocation_x_get(swigCPtr, this);
   }
 
   public void setY(int value) {
-    notificationcenterJNI.JavaAircraftLocationMsg_y_set(swigCPtr, this, value);
+    notificationcenterJNI.AircraftLocation_y_set(swigCPtr, this, value);
   }
 
   public int getY() {
-    return notificationcenterJNI.JavaAircraftLocationMsg_y_get(swigCPtr, this);
+    return notificationcenterJNI.AircraftLocation_y_get(swigCPtr, this);
   }
 
   public void setZ(int value) {
-    notificationcenterJNI.JavaAircraftLocationMsg_z_set(swigCPtr, this, value);
+    notificationcenterJNI.AircraftLocation_z_set(swigCPtr, this, value);
   }
 
   public int getZ() {
-    return notificationcenterJNI.JavaAircraftLocationMsg_z_get(swigCPtr, this);
+    return notificationcenterJNI.AircraftLocation_z_get(swigCPtr, this);
   }
 
-  public JavaAircraftLocationMsg() {
-    this(notificationcenterJNI.new_JavaAircraftLocationMsg__SWIG_0(), true);
+  public AircraftLocation() {
+    this(notificationcenterJNI.new_AircraftLocation__SWIG_0(), true);
   }
 
-  public JavaAircraftLocationMsg(int x, int y, int z) {
-    this(notificationcenterJNI.new_JavaAircraftLocationMsg__SWIG_1(x, y, z), true);
+  public AircraftLocation(int x, int y, int z) {
+    this(notificationcenterJNI.new_AircraftLocation__SWIG_1(x, y, z), true);
   }
 
 }

@@ -27,9 +27,9 @@ class MyConnectionListener extends ConnectionListener {
 }
 
 // 2. Create callback classes for aircraft location monitoring
-class MyAircraftLocationMsgCallback extends JavaAircraftLocationMsgCallback {
+class MyAircraftLocationCallback extends AircraftLocationCallback {
     @Override
-    public void onMessage(JavaAircraftLocationMsg msg) {
+    public void onMessage(AircraftLocation msg) {
         System.out.println("[Java] Received aircraft location message:");
         System.out.println("  - X: " + msg.getX());
         System.out.println("  - Y: " + msg.getY());
@@ -116,7 +116,7 @@ public class Main {
         System.out.println("[Java] BusinessManager obtained successfully.");
 
         // 创建回调对象
-        MyAircraftLocationMsgCallback messageCallback = new MyAircraftLocationMsgCallback();
+        MyAircraftLocationCallback messageCallback = new MyAircraftLocationCallback();
         MyResultCallback resultCallback = new MyResultCallback();
 
         // 演示监听飞机位置消息
