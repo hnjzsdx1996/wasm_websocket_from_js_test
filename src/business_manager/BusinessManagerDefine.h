@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstdint>
+#include <functional>
+#include "topic_message_define/PublishAircraftLocationTopic.h"
+
 using ListenId = int64_t;
 
 // 客户端错误码
@@ -21,6 +25,9 @@ enum NotificationServerErrorCode {
 
 using OnSubscribeMessageCallback = std::function<void(const std::string& message)>;
 using OnSubscribeResultCallback = std::function<void(const NotificationCenterErrorCode& error_code)>;
+
+// 飞机位置消息回调
+using AircraftLocationMsgCallback = std::function<void(const AircraftLocationMsg& msg)>;
 
 
 

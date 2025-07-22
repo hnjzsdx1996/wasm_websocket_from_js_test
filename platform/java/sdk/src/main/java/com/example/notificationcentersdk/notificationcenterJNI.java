@@ -9,11 +9,20 @@
 package com.example.notificationcentersdk;
 
 public class notificationcenterJNI {
-  public final static native void delete_AircraftMessageCallback(long jarg1);
-  public final static native void AircraftMessageCallback_onMessage(long jarg1, AircraftMessageCallback jarg1_, String jarg2);
-  public final static native long new_AircraftMessageCallback();
-  public final static native void AircraftMessageCallback_director_connect(AircraftMessageCallback obj, long cptr, boolean mem_own, boolean weak_global);
-  public final static native void AircraftMessageCallback_change_ownership(AircraftMessageCallback obj, long cptr, boolean take_or_release);
+  public final static native void JavaAircraftLocationMsg_x_set(long jarg1, JavaAircraftLocationMsg jarg1_, int jarg2);
+  public final static native int JavaAircraftLocationMsg_x_get(long jarg1, JavaAircraftLocationMsg jarg1_);
+  public final static native void JavaAircraftLocationMsg_y_set(long jarg1, JavaAircraftLocationMsg jarg1_, int jarg2);
+  public final static native int JavaAircraftLocationMsg_y_get(long jarg1, JavaAircraftLocationMsg jarg1_);
+  public final static native void JavaAircraftLocationMsg_z_set(long jarg1, JavaAircraftLocationMsg jarg1_, int jarg2);
+  public final static native int JavaAircraftLocationMsg_z_get(long jarg1, JavaAircraftLocationMsg jarg1_);
+  public final static native long new_JavaAircraftLocationMsg__SWIG_0();
+  public final static native long new_JavaAircraftLocationMsg__SWIG_1(int jarg1, int jarg2, int jarg3);
+  public final static native void delete_JavaAircraftLocationMsg(long jarg1);
+  public final static native void delete_JavaAircraftLocationMsgCallback(long jarg1);
+  public final static native void JavaAircraftLocationMsgCallback_onMessage(long jarg1, JavaAircraftLocationMsgCallback jarg1_, long jarg2, JavaAircraftLocationMsg jarg2_);
+  public final static native long new_JavaAircraftLocationMsgCallback();
+  public final static native void JavaAircraftLocationMsgCallback_director_connect(JavaAircraftLocationMsgCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void JavaAircraftLocationMsgCallback_change_ownership(JavaAircraftLocationMsgCallback obj, long cptr, boolean take_or_release);
   public final static native void delete_ResultCallback(long jarg1);
   public final static native void ResultCallback_onResult(long jarg1, ResultCallback jarg1_, int jarg2);
   public final static native long new_ResultCallback();
@@ -40,7 +49,7 @@ public class notificationcenterJNI {
   public final static native void BusinessManager_Observe(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native void BusinessManager_CancelObserve(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native long BusinessManager_ListenAircraftLocation(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
-  public final static native int BusinessManager_listenAircraftLocationJava(long jarg1, BusinessManager jarg1_, long jarg2, AircraftMessageCallback jarg2_, long jarg3, ResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_listenAircraftLocationJava(long jarg1, BusinessManager jarg1_, long jarg2, JavaAircraftLocationMsgCallback jarg2_, long jarg3, ResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserveJava(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -52,8 +61,8 @@ public class notificationcenterJNI {
   public final static native void ConnectionListener_director_connect(ConnectionListener obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void ConnectionListener_change_ownership(ConnectionListener obj, long cptr, boolean take_or_release);
 
-  public static void SwigDirector_AircraftMessageCallback_onMessage(AircraftMessageCallback jself, String message) {
-    jself.onMessage(message);
+  public static void SwigDirector_JavaAircraftLocationMsgCallback_onMessage(JavaAircraftLocationMsgCallback jself, long msg) {
+    jself.onMessage(new JavaAircraftLocationMsg(msg, false));
   }
   public static void SwigDirector_ResultCallback_onResult(ResultCallback jself, int result) {
     jself.onResult(result);

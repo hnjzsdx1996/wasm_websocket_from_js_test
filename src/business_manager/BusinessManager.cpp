@@ -55,7 +55,7 @@ void BusinessManager::CancelObserve(int64_t listen_id) {
     strong_topic_mgr->CancelObserve(listen_id);
 }
 
-ListenId BusinessManager::ListenAircraftLocation(const OnSubscribeMessageCallback &on_messages_callback, const OnSubscribeResultCallback &on_result_callback, const std::string &device_sn, NotifactionFrequency freq) {
+ListenId BusinessManager::ListenAircraftLocation(const AircraftLocationMsgCallback &on_messages_callback, const OnSubscribeResultCallback &on_result_callback, const std::string &device_sn, NotifactionFrequency freq) {
     auto strong_topic_mgr = topic_mgr_.lock();
     if (strong_topic_mgr == nullptr) {
         NC_LOG_INFO("[BusinessManager] ListenAircraftLocation failed, no topic_mgr_");
@@ -75,7 +75,8 @@ ListenId BusinessManager::ListenAircraftLocation(const OnSubscribeMessageCallbac
         if (on_msg_cb && message) {
             auto msg = std::make_shared<PublishAircraftLocationTopic>(message);
             NC_LOG_INFO("[BusinessManager] ListenAircraftLocation observe: %s", msg->ToJsonString().c_str());
-            on_msg_cb(msg->ToJsonString());
+            // 直接传递AircraftLocationMsg结构，而不是字符串
+            on_msg_cb(msg->msg);
         }
     });
 

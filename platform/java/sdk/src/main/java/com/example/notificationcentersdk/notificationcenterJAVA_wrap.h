@@ -9,13 +9,13 @@
 #ifndef SWIG_notificationcenter_WRAP_H_
 #define SWIG_notificationcenter_WRAP_H_
 
-class SwigDirector_AircraftMessageCallback : public AircraftMessageCallback, public Swig::Director {
+class SwigDirector_JavaAircraftLocationMsgCallback : public JavaAircraftLocationMsgCallback, public Swig::Director {
 
 public:
     void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
-    SwigDirector_AircraftMessageCallback(JNIEnv *jenv);
-    virtual ~SwigDirector_AircraftMessageCallback();
-    virtual void onMessage(std::string const &message);
+    SwigDirector_JavaAircraftLocationMsgCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_JavaAircraftLocationMsgCallback();
+    virtual void onMessage(JavaAircraftLocationMsg const &msg);
 public:
     bool swig_overrides(int n) {
       return (n < 1 ? swig_override[n] : false);

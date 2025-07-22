@@ -7,11 +7,18 @@
 %feature("c++11");
 %feature("director");
 
+// Ignore problematic macros and specific lines
+%ignore AIGC_JSON_HELPER;
+%ignore AIGC_JSON_HELPER_BASE;
+%ignore PublishAircraftLocationTopic::AIGC_JSON_HELPER;
+%ignore PublishAircraftLocationTopic::AIGC_JSON_HELPER_BASE;
+
 %{
 #include "SDKManager.h"
 #include "BusinessManager.h"
 #include "WebsocketEvent.h"
 #include "business_manager/BusinessManagerDefine.h"
+#include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "message_define/common.h"
 %}
 
@@ -34,15 +41,26 @@
 %ignore SDKManager::getTopicManager;
 %ignore SDKManager::getWebSocketHolder;
 
-// Create Java-friendly callback interfaces
-%feature("director") AircraftMessageCallback;
+// Create Java-friendly callback interfaces with different names
+%feature("director") JavaAircraftLocationMsgCallback;
 %feature("director") ResultCallback;
 
+// 手动定义JavaAircraftLocationMsg类，避免宏问题
 %inline %{
-class AircraftMessageCallback {
+class JavaAircraftLocationMsg {
 public:
-    virtual ~AircraftMessageCallback() {}
-    virtual void onMessage(const std::string& message) = 0;
+    int x;
+    int y;
+    int z;
+    
+    JavaAircraftLocationMsg() : x(0), y(0), z(0) {}
+    JavaAircraftLocationMsg(int x, int y, int z) : x(x), y(y), z(z) {}
+};
+
+class JavaAircraftLocationMsgCallback {
+public:
+    virtual ~JavaAircraftLocationMsgCallback() {}
+    virtual void onMessage(const JavaAircraftLocationMsg& msg) = 0;
 };
 
 class ResultCallback {
@@ -63,10 +81,12 @@ public:
 
 // Add Java-friendly wrapper methods to BusinessManager
 %extend BusinessManager {
-    long listenAircraftLocationJava(AircraftMessageCallback* msg_callback, ResultCallback* result_callback, const std::string& device_sn, int freq) {
-        auto msg_cb = [msg_callback](const std::string& message) {
+    long listenAircraftLocationJava(JavaAircraftLocationMsgCallback* msg_callback, ResultCallback* result_callback, const std::string& device_sn, int freq) {
+        auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
             if (msg_callback) {
-                msg_callback->onMessage(message);
+                // 将AircraftLocationMsg转换为JavaAircraftLocationMsg
+                JavaAircraftLocationMsg java_msg(msg.x, msg.y, msg.z);
+                msg_callback->onMessage(java_msg);
             }
         };
         

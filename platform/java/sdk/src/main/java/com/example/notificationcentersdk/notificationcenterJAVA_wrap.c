@@ -841,16 +841,27 @@ template <typename T> T SwigValueInit() {
 #include "BusinessManager.h"
 #include "WebsocketEvent.h"
 #include "business_manager/BusinessManagerDefine.h"
+#include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "message_define/common.h"
 
 
 #include <string>
 
 
-class AircraftMessageCallback {
+class JavaAircraftLocationMsg {
 public:
-    virtual ~AircraftMessageCallback() {}
-    virtual void onMessage(const std::string& message) = 0;
+    int x;
+    int y;
+    int z;
+    
+    JavaAircraftLocationMsg() : x(0), y(0), z(0) {}
+    JavaAircraftLocationMsg(int x, int y, int z) : x(x), y(y), z(z) {}
+};
+
+class JavaAircraftLocationMsgCallback {
+public:
+    virtual ~JavaAircraftLocationMsgCallback() {}
+    virtual void onMessage(const JavaAircraftLocationMsg& msg) = 0;
 };
 
 class ResultCallback {
@@ -875,10 +886,12 @@ struct SWIG_null_deleter {
 #define SWIG_NO_NULL_DELETER_SWIG_POINTER_NEW
 #define SWIG_NO_NULL_DELETER_SWIG_POINTER_OWN
 
-SWIGINTERN long BusinessManager_listenAircraftLocationJava(BusinessManager *self,AircraftMessageCallback *msg_callback,ResultCallback *result_callback,std::string const &device_sn,int freq){
-        auto msg_cb = [msg_callback](const std::string& message) {
+SWIGINTERN long BusinessManager_listenAircraftLocationJava(BusinessManager *self,JavaAircraftLocationMsgCallback *msg_callback,ResultCallback *result_callback,std::string const &device_sn,int freq){
+        auto msg_cb = [msg_callback](const AircraftLocationMsg& msg) {
             if (msg_callback) {
-                msg_callback->onMessage(message);
+                // 将AircraftLocationMsg转换为JavaAircraftLocationMsg
+                JavaAircraftLocationMsg java_msg(msg.x, msg.y, msg.z);
+                msg_callback->onMessage(java_msg);
             }
         };
         
@@ -917,45 +930,44 @@ SWIGINTERN void BusinessManager_cancelObserveJava(BusinessManager *self,long lis
 
 #include "notificationcenterJAVA_wrap.h"
 
-SwigDirector_AircraftMessageCallback::SwigDirector_AircraftMessageCallback(JNIEnv *jenv) : AircraftMessageCallback(), Swig::Director(jenv) {
+SwigDirector_JavaAircraftLocationMsgCallback::SwigDirector_JavaAircraftLocationMsgCallback(JNIEnv *jenv) : JavaAircraftLocationMsgCallback(), Swig::Director(jenv) {
 }
 
-SwigDirector_AircraftMessageCallback::~SwigDirector_AircraftMessageCallback() {
+SwigDirector_JavaAircraftLocationMsgCallback::~SwigDirector_JavaAircraftLocationMsgCallback() {
   swig_disconnect_director_self("swigDirectorDisconnect");
 }
 
 
-void SwigDirector_AircraftMessageCallback::onMessage(std::string const &message) {
+void SwigDirector_JavaAircraftLocationMsgCallback::onMessage(JavaAircraftLocationMsg const &msg) {
   JNIEnvWrapper swigjnienv(this) ;
   JNIEnv * jenv = swigjnienv.getJNIEnv() ;
   jobject swigjobj = (jobject) NULL ;
-  jstring jmessage = 0 ;
+  jlong jmsg = 0 ;
   
   if (!swig_override[0]) {
-    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftMessageCallback::onMessage.");
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method JavaAircraftLocationMsgCallback::onMessage.");
     return;
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jmessage = jenv->NewStringUTF((&message)->c_str());
-    Swig::LocalRefGuard message_refguard(jenv, jmessage); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[0], swigjobj, jmessage);
+    *(JavaAircraftLocationMsg **)&jmsg = (JavaAircraftLocationMsg *) &msg; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[0], swigjobj, jmsg);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
     }
     
   } else {
-    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftMessageCallback::onMessage ");
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in JavaAircraftLocationMsgCallback::onMessage ");
   }
   if (swigjobj) jenv->DeleteLocalRef(swigjobj);
 }
 
-void SwigDirector_AircraftMessageCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
-  static jclass baseclass = swig_new_global_ref(jenv, "com/example/notificationcentersdk/AircraftMessageCallback");
+void SwigDirector_JavaAircraftLocationMsgCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/example/notificationcentersdk/JavaAircraftLocationMsgCallback");
   if (!baseclass) return;
   static SwigDirectorMethod methods[] = {
-    SwigDirectorMethod(jenv, baseclass, "onMessage", "(Ljava/lang/String;)V")
+    SwigDirectorMethod(jenv, baseclass, "onMessage", "(Lcom/example/notificationcentersdk/JavaAircraftLocationMsg;)V")
   };
   
   if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
@@ -1161,60 +1173,181 @@ void SwigDirector_ConnectionListener::swig_connect_director(JNIEnv *jenv, jobjec
 extern "C" {
 #endif
 
-SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_delete_1AircraftMessageCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
-  AircraftMessageCallback *arg1 = (AircraftMessageCallback *) 0 ;
-  
-  (void)jenv;
-  (void)jcls;
-  arg1 = *(AircraftMessageCallback **)&jarg1; 
-  delete arg1;
-}
-
-
-SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_AircraftMessageCallback_1onMessage(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
-  AircraftMessageCallback *arg1 = (AircraftMessageCallback *) 0 ;
-  std::string *arg2 = 0 ;
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1x_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int arg2 ;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
-  arg1 = *(AircraftMessageCallback **)&jarg1; 
-  if(!jarg2) {
-    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
-    return ;
-  }
-  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
-  if (!arg2_pstr) return ;
-  std::string arg2_str(arg2_pstr);
-  arg2 = &arg2_str;
-  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
-  (arg1)->onMessage((std::string const &)*arg2);
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->x = arg2;
 }
 
 
-SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_new_1AircraftMessageCallback(JNIEnv *jenv, jclass jcls) {
-  jlong jresult = 0 ;
-  AircraftMessageCallback *result = 0 ;
+SWIGEXPORT jint JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1x_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int result;
   
   (void)jenv;
   (void)jcls;
-  result = (AircraftMessageCallback *)new SwigDirector_AircraftMessageCallback(jenv);
-  *(AircraftMessageCallback **)&jresult = result; 
+  (void)jarg1_;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  result = (int) ((arg1)->x);
+  jresult = (jint)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_AircraftMessageCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
-  AircraftMessageCallback *obj = *((AircraftMessageCallback **)&objarg);
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1y_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
   (void)jcls;
-  SwigDirector_AircraftMessageCallback *director = static_cast<SwigDirector_AircraftMessageCallback *>(obj);
+  (void)jarg1_;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->y = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1y_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  result = (int) ((arg1)->y);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1z_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->z = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsg_1z_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  result = (int) ((arg1)->z);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_new_1JavaAircraftLocationMsg_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  JavaAircraftLocationMsg *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (JavaAircraftLocationMsg *)new JavaAircraftLocationMsg();
+  *(JavaAircraftLocationMsg **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_new_1JavaAircraftLocationMsg_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1, jint jarg2, jint jarg3) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  int arg2 ;
+  int arg3 ;
+  JavaAircraftLocationMsg *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  result = (JavaAircraftLocationMsg *)new JavaAircraftLocationMsg(arg1,arg2,arg3);
+  *(JavaAircraftLocationMsg **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_delete_1JavaAircraftLocationMsg(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  JavaAircraftLocationMsg *arg1 = (JavaAircraftLocationMsg *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(JavaAircraftLocationMsg **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_delete_1JavaAircraftLocationMsgCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  JavaAircraftLocationMsgCallback *arg1 = (JavaAircraftLocationMsgCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(JavaAircraftLocationMsgCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsgCallback_1onMessage(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  JavaAircraftLocationMsgCallback *arg1 = (JavaAircraftLocationMsgCallback *) 0 ;
+  JavaAircraftLocationMsg *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(JavaAircraftLocationMsgCallback **)&jarg1; 
+  arg2 = *(JavaAircraftLocationMsg **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "JavaAircraftLocationMsg const & is null");
+    return ;
+  } 
+  (arg1)->onMessage((JavaAircraftLocationMsg const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_new_1JavaAircraftLocationMsgCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  JavaAircraftLocationMsgCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (JavaAircraftLocationMsgCallback *)new SwigDirector_JavaAircraftLocationMsgCallback(jenv);
+  *(JavaAircraftLocationMsgCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsgCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  JavaAircraftLocationMsgCallback *obj = *((JavaAircraftLocationMsgCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_JavaAircraftLocationMsgCallback *director = static_cast<SwigDirector_JavaAircraftLocationMsgCallback *>(obj);
   director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
 }
 
 
-SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_AircraftMessageCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
-  AircraftMessageCallback *obj = *((AircraftMessageCallback **)&objarg);
-  SwigDirector_AircraftMessageCallback *director = dynamic_cast<SwigDirector_AircraftMessageCallback *>(obj);
+SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_JavaAircraftLocationMsgCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  JavaAircraftLocationMsgCallback *obj = *((JavaAircraftLocationMsgCallback **)&objarg);
+  SwigDirector_JavaAircraftLocationMsgCallback *director = dynamic_cast<SwigDirector_JavaAircraftLocationMsgCallback *>(obj);
   (void)jcls;
   if (director) {
     director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
@@ -1638,7 +1771,7 @@ SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcente
 SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_BusinessManager_1ListenAircraftLocation(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
   jlong jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
-  OnSubscribeMessageCallback *arg2 = 0 ;
+  AircraftLocationMsgCallback *arg2 = 0 ;
   OnSubscribeResultCallback *arg3 = 0 ;
   std::string *arg4 = 0 ;
   NotifactionFrequency arg5 ;
@@ -1652,9 +1785,9 @@ SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcent
   
   smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
   arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
-  arg2 = *(OnSubscribeMessageCallback **)&jarg2;
+  arg2 = *(AircraftLocationMsgCallback **)&jarg2;
   if (!arg2) {
-    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeMessageCallback const & is null");
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftLocationMsgCallback const & is null");
     return 0;
   } 
   arg3 = *(OnSubscribeResultCallback **)&jarg3;
@@ -1677,7 +1810,7 @@ SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcent
     return 0;
   }
   arg5 = *argp5; 
-  result = (arg1)->ListenAircraftLocation((OnSubscribeMessageCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  result = (arg1)->ListenAircraftLocation((AircraftLocationMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
   *(ListenId **)&jresult = new ListenId(result); 
   return jresult;
 }
@@ -1686,7 +1819,7 @@ SWIGEXPORT jlong JNICALL Java_com_example_notificationcentersdk_notificationcent
 SWIGEXPORT jint JNICALL Java_com_example_notificationcentersdk_notificationcenterJNI_BusinessManager_1listenAircraftLocationJava(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
   jint jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
-  AircraftMessageCallback *arg2 = (AircraftMessageCallback *) 0 ;
+  JavaAircraftLocationMsgCallback *arg2 = (JavaAircraftLocationMsgCallback *) 0 ;
   ResultCallback *arg3 = (ResultCallback *) 0 ;
   std::string *arg4 = 0 ;
   int arg5 ;
@@ -1701,7 +1834,7 @@ SWIGEXPORT jint JNICALL Java_com_example_notificationcentersdk_notificationcente
   
   smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
   arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
-  arg2 = *(AircraftMessageCallback **)&jarg2; 
+  arg2 = *(JavaAircraftLocationMsgCallback **)&jarg2; 
   arg3 = *(ResultCallback **)&jarg3; 
   if(!jarg4) {
     SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
@@ -1881,7 +2014,7 @@ SWIGEXPORT void JNICALL Java_com_example_notificationcentersdk_notificationcente
     const char *signature;
   } methods[6] = {
     {
-      "SwigDirector_AircraftMessageCallback_onMessage", "(Lcom/example/notificationcentersdk/AircraftMessageCallback;Ljava/lang/String;)V" 
+      "SwigDirector_JavaAircraftLocationMsgCallback_onMessage", "(Lcom/example/notificationcentersdk/JavaAircraftLocationMsgCallback;J)V" 
     },
     {
       "SwigDirector_ResultCallback_onResult", "(Lcom/example/notificationcentersdk/ResultCallback;I)V" 
