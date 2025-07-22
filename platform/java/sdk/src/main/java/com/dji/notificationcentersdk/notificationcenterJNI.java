@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.example.notificationcentersdk;
+package com.dji.notificationcentersdk;
 
 public class notificationcenterJNI {
   public final static native void AircraftLocation_x_set(long jarg1, AircraftLocation jarg1_, int jarg2);

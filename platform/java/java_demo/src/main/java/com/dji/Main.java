@@ -1,6 +1,6 @@
-package com.example;
+package com.dji;
 
-import com.example.notificationcentersdk.*;
+import com.dji.notificationcentersdk.*;
 
 // 1. Create a class that extends the SWIG-generated listener.
 // This is how we handle callbacks from C++.

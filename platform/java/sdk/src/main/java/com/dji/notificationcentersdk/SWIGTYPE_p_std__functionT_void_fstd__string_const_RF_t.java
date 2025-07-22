@@ -6,24 +6,24 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.example.notificationcentersdk;
+package com.dji.notificationcentersdk;
 
-public class SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t {
+public class SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t {
   private transient long swigCPtr;
 
-  protected SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
+  protected SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
     swigCPtr = cPtr;
   }
 
-  protected SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t() {
+  protected SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t() {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t obj) {
+  protected static long getCPtr(SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(SWIGTYPE_p_std__functionT_void_fAircraftLocationMsg_const_RF_t obj) {
+  protected static long swigRelease(SWIGTYPE_p_std__functionT_void_fstd__string_const_RF_t obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }

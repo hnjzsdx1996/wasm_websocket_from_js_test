@@ -1,6 +1,6 @@
 apply plugin: 'application'
 
-mainClassName = 'com.example.Main'
+mainClassName = 'com.dji.Main'
 
 dependencies {
     // Depend on our swig-generated sdk

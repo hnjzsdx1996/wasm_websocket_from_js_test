@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.example.notificationcentersdk;
+package com.dji.notificationcentersdk;
 
 public final class NotificationServerErrorCode {
   public final static NotificationServerErrorCode NotificationServerErrorCode_NoError = new NotificationServerErrorCode("NotificationServerErrorCode_NoError", 0);

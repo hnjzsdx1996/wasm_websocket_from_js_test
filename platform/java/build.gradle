@@ -2,7 +2,7 @@
 
 // Settings common to all projects (including the root).
 allprojects {
-    group 'com.example'
+    group 'com.dji'
     version = '1.0-SNAPSHOT'
 
     repositories {

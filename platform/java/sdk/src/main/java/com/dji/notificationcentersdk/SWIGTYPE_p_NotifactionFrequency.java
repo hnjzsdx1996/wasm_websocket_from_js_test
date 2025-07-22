@@ -6,24 +6,24 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.example.notificationcentersdk;
+package com.dji.notificationcentersdk;
 
-public class SWIGTYPE_p_std__weak_ptrT_TopicManager_t {
+public class SWIGTYPE_p_NotifactionFrequency {
   private transient long swigCPtr;
 
-  protected SWIGTYPE_p_std__weak_ptrT_TopicManager_t(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
+  protected SWIGTYPE_p_NotifactionFrequency(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
     swigCPtr = cPtr;
   }
 
-  protected SWIGTYPE_p_std__weak_ptrT_TopicManager_t() {
+  protected SWIGTYPE_p_NotifactionFrequency() {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_std__weak_ptrT_TopicManager_t obj) {
+  protected static long getCPtr(SWIGTYPE_p_NotifactionFrequency obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(SWIGTYPE_p_std__weak_ptrT_TopicManager_t obj) {
+  protected static long swigRelease(SWIGTYPE_p_NotifactionFrequency obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }

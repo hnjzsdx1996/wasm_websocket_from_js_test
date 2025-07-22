@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-package com.example.notificationcentersdk;
+package com.dji.notificationcentersdk;
 
 public class ConnectionListener {
   private transient long swigCPtr;
