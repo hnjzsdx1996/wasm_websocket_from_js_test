@@ -4,11 +4,12 @@
 
 class AircraftLocationMsg {
 public:
-    int x = 0;
-    int y = 0;
-    int z = 0;
+    double height = 0.0; // 椭球高度
+    double elevation = 0.0; // 相对起飞点高度
+    double longitude = 0.0;
+    double latitude = 0.0;
 
-    AIGC_JSON_HELPER(x, y, z);
+    AIGC_JSON_HELPER(height, elevation, longitude, latitude);
 };
 
 class PublishAircraftLocationTopic : public PublishTopicWrapper {

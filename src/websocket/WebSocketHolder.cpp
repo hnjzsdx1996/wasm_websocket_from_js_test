@@ -6,7 +6,17 @@ int64_t WebSocketHolder::setOnMessage(MessageCallback cb) {
     std::lock_guard<std::mutex> lock(mtx_);
     int64_t id = next_listen_id_++;
     message_callbacks_[id] = std::move(cb);
-    if (ws_) ws_->setOnMessage(cb); // 设置到当前 ws
+    
+    // 如果WebSocket已经存在，需要重新设置所有回调
+    if (ws_) {
+        // 清除WebSocketBase中的所有回调
+        ws_->clearMessageCallbacks();
+        
+        // 重新设置所有回调
+        for (const auto& kv : message_callbacks_) {
+            ws_->setOnMessage(kv.second);
+        }
+    }
     return id;
 }
 

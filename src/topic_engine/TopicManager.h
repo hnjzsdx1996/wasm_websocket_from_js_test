@@ -10,8 +10,9 @@
 #include "websocket/WebSocketHolder.h"
 #include "../base/utils/async_capture_protect.h"
 
-using PublishTopicCallback = std::function<void(int err, std::shared_ptr<PublishTopicWrapper>)>;
+using PublishTopicCallback = std::function<void(std::shared_ptr<PublishTopicWrapper>)>;
 using SendTopicCallback = std::function<void(int err, std::shared_ptr<TopicMessageWrapper>)>;
+using SubscribeResultCallback = std::function<void(int err)>;
 
 enum TopicManagerErrorCode {
     TopicManager_NoError = 0,
@@ -48,12 +49,14 @@ public:
 
     void setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& holder);
 
-    int64_t Observe(const SubscribeTopicTuple& tuple, PublishTopicCallback cb);
+    int64_t Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, SubscribeResultCallback result_cb = nullptr);
     int64_t ObserveAll(PublishTopicCallback cb);
     void CancelObserve(int64_t listen_id);
-    int SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, SendTopicCallback cb = nullptr);
 
 private:
+    int SendSubscribe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, int64_t listen_id, const SubscribeResultCallback& result_cb); // 发起订阅请求
+    int SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, SendTopicCallback cb = nullptr);
+
     void OnWebSocketMessage(const std::string& json);
 
     void OnSubscribe(const std::string& json);

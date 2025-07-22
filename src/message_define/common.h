@@ -1,30 +1,19 @@
 #pragma once
 
-#include <AIGCJson.hpp>
-#include "base/logger/logger.h"
+// same as plog::Severity
+enum class SdkLogLevel {
+    NONE = 0,
+    FATAL = 1,
+    ERROR = 2,
+    WARNING = 3,
+    INFO = 4,
+    DEBUG = 5,
+    VERBOSE = 6
+};
 
-class SDKConfig {
+class SdkInitializeInfo {
 public:
-    std::string sn;
-    uint16_t ping_pong_interval;
-
-    AIGC_JSON_HELPER(sn, ping_pong_interval);
-
-    std::string ToJsonString() {
-        std::string err;
-        std::string json_string;
-        aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
-        if (!err.empty()) {
-            NC_LOG_ERROR("CloudLinkConfigInfo ToJsonString error, err: %s", err.c_str());
-        }
-        return json_string;
-    }
-
-    void FromJsonString(const std::string &json_string) {
-        std::string err;
-        aigc::JsonHelper::JsonToObject(*this, json_string, {}, &err);
-        if (!err.empty()) {
-            NC_LOG_ERROR("CloudLinkConfigInfo FromJsonString error, err: %s, json: %s", err.c_str(), json_string.c_str());
-        }
-    }
+    // 日志配置
+    std::string log_path;
+    SdkLogLevel log_level = SdkLogLevel::NONE;
 };

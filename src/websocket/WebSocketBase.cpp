@@ -6,6 +6,11 @@ void WebSocketBase::setOnMessage(MessageCallback cb) {
     message_callbacks_.emplace_back(std::move(cb));
 }
 
+void WebSocketBase::clearMessageCallbacks() {
+    std::unique_lock<std::mutex> lock(mtx_);
+    message_callbacks_.clear();
+}
+
 void WebSocketBase::setOnOpen(OpenCallback cb) {
     open_callback_ = std::move(cb);
 }

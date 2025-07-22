@@ -8,31 +8,50 @@ extern "C" {
 typedef void* sdk_handle;
 typedef void* websocket_handle;
 
-// todo:sdk 不应该直接把 websocket 的原始 message_callback 之类的接口给到用户，需要封装
-typedef void (*sdk_message_callback)(const char* msg, void* user_data);
-typedef void (*sdk_open_callback)(void* user_data);
-typedef void (*sdk_close_callback)(void* user_data);
-typedef void (*sdk_error_callback)(const char* error, void* user_data);
-void sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_data);
-void sdk_set_open_callback(sdk_handle h, sdk_open_callback cb, void* user_data);
-void sdk_set_close_callback(sdk_handle h, sdk_close_callback cb, void* user_data);
-void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_data);
+// 日志级别枚举
+typedef enum {
+    SDK_LOG_NONE = 0,
+    SDK_LOG_FATAL = 1,
+    SDK_LOG_ERROR = 2,
+    SDK_LOG_WARNING = 3,
+    SDK_LOG_INFO = 4,
+    SDK_LOG_DEBUG = 5,
+    SDK_LOG_VERBOSE = 6
+} sdk_log_level_t;
+
+// 初始化信息结构体
+typedef struct {
+    const char* log_path;
+    sdk_log_level_t log_level;
+} sdk_initialize_info_t;
+
+// WebSocket 事件回调函数类型
+typedef void (*websocket_on_message_callback)(const char* message);
+typedef void (*websocket_on_open_callback)();
+typedef void (*websocket_on_close_callback)();
+typedef void (*websocket_on_error_callback)(const char* error);
 
 sdk_handle sdk_create();
 void sdk_destroy(sdk_handle h);
-void sdk_configure(sdk_handle h, const char* config_str);
+
+// 初始化 SDK
+void sdk_init(sdk_handle h, const sdk_initialize_info_t* info);
+int sdk_is_init(sdk_handle h);
+
+// WebSocket 相关接口
 void sdk_connect(sdk_handle h, const char* url);
-void sdk_send(sdk_handle h, const char* msg);
-void sdk_close(sdk_handle h);
 void sdk_set_websocket(sdk_handle h, websocket_handle ws);
+void sdk_set_websocket_event_listener(sdk_handle h, 
+                                     websocket_on_message_callback on_message,
+                                     websocket_on_open_callback on_open,
+                                     websocket_on_close_callback on_close,
+                                     websocket_on_error_callback on_error);
+
+// 轮询接口
 size_t sdk_poll(sdk_handle h);
 
-// 新增监听飞机位置消息的接口
-// on_messages_callback: 消息回调，on_result_callback: 结果回调，device_sn: 设备SN，freq: 频率
-typedef void (*sdk_listen_message_callback)(const char* msg, void* user_data);
-typedef void (*sdk_listen_result_callback)(int result, void* user_data);
+// 业务管理接口
 void sdk_cancel_observe(sdk_handle h, int64_t listen_id);
-int sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on_messages_callback, void* msg_user_data, sdk_listen_result_callback on_result_callback, void* result_user_data, const char* device_sn, int freq);
 
 #ifdef __cplusplus
 }
