@@ -59,7 +59,16 @@ class MyAircraftSpeedMessageCallback extends AircraftSpeedCallback {
     }
 }
 
-// 5. 创建订阅结果回调类
+// 5. 创建设备OSD消息回调类
+class MyDeviceOsdMessageCallback extends DeviceOsdCallback {
+    @Override
+    public void invoke(DeviceOsd message) {
+        System.out.println("[Java] Received device OSD message:");
+        System.out.println("  - Mode Code (模式代码): " + message.getMode_code());
+    }
+}
+
+// 6. 创建订阅结果回调类
 class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
@@ -83,7 +92,7 @@ class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
     }
 }
 
-// 6. 创建飞机姿态订阅结果回调类
+// 7. 创建飞机姿态订阅结果回调类
 class MyAircraftAttitudeResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
@@ -95,7 +104,7 @@ class MyAircraftAttitudeResultCallback extends SDKSubscribeResultCallback {
     }
 }
 
-// 7. 创建飞机速度订阅结果回调类
+// 8. 创建飞机速度订阅结果回调类
 class MyAircraftSpeedResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
@@ -103,6 +112,18 @@ class MyAircraftSpeedResultCallback extends SDKSubscribeResultCallback {
             System.out.println("[Java] Aircraft speed subscription successful.");
         } else {
             System.out.println("[Java] Aircraft speed subscription failed. Error code: " + errorCode);
+        }
+    }
+}
+
+// 9. 创建设备OSD订阅结果回调类
+class MyDeviceOsdResultCallback extends SDKSubscribeResultCallback {
+    @Override
+    public void invoke(NotificationCenterErrorCode errorCode) {
+        if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+            System.out.println("[Java] Device OSD subscription successful.");
+        } else {
+            System.out.println("[Java] Device OSD subscription failed. Error code: " + errorCode);
         }
     }
 }
@@ -128,7 +149,7 @@ public class Main {
         sdk.setWebsocketEventListener(listener);
         System.out.println("[Java] Websocket event listener set.");
 
-        String url = "ws://localhost:3001";
+        String url = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
         System.out.println("[Java] Connecting to " + url + "...");
         sdk.connect(url);
 
@@ -153,66 +174,86 @@ public class Main {
         
         MyAircraftSpeedMessageCallback speedMessageCallback = new MyAircraftSpeedMessageCallback();
         MyAircraftSpeedResultCallback speedResultCallback = new MyAircraftSpeedResultCallback();
+        
+        MyDeviceOsdMessageCallback deviceOsdMessageCallback = new MyDeviceOsdMessageCallback();
+        MyDeviceOsdResultCallback deviceOsdResultCallback = new MyDeviceOsdResultCallback();
 
         // 8. 演示监听飞机位置消息
         System.out.println("[Java] Starting aircraft location monitoring...");
         
         // 9. 监听单个设备
-        String deviceSN = "TEST001";
+        String deviceSN = "8UUDMAQ00A0121";
         NotificationFrequency frequency = NotificationFrequency.ANY;
         
-        long locationListenId = businessManager.ListenAircraftLocation(
-            locationMessageCallback, 
-            locationResultCallback, 
+        // long locationListenId = businessManager.ListenAircraftLocation(
+        //     locationMessageCallback, 
+        //     locationResultCallback, 
+        //     deviceSN, 
+        //     frequency
+        // );
+        
+        // System.out.println("[Java] Started monitoring aircraft location for device " + deviceSN + 
+        //                  " with frequency " + frequency + 
+        //                  " (Listen ID: " + locationListenId + ")");
+        
+        // // 10. 演示监听飞机姿态消息
+        // System.out.println("[Java] Starting aircraft attitude monitoring...");
+        
+        // long attitudeListenId = businessManager.ListenAircraftAttitude(
+        //     attitudeMessageCallback, 
+        //     attitudeResultCallback, 
+        //     deviceSN, 
+        //     frequency
+        // );
+        
+        // System.out.println("[Java] Started monitoring aircraft attitude for device " + deviceSN + 
+        //                  " with frequency " + frequency + 
+        //                  " (Listen ID: " + attitudeListenId + ")");
+        
+        // // 11. 演示监听飞机速度消息
+        // System.out.println("[Java] Starting aircraft speed monitoring...");
+        
+        // long speedListenId = businessManager.ListenAircraftSpeed(
+        //     speedMessageCallback, 
+        //     speedResultCallback, 
+        //     deviceSN, 
+        //     frequency
+        // );
+        
+        // System.out.println("[Java] Started monitoring aircraft speed for device " + deviceSN + 
+        //                  " with frequency " + frequency + 
+        //                  " (Listen ID: " + speedListenId + ")");
+        
+        // 12. 演示监听设备OSD消息
+        System.out.println("[Java] Starting device OSD monitoring...");
+        
+        long deviceOsdListenId = businessManager.ListenDeviceOsd(
+            deviceOsdMessageCallback, 
+            deviceOsdResultCallback, 
             deviceSN, 
             frequency
         );
         
-        System.out.println("[Java] Started monitoring aircraft location for device " + deviceSN + 
+        System.out.println("[Java] Started monitoring device OSD for device " + deviceSN + 
                          " with frequency " + frequency + 
-                         " (Listen ID: " + locationListenId + ")");
+                         " (Listen ID: " + deviceOsdListenId + ")");
         
-        // 10. 演示监听飞机姿态消息
-        System.out.println("[Java] Starting aircraft attitude monitoring...");
-        
-        long attitudeListenId = businessManager.ListenAircraftAttitude(
-            attitudeMessageCallback, 
-            attitudeResultCallback, 
-            deviceSN, 
-            frequency
-        );
-        
-        System.out.println("[Java] Started monitoring aircraft attitude for device " + deviceSN + 
-                         " with frequency " + frequency + 
-                         " (Listen ID: " + attitudeListenId + ")");
-        
-        // 11. 演示监听飞机速度消息
-        System.out.println("[Java] Starting aircraft speed monitoring...");
-        
-        long speedListenId = businessManager.ListenAircraftSpeed(
-            speedMessageCallback, 
-            speedResultCallback, 
-            deviceSN, 
-            frequency
-        );
-        
-        System.out.println("[Java] Started monitoring aircraft speed for device " + deviceSN + 
-                         " with frequency " + frequency + 
-                         " (Listen ID: " + speedListenId + ")");
-        
-        // 12. 等待一段时间让自动poll处理消息
+        // 13. 等待一段时间让自动poll处理消息
         System.out.println("[Java] Waiting for messages (auto-poll is running)...");
         Thread.sleep(10000); // 等待10秒
         
         // 取消订阅
-        businessManager.cancelObserve((int)locationListenId);
-        System.out.println("[Java] Cancelled location monitoring for device " + deviceSN);
+        // businessManager.cancelObserve((int)locationListenId);
+        // System.out.println("[Java] Cancelled location monitoring for device " + deviceSN);
         
-        businessManager.cancelObserve((int)attitudeListenId);
-        System.out.println("[Java] Cancelled attitude monitoring for device " + deviceSN);
+        // businessManager.cancelObserve((int)attitudeListenId);
+        // System.out.println("[Java] Cancelled attitude monitoring for device " + deviceSN);
         
-        businessManager.cancelObserve((int)speedListenId);
-        System.out.println("[Java] Cancelled speed monitoring for device " + deviceSN);
+        // businessManager.cancelObserve((int)speedListenId);
+        // System.out.println("[Java] Cancelled speed monitoring for device " + deviceSN);
+        
+        businessManager.cancelObserve((int)deviceOsdListenId);
+        System.out.println("[Java] Cancelled device OSD monitoring for device " + deviceSN);
 
         // 继续等待一段时间
         System.out.println("[Java] Continuing to wait for cleanup...");

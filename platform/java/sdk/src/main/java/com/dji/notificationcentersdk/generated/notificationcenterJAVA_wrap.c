@@ -785,7 +785,7 @@ namespace Swig {
 namespace Swig {
   namespace {
     jclass jclass_notificationcenterJNI = NULL;
-    jmethodID director_method_ids[8];
+    jmethodID director_method_ids[9];
   }
 }
 
@@ -844,6 +844,7 @@ template <typename T> T SwigValueInit() {
 #include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftAttitudeTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftSpeedTopic.h"
+#include "business_manager/topic_message_define/PublishDeviceOsdTopic.h"
 #include "message_define/common.h"
 
 
@@ -885,6 +886,15 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
+// 定义新的DeviceOsd类
+class DeviceOsd {
+public:
+    int mode_code; // 模式代码
+    
+    DeviceOsd() : mode_code(0) {}
+    DeviceOsd(int mode_code) : mode_code(mode_code) {}
+};
+
 // 定义通知频率枚举
 enum NotificationFrequency {
     ANY = 0,
@@ -916,6 +926,12 @@ class AircraftSpeedCallback {
 public:
     virtual ~AircraftSpeedCallback() {}
     virtual void invoke(const AircraftSpeed& message) = 0;
+};
+
+class DeviceOsdCallback {
+public:
+    virtual ~DeviceOsdCallback() {}
+    virtual void invoke(const DeviceOsd& message) = 0;
 };
 
 class SDKSubscribeResultCallback {
@@ -1053,6 +1069,40 @@ SWIGINTERN long BusinessManager_ListenAircraftSpeed__SWIG_1(BusinessManager *sel
         }
         
         return self->ListenAircraftSpeed(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenDeviceOsd__SWIG_1(BusinessManager *self,DeviceOsdCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const DeviceOsdMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将DeviceOsdMsg转换为DeviceOsd
+                DeviceOsd device_osd(msg.mode_code);
+                onSubscribeMessageCallback->invoke(device_osd);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenDeviceOsd(msg_cb, result_cb, sn, notify_freq);
     }
 SWIGINTERN void BusinessManager_cancelObserve(BusinessManager *self,long listen_id){
         self->CancelObserve(listen_id);
@@ -1227,6 +1277,60 @@ void SwigDirector_AircraftSpeedCallback::swig_connect_director(JNIEnv *jenv, job
 }
 
 
+SwigDirector_DeviceOsdCallback::SwigDirector_DeviceOsdCallback(JNIEnv *jenv) : DeviceOsdCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_DeviceOsdCallback::~SwigDirector_DeviceOsdCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_DeviceOsdCallback::invoke(DeviceOsd const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method DeviceOsdCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(DeviceOsd **)&jmessage = (DeviceOsd *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[3], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in DeviceOsdCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_DeviceOsdCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/DeviceOsdCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/DeviceOsd;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
 SwigDirector_SDKSubscribeResultCallback::SwigDirector_SDKSubscribeResultCallback(JNIEnv *jenv) : SDKSubscribeResultCallback(), Swig::Director(jenv) {
 }
 
@@ -1248,7 +1352,7 @@ void SwigDirector_SDKSubscribeResultCallback::invoke(NotificationCenterErrorCode
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jresult = (jint)result;
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[3], swigjobj, jresult);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[4], swigjobj, jresult);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1303,7 +1407,7 @@ void SwigDirector_ConnectionListener::OnMessage(std::string const &message) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jmessage = jenv->NewStringUTF((&message)->c_str());
     Swig::LocalRefGuard message_refguard(jenv, jmessage); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[4], swigjobj, jmessage);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[5], swigjobj, jmessage);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1326,7 +1430,7 @@ void SwigDirector_ConnectionListener::OnOpen() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[5], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[6], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1349,7 +1453,7 @@ void SwigDirector_ConnectionListener::OnClose() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[6], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[7], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1375,7 +1479,7 @@ void SwigDirector_ConnectionListener::OnError(std::string const &error) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jerror = jenv->NewStringUTF((&error)->c_str());
     Swig::LocalRefGuard error_refguard(jenv, jerror); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[7], swigjobj, jerror);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[8], swigjobj, jerror);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1788,6 +1892,70 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1mode_1code_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->mode_code = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1mode_1code_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  result = (int) ((arg1)->mode_code);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsd_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  DeviceOsd *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (DeviceOsd *)new DeviceOsd();
+  *(DeviceOsd **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsd_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  DeviceOsd *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  result = (DeviceOsd *)new DeviceOsd(arg1);
+  *(DeviceOsd **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1DeviceOsd(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  delete arg1;
+}
+
+
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftLocationCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   AircraftLocationCallback *arg1 = (AircraftLocationCallback *) 0 ;
   
@@ -1955,6 +2123,64 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftSpeedCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
   AircraftSpeedCallback *obj = *((AircraftSpeedCallback **)&objarg);
   SwigDirector_AircraftSpeedCallback *director = dynamic_cast<SwigDirector_AircraftSpeedCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1DeviceOsdCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  DeviceOsdCallback *arg1 = (DeviceOsdCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(DeviceOsdCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  DeviceOsdCallback *arg1 = (DeviceOsdCallback *) 0 ;
+  DeviceOsd *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(DeviceOsdCallback **)&jarg1; 
+  arg2 = *(DeviceOsd **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "DeviceOsd const & is null");
+    return ;
+  } 
+  (arg1)->invoke((DeviceOsd const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsdCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  DeviceOsdCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (DeviceOsdCallback *)new SwigDirector_DeviceOsdCallback(jenv);
+  *(DeviceOsdCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  DeviceOsdCallback *obj = *((DeviceOsdCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_DeviceOsdCallback *director = static_cast<SwigDirector_DeviceOsdCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  DeviceOsdCallback *obj = *((DeviceOsdCallback **)&objarg);
+  SwigDirector_DeviceOsdCallback *director = dynamic_cast<SwigDirector_DeviceOsdCallback *>(obj);
   (void)jcls;
   if (director) {
     director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
@@ -2475,6 +2701,54 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenDeviceOsd_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  DeviceOsdMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(DeviceOsdMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "DeviceOsdMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenDeviceOsd((DeviceOsdMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
 SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftLocation_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
   jint jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
@@ -2578,6 +2852,42 @@ SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
   arg5 = (NotificationFrequency)jarg5; 
   result = (long)BusinessManager_ListenAircraftSpeed__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenDeviceOsd_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  DeviceOsdCallback *arg2 = (DeviceOsdCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(DeviceOsdCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenDeviceOsd__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
   jresult = (jint)result; 
   return jresult;
 }
@@ -2743,7 +3053,7 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   static struct {
     const char *method;
     const char *signature;
-  } methods[8] = {
+  } methods[9] = {
     {
       "SwigDirector_AircraftLocationCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftLocationCallback;J)V" 
     },
@@ -2752,6 +3062,9 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
     },
     {
       "SwigDirector_AircraftSpeedCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftSpeedCallback;J)V" 
+    },
+    {
+      "SwigDirector_DeviceOsdCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/DeviceOsdCallback;J)V" 
     },
     {
       "SwigDirector_SDKSubscribeResultCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/SDKSubscribeResultCallback;I)V" 

@@ -54,6 +54,21 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
+class SwigDirector_DeviceOsdCallback : public DeviceOsdCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_DeviceOsdCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_DeviceOsdCallback();
+    virtual void invoke(DeviceOsd const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
 class SwigDirector_SDKSubscribeResultCallback : public SDKSubscribeResultCallback, public Swig::Director {
 
 public:

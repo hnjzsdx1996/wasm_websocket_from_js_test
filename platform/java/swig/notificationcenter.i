@@ -15,6 +15,7 @@
 #include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftAttitudeTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftSpeedTopic.h"
+#include "business_manager/topic_message_define/PublishDeviceOsdTopic.h"
 #include "message_define/common.h"
 %}
 
@@ -74,6 +75,15 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
+// 定义新的DeviceOsd类
+class DeviceOsd {
+public:
+    int mode_code; // 模式代码
+    
+    DeviceOsd() : mode_code(0) {}
+    DeviceOsd(int mode_code) : mode_code(mode_code) {}
+};
+
 // 定义通知频率枚举
 enum NotificationFrequency {
     ANY = 0,
@@ -107,6 +117,12 @@ public:
     virtual void invoke(const AircraftSpeed& message) = 0;
 };
 
+class DeviceOsdCallback {
+public:
+    virtual ~DeviceOsdCallback() {}
+    virtual void invoke(const DeviceOsd& message) = 0;
+};
+
 class SDKSubscribeResultCallback {
 public:
     virtual ~SDKSubscribeResultCallback() {}
@@ -118,6 +134,7 @@ public:
 %feature("director") AircraftLocationCallback;
 %feature("director") AircraftAttitudeCallback;
 %feature("director") AircraftSpeedCallback;
+%feature("director") DeviceOsdCallback;
 %feature("director") SDKSubscribeResultCallback;
 
 // Include the type definitions and enums
@@ -258,6 +275,45 @@ public:
         }
         
         return $self->ListenAircraftSpeed(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenDeviceOsd(
+        DeviceOsdCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const DeviceOsdMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将DeviceOsdMsg转换为DeviceOsd
+                DeviceOsd device_osd(msg.mode_code);
+                onSubscribeMessageCallback->invoke(device_osd);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenDeviceOsd(msg_cb, result_cb, sn, notify_freq);
     }
     
     void cancelObserve(long listen_id) {

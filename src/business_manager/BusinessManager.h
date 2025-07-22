@@ -60,6 +60,7 @@ public:
     DEFINE_LISTEN_METHOD(ListenAircraftAttitude, AircraftAttitudeMsg, AircraftAttitudeMsgCallback, PublishAircraftAttitudeTopic, "aircraft_attitude")
     DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "aircraft_location")
     DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "aircraft_speed")
+    DEFINE_LISTEN_METHOD(ListenDeviceOsd, DeviceOsdMsg, DeviceOsdMsgCallback, PublishDeviceOsdTopic, "device_osd")
 
     #undef DEFINE_LISTEN_METHOD
 };
