@@ -8,20 +8,20 @@
 
 package com.dji.notificationcentersdk.generated;
 
-public class SubscribeResultCallback {
+public class SDKSubscribeResultCallback {
   private transient long swigCPtr;
   protected transient boolean swigCMemOwn;
 
-  protected SubscribeResultCallback(long cPtr, boolean cMemoryOwn) {
+  protected SDKSubscribeResultCallback(long cPtr, boolean cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = cPtr;
   }
 
-  protected static long getCPtr(SubscribeResultCallback obj) {
+  protected static long getCPtr(SDKSubscribeResultCallback obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(SubscribeResultCallback obj) {
+  protected static long swigRelease(SDKSubscribeResultCallback obj) {
     long ptr = 0;
     if (obj != null) {
       if (!obj.swigCMemOwn)
@@ -42,7 +42,7 @@ public class SubscribeResultCallback {
     if (swigCPtr != 0) {
       if (swigCMemOwn) {
         swigCMemOwn = false;
-        notificationcenterJNI.delete_SubscribeResultCallback(swigCPtr);
+        notificationcenterJNI.delete_SDKSubscribeResultCallback(swigCPtr);
       }
       swigCPtr = 0;
     }
@@ -55,21 +55,21 @@ public class SubscribeResultCallback {
 
   public void swigReleaseOwnership() {
     swigCMemOwn = false;
-    notificationcenterJNI.SubscribeResultCallback_change_ownership(this, swigCPtr, false);
+    notificationcenterJNI.SDKSubscribeResultCallback_change_ownership(this, swigCPtr, false);
   }
 
   public void swigTakeOwnership() {
     swigCMemOwn = true;
-    notificationcenterJNI.SubscribeResultCallback_change_ownership(this, swigCPtr, true);
+    notificationcenterJNI.SDKSubscribeResultCallback_change_ownership(this, swigCPtr, true);
   }
 
   public void invoke(NotificationCenterErrorCode result) {
-    notificationcenterJNI.SubscribeResultCallback_invoke(swigCPtr, this, result.swigValue());
+    notificationcenterJNI.SDKSubscribeResultCallback_invoke(swigCPtr, this, result.swigValue());
   }
 
-  public SubscribeResultCallback() {
-    this(notificationcenterJNI.new_SubscribeResultCallback(), true);
-    notificationcenterJNI.SubscribeResultCallback_director_connect(this, swigCPtr, true, true);
+  public SDKSubscribeResultCallback() {
+    this(notificationcenterJNI.new_SDKSubscribeResultCallback(), true);
+    notificationcenterJNI.SDKSubscribeResultCallback_director_connect(this, swigCPtr, true, true);
   }
 
 }

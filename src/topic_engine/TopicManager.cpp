@@ -6,7 +6,11 @@
 #include "logger.h"
 #include "base/async/thread_pool_executor.h"
 #include "base/utils/json_utils.h"
+#include "../business_manager/BusinessManagerDefine.h"
+#include "../business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 
+
+constexpr auto kWebsocketTimeout = 3000; // websocket 消息超时时间 ms
 
 void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& holder) {
     ws_holder_ = holder;
@@ -22,13 +26,27 @@ void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& hold
     });
 }
 
-int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, PublishTopicCallback cb) {
+int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, SubscribeResultCallback result_cb) {
     int64_t id;
+    bool need_subscribe = false;
     {
         std::lock_guard<std::mutex> lock(mtx_);
         id = next_listen_id_++;
+        need_subscribe = (topic_observers_[tuple].empty()); // 检查是否已经订阅过这个消息（在添加新回调之前检查）
         topic_observers_[tuple][id] = std::move(cb);
     }
+    
+    // 如果需要订阅，发起订阅请求
+    if (need_subscribe) {
+        auto ret = SendSubscribe(tuple, freq, id, result_cb);
+        if (ret != TopicManager_NoError) {
+            return -1; // 返回错误ID
+        }
+    } else if (result_cb) {
+        // 已经订阅过，直接返回成功
+        result_cb(NotificationCenterErrorCode_NoError);
+    }
+    
     return id;
 }
 
@@ -73,7 +91,7 @@ int TopicManager::SendMessage(const std::shared_ptr<TopicMessageWrapper>& msg, S
                         cb(TopicManager_ErrorTimeout, nullptr);
                     });
                 }
-            }, std::chrono::milliseconds(3000));
+            }, std::chrono::milliseconds(kWebsocketTimeout));
         }
         strong_ws_holder->getWebSocket()->send(msg->ToJsonString());
         return TopicManager_NoError;
@@ -195,7 +213,7 @@ void TopicManager::OnPublish(const std::string &json) {
             cbs = topic_observers_[tuple];
         }
         for (auto& [_, cb] : cbs) {
-            cb(TopicManager_NoError, publish_msg);
+            cb(publish_msg);
         }
     }
 
@@ -206,7 +224,7 @@ void TopicManager::OnPublish(const std::string &json) {
         cbs = all_topic_observers_;
     }
     for (auto& [_, cb] : cbs) {
-        cb(TopicManager_NoError, publish_msg);
+        cb(publish_msg);
     }
 }
 
@@ -253,19 +271,73 @@ void TopicManager::UnsubscribeUnlistened() {
     }
 }
 
+int TopicManager::SendSubscribe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, int64_t listen_id, const SubscribeResultCallback& result_cb) {
+    NC_LOG_INFO("[TopicManager] SendSubscribe, sn: %s, topic: %s, freq: %d", tuple.sn.c_str(), tuple.topic.c_str(), freq);
+
+    auto subscribe_msg = std::make_shared<SubscribeTopicWrapper>(tuple.sn, tuple.topic, freq);
+    
+    WeakDummy(weak_ptr);
+    auto ret = SendMessage(subscribe_msg, [this, weak_ptr, tuple, listen_id, result_cb](int err, const std::shared_ptr<TopicMessageWrapper>& message)->void {
+        WeakDummyReturn(weak_ptr);
+        if (err == TopicManager_NoError) {
+            // 订阅成功
+            if (result_cb) {
+                result_cb(NotificationCenterErrorCode_NoError);
+            }
+            return;
+        }
+        
+        // 订阅失败，清理监听回调
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            auto it = topic_observers_.find(tuple);
+            if (it != topic_observers_.end()) {
+                it->second.erase(listen_id);
+                if (it->second.empty()) {
+                    topic_observers_.erase(it);
+                }
+            }
+        }
+        
+        if (result_cb) {
+            result_cb(NotificationCenterErrorCode_SubscribeError);
+        }
+    });
+    
+    if (ret != TopicManager_NoError) {
+        // 发送失败，清理监听回调
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            auto it = topic_observers_.find(tuple);
+            if (it != topic_observers_.end()) {
+                it->second.erase(listen_id);
+                if (it->second.empty()) {
+                    topic_observers_.erase(it);
+                }
+            }
+        }
+        
+        if (result_cb) {
+            result_cb(NotificationCenterErrorCode_SendError);
+        }
+    }
+    
+    return ret;
+}
+
 void TopicManager::SendUnsubscribe(const SubscribeTopicTuple &topic_tuple) {
     auto unsubscribe_msg = std::make_shared<UnSubscribeTopicWrapper>(topic_tuple.sn, topic_tuple.topic);
     WeakDummy(weak_ptr);
-    auto ret = SendMessage(unsubscribe_msg, [this, weak_ptr](int err, const std::shared_ptr<TopicMessageWrapper>& unsubscribe_reply)->void {
+    auto ret = SendMessage(unsubscribe_msg, [this, weak_ptr, topic_tuple](int err, const std::shared_ptr<TopicMessageWrapper>& unsubscribe_reply)->void {
         WeakDummyReturn(weak_ptr);
         if (err != TopicManager_NoError) {
-            // todo:sdk 取消订阅识别怎么处理?
-            NC_LOG_ERROR("[TopicManager] SendUnsubscribe reply error: %d", err);
+            // 取消订阅失败就不管了，就算收到了推送数据，由于 callback 已经删除，也没有什么影响
+            NC_LOG_ERROR("[TopicManager] SendUnsubscribe [%s - %s] reply error: %d", topic_tuple.sn.c_str(), topic_tuple.topic.c_str(), err);
             return;
         }
-        NC_LOG_INFO("[TopicManager] SendUnsubscribe success");
+        NC_LOG_INFO("[TopicManager] SendUnsubscribe [%s - %s] success", topic_tuple.sn.c_str(), topic_tuple.topic.c_str());
     });
     if (ret != TopicManager_NoError) {
-        NC_LOG_ERROR("[TopicManager] SendUnsubscribe error: %d", ret);
+        NC_LOG_ERROR("[TopicManager] SendUnsubscribe [%s - %s] error: %d", topic_tuple.sn.c_str(), topic_tuple.topic.c_str(), ret);
     }
 }

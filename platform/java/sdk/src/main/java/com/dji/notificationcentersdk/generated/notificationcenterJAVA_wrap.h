@@ -24,12 +24,12 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
-class SwigDirector_SubscribeResultCallback : public SubscribeResultCallback, public Swig::Director {
+class SwigDirector_SDKSubscribeResultCallback : public SDKSubscribeResultCallback, public Swig::Director {
 
 public:
     void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
-    SwigDirector_SubscribeResultCallback(JNIEnv *jenv);
-    virtual ~SwigDirector_SubscribeResultCallback();
+    SwigDirector_SDKSubscribeResultCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_SDKSubscribeResultCallback();
     virtual void invoke(NotificationCenterErrorCode const &result);
 public:
     bool swig_overrides(int n) {

@@ -88,20 +88,35 @@ find_package(Threads REQUIRED)
 # 仅在启用 libwebsockets 时链接
 if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
     # 链接顺序很重要：先链接 libwebsockets，再链接 OpenSSL
-    target_link_libraries(NotificationCenterSDK PUBLIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
-        ${OPENSSL_LIBRARIES}
-        ssl
-        crypto
-        Threads::Threads
-    )
-    target_link_libraries(NotificationCenterSDKShared PUBLIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
-        ${OPENSSL_LIBRARIES}
-        ssl
-        crypto
-        Threads::Threads
-    )
+    if(APPLE)
+        # macOS 平台使用 OpenSSL 变量
+        target_link_libraries(NotificationCenterSDK PUBLIC 
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
+            ${OPENSSL_LIBRARIES}
+            Threads::Threads
+        )
+        target_link_libraries(NotificationCenterSDKShared PUBLIC 
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
+            ${OPENSSL_LIBRARIES}
+            Threads::Threads
+        )
+    else()
+        # Linux 平台使用 ssl 和 crypto
+        target_link_libraries(NotificationCenterSDK PUBLIC 
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
+            ${OPENSSL_LIBRARIES}
+            ssl
+            crypto
+            Threads::Threads
+        )
+        target_link_libraries(NotificationCenterSDKShared PUBLIC 
+            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
+            ${OPENSSL_LIBRARIES}
+            ssl
+            crypto
+            Threads::Threads
+        )
+    endif()
 else()
     # 即使不使用 libwebsockets，也需要链接 pthread
     target_link_libraries(NotificationCenterSDK PUBLIC Threads::Threads)

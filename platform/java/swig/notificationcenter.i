@@ -70,16 +70,16 @@ public:
     virtual void invoke(const AircraftLocation& message) = 0;
 };
 
-class SubscribeResultCallback {
+class SDKSubscribeResultCallback {
 public:
-    virtual ~SubscribeResultCallback() {}
+    virtual ~SDKSubscribeResultCallback() {}
     virtual void invoke(const NotificationCenterErrorCode& result) = 0;
 };
 %}
 
 // Create Java-friendly callback interfaces and data structures
 %feature("director") AircraftLocationCallback;
-%feature("director") SubscribeResultCallback;
+%feature("director") SDKSubscribeResultCallback;
 
 // Include the type definitions and enums
 %include "message_define/common.h"
@@ -94,7 +94,7 @@ public:
 %extend BusinessManager {
     long ListenAircraftLocation(
         AircraftLocationCallback* onSubscribeMessageCallback,
-        SubscribeResultCallback* onSubscribeResultCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
         const std::string& sn,
         NotificationFrequency notificationFrequency) {
         

@@ -39,7 +39,7 @@ class MyAircraftLocationMessageCallback extends AircraftLocationCallback {
 }
 
 // 3. 创建订阅结果回调类
-class MyAircraftLocationResultCallback extends SubscribeResultCallback {
+class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
         if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
