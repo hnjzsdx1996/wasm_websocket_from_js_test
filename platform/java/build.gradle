@@ -8,6 +8,11 @@ allprojects {
     repositories {
         mavenCentral()
     }
+
+    // 自动修复：强制所有 Java 编译任务使用 UTF-8 编码，解决中文注释乱码警告
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
 }
 
 // Settings common to all subprojects (sdk, java_demo).

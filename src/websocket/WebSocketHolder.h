@@ -3,6 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <atomic>
 #include <cstdint>
 #include "WebSocketBase.h"
 

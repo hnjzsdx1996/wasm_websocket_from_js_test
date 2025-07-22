@@ -24,12 +24,19 @@ cmake --build "$BUILD_DIR" -- -j8
 echo ">>> JNI library built successfully."
 
 # --- Find and copy the JNI library ---
-# On macOS, the swig-generated JNI lib is .jnilib
-JNI_LIB_NAME="libnotificationcenter.jnilib"
+# On macOS, the swig-generated JNI lib is .jnilib, on Linux it's .so
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    JNI_LIB_NAME="libnotificationcenter.jnilib"
+else
+    JNI_LIB_NAME="libnotificationcenter.so"
+fi
+
 JNI_LIB_PATH=$(find "$BUILD_DIR" -name "$JNI_LIB_NAME")
 
 if [ -z "$JNI_LIB_PATH" ]; then
     echo ">>> Error: Could not find the built JNI library ($JNI_LIB_NAME)."
+    echo ">>> Available files in $BUILD_DIR:"
+    find "$BUILD_DIR" -name "*.so" -o -name "*.jnilib" | head -10
     exit 1
 fi
 

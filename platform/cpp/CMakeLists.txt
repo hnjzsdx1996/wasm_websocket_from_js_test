@@ -3,6 +3,9 @@ project(example_cpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# 查找 pthread 库
+find_package(Threads REQUIRED)
+
 # 包含第三方库配置
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/ThirdParty.cmake)
 
@@ -20,7 +23,7 @@ target_include_directories(example_cpp PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/error
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/internal
 )
-target_link_libraries(example_cpp NotificationCenterSDK) 
+target_link_libraries(example_cpp NotificationCenterSDK Threads::Threads) 
 
 add_executable(thread_pool_test thread_pool_test.cpp)
 target_include_directories(thread_pool_test PRIVATE
@@ -33,7 +36,7 @@ target_include_directories(thread_pool_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/error
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/internal
 )
-target_link_libraries(thread_pool_test NotificationCenterSDK) 
+target_link_libraries(thread_pool_test NotificationCenterSDK Threads::Threads) 
 
 add_executable(timer_test timer_test.cpp)
 target_include_directories(timer_test PRIVATE
@@ -46,7 +49,7 @@ target_include_directories(timer_test PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/error
     ${CMAKE_CURRENT_SOURCE_DIR}/../../src/third_party/AIGCJson/include/rapidjson/internal
 )
-target_link_libraries(timer_test NotificationCenterSDK pthread)
+target_link_libraries(timer_test NotificationCenterSDK Threads::Threads)
 
 
 add_executable(libwebsockets_test libwebsockets_test.cpp)
@@ -69,6 +72,7 @@ target_link_libraries(libwebsockets_test
     NotificationCenterSDK
     ${OPENSSL_LIBRARIES}
     ${LIBWEBSOCKETS_ABS_PATH}
+    Threads::Threads
 )
 
 
@@ -92,4 +96,5 @@ target_link_libraries(notification_center_sdk_test
         NotificationCenterSDK
         ${OPENSSL_LIBRARIES}
         ${LIBWEBSOCKETS_ABS_PATH}
+        Threads::Threads
 )

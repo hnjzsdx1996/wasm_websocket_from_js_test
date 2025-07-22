@@ -9,6 +9,7 @@ set(CMAKE_JAVA_COMPILE_FLAGS "-source 1.8 -target 1.8")
 
 find_package(JNI REQUIRED)
 find_package(SWIG REQUIRED)
+find_package(Threads REQUIRED)
 
 include(UseSWIG)
 
@@ -68,4 +69,5 @@ target_include_directories(${SWIG_MODULE_NAME} PUBLIC
 target_link_libraries(${SWIG_MODULE_NAME} PRIVATE
         NotificationCenterSDK
         ${JNI_LIBRARIES}
+        Threads::Threads
 )
