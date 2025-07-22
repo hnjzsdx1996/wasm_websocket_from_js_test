@@ -12,11 +12,6 @@ void sdk_destroy(sdk_handle h) {
     delete static_cast<SDKManager*>(h);
 }
 
-void sdk_configure(sdk_handle h, const char* config_str) {
-    if (!h) return;
-    static_cast<SDKManager*>(h)->configure(std::string(config_str));
-}
-
 void sdk_connect(sdk_handle h, const char* url) {
     if (!h) return;
     auto strong_ws_holder = static_cast<SDKManager*>(h)->getWebSocketHolder().lock();

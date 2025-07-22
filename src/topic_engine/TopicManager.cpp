@@ -8,9 +8,8 @@
 #include "base/utils/json_utils.h"
 
 
-void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder> &holder) {
+void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& holder) {
     ws_holder_ = holder;
-    // 注册消息回调监听
     auto strong_ws_holder = ws_holder_.lock();
     if (strong_ws_holder == nullptr) {
         NC_LOG_INFO("[TopicManager] setWebSocketHolder failed");

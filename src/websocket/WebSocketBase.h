@@ -2,8 +2,10 @@
 #include <string>
 #include <functional>
 #include <list>
+#include <mutex>
 
-// WebSocket抽象基类，便于未来C++原生实现
+// WebSocket抽象基类
+// 支持多种 websocket 链路（JS 平台使用注入方式，其他平台使用内置 libwebsockets 库）
 class WebSocketBase {
 public:
     using MessageCallback = std::function<void(const std::string&)>;
@@ -19,6 +21,7 @@ public:
     virtual bool isOpen() const = 0;
 
     void setOnMessage(MessageCallback cb);
+    void clearMessageCallbacks(); // 清除所有消息回调
     void setOnOpen(OpenCallback cb);
     void setOnClose(CloseCallback cb);
     void setOnError(ErrorCallback cb);

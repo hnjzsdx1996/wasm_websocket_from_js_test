@@ -8,22 +8,22 @@
 
 package com.example.notificationcentersdk;
 
-public class SWIGTYPE_p_OnSubscribeResultCallback {
+public class SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t {
   private transient long swigCPtr;
 
-  protected SWIGTYPE_p_OnSubscribeResultCallback(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
+  protected SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t(long cPtr, @SuppressWarnings("unused") boolean futureUse) {
     swigCPtr = cPtr;
   }
 
-  protected SWIGTYPE_p_OnSubscribeResultCallback() {
+  protected SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t() {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_OnSubscribeResultCallback obj) {
+  protected static long getCPtr(SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 
-  protected static long swigRelease(SWIGTYPE_p_OnSubscribeResultCallback obj) {
+  protected static long swigRelease(SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }

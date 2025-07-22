@@ -9,6 +9,36 @@
 #ifndef SWIG_notificationcenter_WRAP_H_
 #define SWIG_notificationcenter_WRAP_H_
 
+class SwigDirector_AircraftMessageCallback : public AircraftMessageCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftMessageCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftMessageCallback();
+    virtual void onMessage(std::string const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_ResultCallback : public ResultCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_ResultCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_ResultCallback();
+    virtual void onResult(long result);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
 class SwigDirector_ConnectionListener : public WebsocketEvent, public Swig::Director {
 
 public:

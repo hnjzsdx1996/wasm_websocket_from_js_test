@@ -44,20 +44,20 @@ public class SDKManager {
     this(notificationcenterJNI.new_SDKManager(), true);
   }
 
-  public void configure(String config) {
-    notificationcenterJNI.SDKManager_configure(swigCPtr, this, config);
+  public void init(SdkInitializeInfo info) {
+    notificationcenterJNI.SDKManager_init(swigCPtr, this, SdkInitializeInfo.getCPtr(info), info);
   }
 
-  public void connect(String url) {
-    notificationcenterJNI.SDKManager_connect(swigCPtr, this, url);
+  public boolean isInit() {
+    return notificationcenterJNI.SDKManager_isInit(swigCPtr, this);
   }
 
   public void setWebsocketEventListener(ConnectionListener listener) {
     notificationcenterJNI.SDKManager_setWebsocketEventListener(swigCPtr, this, ConnectionListener.getCPtr(listener), listener);
   }
 
-  public void setWebSocket(SWIGTYPE_p_WebSocketBase ws) {
-    notificationcenterJNI.SDKManager_setWebSocket(swigCPtr, this, SWIGTYPE_p_WebSocketBase.getCPtr(ws));
+  public void connect(String url) {
+    notificationcenterJNI.SDKManager_connect(swigCPtr, this, url);
   }
 
   public BusinessManager getBusinessManager() {
@@ -65,8 +65,8 @@ public class SDKManager {
     return (cPtr == 0) ? null : new BusinessManager(cPtr, true);
   }
 
-  public long poll() {
-    return notificationcenterJNI.SDKManager_poll(swigCPtr, this);
+  public static long poll() {
+    return notificationcenterJNI.SDKManager_poll();
   }
 
 }

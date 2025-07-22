@@ -20,7 +20,6 @@ void sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_data
 
 sdk_handle sdk_create();
 void sdk_destroy(sdk_handle h);
-void sdk_configure(sdk_handle h, const char* config_str);
 void sdk_connect(sdk_handle h, const char* url);
 void sdk_send(sdk_handle h, const char* msg);
 void sdk_close(sdk_handle h);

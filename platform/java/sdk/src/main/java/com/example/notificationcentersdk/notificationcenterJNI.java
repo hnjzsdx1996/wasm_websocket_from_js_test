@@ -9,19 +9,39 @@
 package com.example.notificationcentersdk;
 
 public class notificationcenterJNI {
+  public final static native void delete_AircraftMessageCallback(long jarg1);
+  public final static native void AircraftMessageCallback_onMessage(long jarg1, AircraftMessageCallback jarg1_, String jarg2);
+  public final static native long new_AircraftMessageCallback();
+  public final static native void AircraftMessageCallback_director_connect(AircraftMessageCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftMessageCallback_change_ownership(AircraftMessageCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_ResultCallback(long jarg1);
+  public final static native void ResultCallback_onResult(long jarg1, ResultCallback jarg1_, int jarg2);
+  public final static native long new_ResultCallback();
+  public final static native void ResultCallback_director_connect(ResultCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void ResultCallback_change_ownership(ResultCallback obj, long cptr, boolean take_or_release);
+  public final static native void SdkInitializeInfo_log_path_set(long jarg1, SdkInitializeInfo jarg1_, String jarg2);
+  public final static native String SdkInitializeInfo_log_path_get(long jarg1, SdkInitializeInfo jarg1_);
+  public final static native void SdkInitializeInfo_log_level_set(long jarg1, SdkInitializeInfo jarg1_, int jarg2);
+  public final static native int SdkInitializeInfo_log_level_get(long jarg1, SdkInitializeInfo jarg1_);
+  public final static native long new_SdkInitializeInfo__SWIG_0(String jarg1, int jarg2);
+  public final static native long new_SdkInitializeInfo__SWIG_1(String jarg1);
+  public final static native long new_SdkInitializeInfo__SWIG_2();
+  public final static native void delete_SdkInitializeInfo(long jarg1);
   public final static native long new_SDKManager();
   public final static native void delete_SDKManager(long jarg1);
-  public final static native void SDKManager_configure(long jarg1, SDKManager jarg1_, String jarg2);
-  public final static native void SDKManager_connect(long jarg1, SDKManager jarg1_, String jarg2);
+  public final static native void SDKManager_init(long jarg1, SDKManager jarg1_, long jarg2, SdkInitializeInfo jarg2_);
+  public final static native boolean SDKManager_isInit(long jarg1, SDKManager jarg1_);
   public final static native void SDKManager_setWebsocketEventListener(long jarg1, SDKManager jarg1_, long jarg2, ConnectionListener jarg2_);
-  public final static native void SDKManager_setWebSocket(long jarg1, SDKManager jarg1_, long jarg2);
+  public final static native void SDKManager_connect(long jarg1, SDKManager jarg1_, String jarg2);
   public final static native long SDKManager_getBusinessManager(long jarg1, SDKManager jarg1_);
-  public final static native long SDKManager_poll(long jarg1, SDKManager jarg1_);
+  public final static native long SDKManager_poll();
   public final static native long new_BusinessManager(long jarg1);
   public final static native void BusinessManager_Send(long jarg1, BusinessManager jarg1_, String jarg2);
   public final static native void BusinessManager_Observe(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native void BusinessManager_CancelObserve(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native long BusinessManager_ListenAircraftLocation(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native int BusinessManager_listenAircraftLocationJava(long jarg1, BusinessManager jarg1_, long jarg2, AircraftMessageCallback jarg2_, long jarg3, ResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native void BusinessManager_cancelObserveJava(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
   public final static native void ConnectionListener_OnMessage(long jarg1, ConnectionListener jarg1_, String jarg2);
@@ -32,6 +52,12 @@ public class notificationcenterJNI {
   public final static native void ConnectionListener_director_connect(ConnectionListener obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void ConnectionListener_change_ownership(ConnectionListener obj, long cptr, boolean take_or_release);
 
+  public static void SwigDirector_AircraftMessageCallback_onMessage(AircraftMessageCallback jself, String message) {
+    jself.onMessage(message);
+  }
+  public static void SwigDirector_ResultCallback_onResult(ResultCallback jself, int result) {
+    jself.onResult(result);
+  }
   public static void SwigDirector_ConnectionListener_OnMessage(ConnectionListener jself, String message) {
     jself.OnMessage(message);
   }
