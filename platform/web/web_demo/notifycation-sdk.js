@@ -4,6 +4,7 @@
 const NotifycationSDKManager = (function() {
     let sdk = null;
     let sdkHandle = null;
+    let wsHandle = null;
     let pollingInterval = null;
     let isPolling = false;
     let log = function(msg) { console.log(msg); };
@@ -24,41 +25,40 @@ const NotifycationSDKManager = (function() {
             NotificationCenterSDK().then(function(ModuleInstance) {
                 sdk = ModuleInstance;
                 sdkHandle = sdk._js_sdk_create();
-                // 配置参数
-                const configStr = JSON.stringify(configObj || { sn: "1234567890", ping_pong_interval: 100 });
-                const configPtr = sdk._malloc(sdk.lengthBytesUTF8(configStr) + 1);
-                sdk.stringToUTF8(configStr, configPtr, sdk.lengthBytesUTF8(configStr) + 1);
-                sdk._js_sdk_configure(sdkHandle, configPtr);
-                sdk._free(configPtr);
+                
+                // 初始化SDK
+                const logPath = configObj.log_path || "";
+                const logLevel = configObj.log_level || 4; // SDK_LOG_INFO
+                const logPathPtr = sdk._malloc(sdk.lengthBytesUTF8(logPath) + 1);
+                sdk.stringToUTF8(logPath, logPathPtr, sdk.lengthBytesUTF8(logPath) + 1);
+                sdk._js_sdk_init(sdkHandle, logPathPtr, logLevel);
+                sdk._free(logPathPtr);
+                
                 // 创建 JSWebSocket 并注入
-                const wsHandle = sdk._js_sdk_create_js_websocket();
+                wsHandle = sdk._js_sdk_create_js_websocket();
                 sdk._js_sdk_set_websocket(sdkHandle, wsHandle);
-                // 注册回调
-                if (callbacks.onMessage) {
-                    // 通过接口调用获取数据，不再提供通用的全量消息回调
-                    // sdk._js_sdk_set_message_callback(sdkHandle, sdk.addFunction(function(msgPtr, userData) {
-                    //     const msg = sdk.UTF8ToString(msgPtr);
-                    //     callbacks.onMessage(msg);
-                    //     sdk._free(msgPtr);
-                    // }, 'vii'), 0);
-                }
-                if (callbacks.onOpen) {
-                    sdk._js_sdk_set_open_callback(sdkHandle, sdk.addFunction(function(userData) {
-                        callbacks.onOpen();
-                    }, 'vi'), 0);
-                }
-                if (callbacks.onClose) {
-                    sdk._js_sdk_set_close_callback(sdkHandle, sdk.addFunction(function(userData) {
-                        callbacks.onClose();
-                    }, 'vi'), 0);
-                }
-                if (callbacks.onError) {
-                    sdk._js_sdk_set_error_callback(sdkHandle, sdk.addFunction(function(errPtr, userData) {
-                        const err = sdk.UTF8ToString(errPtr);
-                        callbacks.onError(err);
-                        sdk._free(errPtr);
-                    }, 'vii'), 0);
-                }
+                
+                // 注册WebSocket事件监听器
+                const onMessagePtr = callbacks.onMessage ? sdk.addFunction(function(msgPtr) {
+                    const msg = sdk.UTF8ToString(msgPtr);
+                    callbacks.onMessage(msg);
+                }, 'vi') : 0;
+                
+                const onOpenPtr = callbacks.onOpen ? sdk.addFunction(function() {
+                    callbacks.onOpen();
+                }, 'v') : 0;
+                
+                const onClosePtr = callbacks.onClose ? sdk.addFunction(function() {
+                    callbacks.onClose();
+                }, 'v') : 0;
+                
+                const onErrorPtr = callbacks.onError ? sdk.addFunction(function(errPtr) {
+                    const err = sdk.UTF8ToString(errPtr);
+                    callbacks.onError(err);
+                }, 'vi') : 0;
+                
+                sdk._js_sdk_set_websocket_event_listener(sdkHandle, onMessagePtr, onOpenPtr, onClosePtr, onErrorPtr);
+                
                 log('WASM加载完成, 可操作WebSocket');
                 resolve();
             }).catch(reject);
@@ -66,7 +66,7 @@ const NotifycationSDKManager = (function() {
     }
 
     function connect(url) {
-        if (!sdk || !sdkHandle) {
+        if (!sdk || !sdkHandle || !wsHandle) {
             log('WASM未加载完成');
             return;
         }
@@ -78,19 +78,22 @@ const NotifycationSDKManager = (function() {
     }
 
     function sendMsg(msg) {
-        if (!sdk || !sdkHandle) {
+        if (!sdk || !wsHandle) {
             log('WASM未加载完成');
             return;
         }
+        // 通过WebSocket发送消息
         const msgPtr = sdk._malloc(sdk.lengthBytesUTF8(msg) + 1);
         sdk.stringToUTF8(msg, msgPtr, sdk.lengthBytesUTF8(msg) + 1);
-        sdk._js_sdk_send(sdkHandle, msgPtr);
+        sdk._js_websocket_send(wsHandle, msgPtr);
         sdk._free(msgPtr);
         log('发送: ' + msg);
     }
 
     function close() {
-        if (sdk && sdkHandle) sdk._js_sdk_close(sdkHandle);
+        if (sdk && wsHandle) {
+            sdk._js_websocket_close(wsHandle);
+        }
         log('已请求断开');
     }
 
@@ -116,21 +119,9 @@ const NotifycationSDKManager = (function() {
             log('WASM未加载完成');
             return;
         }
-        const msgCbPtr = sdk.addFunction(function(msgPtr, userData) {
-            const msg = sdk.UTF8ToString(msgPtr);
-            msgCb && msgCb(msg);
-        }, 'vii');
-        const resultCbPtr = sdk.addFunction(function(result, userData) {
-            resultCb && resultCb(result);
-        }, 'vii');
-        const deviceSnLen = sdk.lengthBytesUTF8(deviceSn) + 1;
-        const deviceSnPtr = sdk._malloc(deviceSnLen);
-        sdk.stringToUTF8(deviceSn, deviceSnPtr, deviceSnLen);
-        // 调用并获取listenId
-        const listenId = sdk._js_sdk_listen_aircraft_location(sdkHandle, msgCbPtr, 0, resultCbPtr, 0, deviceSnPtr, freq);
-        sdk._free(deviceSnPtr);
-        log('监听ID: ' + listenId);
-        return listenId;
+        // 注意：新的API中没有listen_aircraft_location接口
+        log('监听飞机位置功能在新的API中已被移除');
+        return -1;
     }
 
     function cancelObserve(listenId) {

@@ -6010,6 +6010,10 @@ async function createWasm() {
       return ret;
     };
 
+
+
+
+
 PThread.init();;
 
   FS.createPreloadedFile = FS_createPreloadedFile;
@@ -6575,6 +6579,10 @@ unexportedSymbols.forEach(unexportedRuntimeSymbol);
 
   // End runtime exports
   // Begin JS library exports
+  Module['_js_websocket_close'] = _js_websocket_close;
+  Module['_js_websocket_connect'] = _js_websocket_connect;
+  Module['_js_websocket_is_open'] = _js_websocket_is_open;
+  Module['_js_websocket_send'] = _js_websocket_send;
   // End JS library exports
 
 // end include: postlibrary.js
@@ -6617,17 +6625,12 @@ var _js_websocket_on_error = Module['_js_websocket_on_error'] = makeInvalidEarly
 var _js_sdk_create = Module['_js_sdk_create'] = makeInvalidEarlyAccess('_js_sdk_create');
 var _js_sdk_create_js_websocket = Module['_js_sdk_create_js_websocket'] = makeInvalidEarlyAccess('_js_sdk_create_js_websocket');
 var _js_sdk_destroy = Module['_js_sdk_destroy'] = makeInvalidEarlyAccess('_js_sdk_destroy');
-var _js_sdk_configure = Module['_js_sdk_configure'] = makeInvalidEarlyAccess('_js_sdk_configure');
+var _js_sdk_init = Module['_js_sdk_init'] = makeInvalidEarlyAccess('_js_sdk_init');
+var _js_sdk_is_init = Module['_js_sdk_is_init'] = makeInvalidEarlyAccess('_js_sdk_is_init');
 var _js_sdk_connect = Module['_js_sdk_connect'] = makeInvalidEarlyAccess('_js_sdk_connect');
-var _js_sdk_send = Module['_js_sdk_send'] = makeInvalidEarlyAccess('_js_sdk_send');
-var _js_sdk_close = Module['_js_sdk_close'] = makeInvalidEarlyAccess('_js_sdk_close');
 var _js_sdk_set_websocket = Module['_js_sdk_set_websocket'] = makeInvalidEarlyAccess('_js_sdk_set_websocket');
-var _js_sdk_set_message_callback = Module['_js_sdk_set_message_callback'] = makeInvalidEarlyAccess('_js_sdk_set_message_callback');
-var _js_sdk_set_open_callback = Module['_js_sdk_set_open_callback'] = makeInvalidEarlyAccess('_js_sdk_set_open_callback');
-var _js_sdk_set_close_callback = Module['_js_sdk_set_close_callback'] = makeInvalidEarlyAccess('_js_sdk_set_close_callback');
-var _js_sdk_set_error_callback = Module['_js_sdk_set_error_callback'] = makeInvalidEarlyAccess('_js_sdk_set_error_callback');
+var _js_sdk_set_websocket_event_listener = Module['_js_sdk_set_websocket_event_listener'] = makeInvalidEarlyAccess('_js_sdk_set_websocket_event_listener');
 var _js_sdk_poll = Module['_js_sdk_poll'] = makeInvalidEarlyAccess('_js_sdk_poll');
-var _js_sdk_listen_aircraft_location = Module['_js_sdk_listen_aircraft_location'] = makeInvalidEarlyAccess('_js_sdk_listen_aircraft_location');
 var _js_sdk_cancel_observe = Module['_js_sdk_cancel_observe'] = makeInvalidEarlyAccess('_js_sdk_cancel_observe');
 var __emscripten_tls_init = makeInvalidEarlyAccess('__emscripten_tls_init');
 var __emscripten_thread_init = makeInvalidEarlyAccess('__emscripten_thread_init');
@@ -6660,17 +6663,12 @@ function assignWasmExports(wasmExports) {
   Module['_js_sdk_create'] = _js_sdk_create = createExportWrapper('js_sdk_create', 0);
   Module['_js_sdk_create_js_websocket'] = _js_sdk_create_js_websocket = createExportWrapper('js_sdk_create_js_websocket', 0);
   Module['_js_sdk_destroy'] = _js_sdk_destroy = createExportWrapper('js_sdk_destroy', 1);
-  Module['_js_sdk_configure'] = _js_sdk_configure = createExportWrapper('js_sdk_configure', 2);
+  Module['_js_sdk_init'] = _js_sdk_init = createExportWrapper('js_sdk_init', 3);
+  Module['_js_sdk_is_init'] = _js_sdk_is_init = createExportWrapper('js_sdk_is_init', 1);
   Module['_js_sdk_connect'] = _js_sdk_connect = createExportWrapper('js_sdk_connect', 2);
-  Module['_js_sdk_send'] = _js_sdk_send = createExportWrapper('js_sdk_send', 2);
-  Module['_js_sdk_close'] = _js_sdk_close = createExportWrapper('js_sdk_close', 1);
   Module['_js_sdk_set_websocket'] = _js_sdk_set_websocket = createExportWrapper('js_sdk_set_websocket', 2);
-  Module['_js_sdk_set_message_callback'] = _js_sdk_set_message_callback = createExportWrapper('js_sdk_set_message_callback', 3);
-  Module['_js_sdk_set_open_callback'] = _js_sdk_set_open_callback = createExportWrapper('js_sdk_set_open_callback', 3);
-  Module['_js_sdk_set_close_callback'] = _js_sdk_set_close_callback = createExportWrapper('js_sdk_set_close_callback', 3);
-  Module['_js_sdk_set_error_callback'] = _js_sdk_set_error_callback = createExportWrapper('js_sdk_set_error_callback', 3);
+  Module['_js_sdk_set_websocket_event_listener'] = _js_sdk_set_websocket_event_listener = createExportWrapper('js_sdk_set_websocket_event_listener', 5);
   Module['_js_sdk_poll'] = _js_sdk_poll = createExportWrapper('js_sdk_poll', 1);
-  Module['_js_sdk_listen_aircraft_location'] = _js_sdk_listen_aircraft_location = createExportWrapper('js_sdk_listen_aircraft_location', 7);
   Module['_js_sdk_cancel_observe'] = _js_sdk_cancel_observe = createExportWrapper('js_sdk_cancel_observe', 2);
   __emscripten_tls_init = createExportWrapper('_emscripten_tls_init', 0);
   __emscripten_thread_init = createExportWrapper('_emscripten_thread_init', 6);

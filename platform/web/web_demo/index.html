@@ -12,6 +12,7 @@
         .url-container > * { margin: 0; }
         #msgInput { width: 100%; height: 100px; font-family: monospace; font-size: 12px; resize: vertical; }
         .message-container { margin-bottom: 1em; }
+        .deprecated { color: #999; font-style: italic; }
     </style>
 </head>
 <body>
@@ -35,11 +36,11 @@
         <textarea id="msgInput" placeholder="输入要发送的消息">{"timestamp":1752374563734,"topic":"subscribe","data":[{"sn":"drone_001","topic_list":["topic1"]}],"uuid":"54c56d3c-6fbd-4c0b-b236-b2107e85d30f"}</textarea>
         <div style="margin-top: 0.5em;">
             <button onclick="sendMsg()">发送</button>
-            <button onclick="listenAircraftLocation()">监听飞机位置</button>
+            <button onclick="listenAircraftLocation()" class="deprecated">监听飞机位置 (已移除)</button>
         </div>
         <div style="margin-top: 0.5em;">
             <input id="listenIdInput" type="number" placeholder="输入ListenId" style="width:160px;">
-            <button onclick="cancelObserve()">取消监听</button>
+            <button onclick="cancelObserve()" class="deprecated">取消监听 (已移除)</button>
         </div>
     </div>
     <div id="log"></div>
@@ -125,30 +126,18 @@
             }
         }
         function listenAircraftLocation() {
-            const listenId = NotifycationSDKManager.listenAircraftLocation(
-                'drone_001',
-                1,
-                function(msg) { log('飞机位置消息: ' + msg); },
-                function(result) { log('订阅结果: ' + result); }
-            );
-            log('listenAircraftLocation 监听ID: ' + listenId);
+            log('监听飞机位置功能在新的API中已被移除');
         }
         function cancelObserve() {
-            const listenId = parseInt(document.getElementById('listenIdInput').value);
-            if (isNaN(listenId)) {
-                log('请输入有效的ListenId');
-                return;
-            }
-            NotifycationSDKManager.cancelObserve(listenId);
+            log('取消监听功能在新的API中已被移除');
         }
         // SDK加载与初始化
         window.addEventListener('load', function() {
             NotifycationSDKManager.setLogger(log);
             NotifycationSDKManager.loadAndInit(
-                { sn: "1234567890", ping_pong_interval: 100 },
+                { log_path: "", log_level: 4 }, // 使用新的初始化参数
                 {
                     onMessage: function(msg) {
-                        // todo:sdk 后续将会取消此接口，消息监听通过订阅进行，不可以监听全量消息
                         log('收到: ' + msg);
                     },
                     onOpen: function() {

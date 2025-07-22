@@ -2,7 +2,7 @@
 set -e
 
 # 加载 emsdk 环境
-source ../emsdk/emsdk_env.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../emsdk/emsdk_env.sh"
 
 # 工程根目录
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )/../../.." && pwd)"

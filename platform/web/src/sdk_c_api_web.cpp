@@ -20,8 +20,16 @@ void js_sdk_destroy(sdk_handle h) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void js_sdk_configure(sdk_handle h, const char* config_str) {
-    ::sdk_configure(h, config_str);
+void js_sdk_init(sdk_handle h, const char* log_path, int log_level) {
+    sdk_initialize_info_t info;
+    info.log_path = log_path;
+    info.log_level = static_cast<sdk_log_level_t>(log_level);
+    ::sdk_init(h, &info);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int js_sdk_is_init(sdk_handle h) {
+    return ::sdk_is_init(h);
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -30,48 +38,22 @@ void js_sdk_connect(sdk_handle h, const char* url) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-void js_sdk_send(sdk_handle h, const char* msg) {
-    ::sdk_send(h, msg);
-}
-
-EMSCRIPTEN_KEEPALIVE
-void js_sdk_close(sdk_handle h) {
-    ::sdk_close(h);
-}
-
-EMSCRIPTEN_KEEPALIVE
 void js_sdk_set_websocket(sdk_handle h, websocket_handle ws) {
     ::sdk_set_websocket(h, ws);
 }
 
 EMSCRIPTEN_KEEPALIVE
-void js_sdk_set_message_callback(sdk_handle h, sdk_message_callback cb, void* user_data) {
-    ::sdk_set_message_callback(h, cb, user_data);
-}
-
-EMSCRIPTEN_KEEPALIVE
-void js_sdk_set_open_callback(sdk_handle h, sdk_open_callback cb, void* user_data) {
-    ::sdk_set_open_callback(h, cb, user_data);
-}
-
-EMSCRIPTEN_KEEPALIVE
-void js_sdk_set_close_callback(sdk_handle h, sdk_close_callback cb, void* user_data) {
-    ::sdk_set_close_callback(h, cb, user_data);
-}
-
-EMSCRIPTEN_KEEPALIVE
-void js_sdk_set_error_callback(sdk_handle h, sdk_error_callback cb, void* user_data) {
-    ::sdk_set_error_callback(h, cb, user_data);
+void js_sdk_set_websocket_event_listener(sdk_handle h, 
+                                        websocket_on_message_callback on_message,
+                                        websocket_on_open_callback on_open,
+                                        websocket_on_close_callback on_close,
+                                        websocket_on_error_callback on_error) {
+    ::sdk_set_websocket_event_listener(h, on_message, on_open, on_close, on_error);
 }
 
 EMSCRIPTEN_KEEPALIVE
 size_t js_sdk_poll(sdk_handle h) {
     return ::sdk_poll(h);
-}
-
-EMSCRIPTEN_KEEPALIVE
-int js_sdk_listen_aircraft_location(sdk_handle h, sdk_listen_message_callback on_messages_callback, void* msg_user_data, sdk_listen_result_callback on_result_callback, void* result_user_data, const char* device_sn, int freq) {
-    return ::sdk_listen_aircraft_location(h, on_messages_callback, msg_user_data, on_result_callback, result_user_data, device_sn, freq);
 }
 
 EMSCRIPTEN_KEEPALIVE
