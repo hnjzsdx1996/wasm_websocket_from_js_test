@@ -90,14 +90,12 @@ if(DEFINED USE_LIBWEBSOCKETS AND USE_LIBWEBSOCKETS)
     # 链接顺序很重要：先链接 libwebsockets，再链接 OpenSSL
     target_link_libraries(NotificationCenterSDK PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
-        ssl
-        crypto
+        ${OPENSSL_LIBRARIES}
         Threads::Threads
     )
     target_link_libraries(NotificationCenterSDKShared PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libwebsockets/build/lib/libwebsockets.a
-        ssl
-        crypto
+        ${OPENSSL_LIBRARIES}
         Threads::Threads
     )
 else()
