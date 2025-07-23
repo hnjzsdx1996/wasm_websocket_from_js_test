@@ -67,6 +67,14 @@ public:
     AIGC_JSON_HELPER(device_sn, topics);
 };
 
+class SubscribeTopicMessageData {
+public:
+    NotifactionFrequency notify_strategy = NotifactionFrequency_Any;
+    std::vector<SubscribeItems> items;
+
+    AIGC_JSON_HELPER(notify_strategy, items);
+};
+
 class SubscribeTopicWrapper : public TopicMessageWrapper {
 public:
 
@@ -74,8 +82,8 @@ public:
         message_type = "subscribe";
         need_replay = true;
         version = "1";
-        notify_strategy = freq;
-        items.push_back({
+        message_data.notify_strategy = freq;
+        message_data.items.push_back({
             .device_sn = sn,
             .topics = {topic},
         });
@@ -88,10 +96,9 @@ public:
         return true;
     }
 
-    NotifactionFrequency notify_strategy;
-    std::vector<SubscribeItems> items;
+    SubscribeTopicMessageData message_data;
 
-    AIGC_JSON_HELPER(notify_strategy, items);
+    AIGC_JSON_HELPER(message_data);
     AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
 
     std::string ToJsonString() override {
@@ -105,6 +112,40 @@ public:
     }
 };
 
+class SubscribeTopicReplyMessageData {
+public:
+    int code = 0;
+    std::string message;
+
+    AIGC_JSON_HELPER(code, message);
+};
+
+class SubscribeTopicReplyWrapper : public TopicMessageWrapper {
+public:
+
+    SubscribeTopicReplyMessageData message_data;
+
+    AIGC_JSON_HELPER(message_data);
+    AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
+
+    std::string ToJsonString() override {
+        std::string err, json_string;
+        aigc::JsonHelper::ObjectToJson(*this, json_string, &err);
+        return json_string;
+    }
+    void FromJsonString(const std::string& json) override {
+        std::string err;
+        aigc::JsonHelper::JsonToObject(*this, json, {}, &err);
+    }
+};
+
+class UnSubscribeTopicMessageData {
+public:
+    std::vector<SubscribeItems> items;
+
+    AIGC_JSON_HELPER(items);
+};
+
 class UnSubscribeTopicWrapper : public TopicMessageWrapper {
 public:
 
@@ -112,7 +153,7 @@ public:
         message_type = "unsubscribe";
         need_replay = true;
         version = "1";
-        items.push_back({
+        message_data.items.push_back({
             .device_sn = sn,
             .topics = {topic},
         });
@@ -125,9 +166,9 @@ public:
         return true;
     }
 
-    std::vector<SubscribeItems> items;
+    UnSubscribeTopicMessageData message_data;
 
-    AIGC_JSON_HELPER(items);
+    AIGC_JSON_HELPER(message_data);
     AIGC_JSON_HELPER_BASE((TopicMessageWrapper *)this)
 
     std::string ToJsonString() override {

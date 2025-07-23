@@ -29,7 +29,11 @@ class MyDeviceOsdMessageCallback extends DeviceOsdCallback {
     @Override
     public void invoke(DeviceOsd message) {
         System.out.println("[Java] Received device OSD message:");
-        System.out.println("  - Mode Code (模式代码): " + message.getMode_code());
+        System.out.println("  - Device SN (设备序列号): " + message.getSn());
+        System.out.println("  - Mode Code (模式代码): " + message.getHost().getMode_code());
+        System.out.println("  - Attitude Head (机头朝向角度): " + message.getHost().getAttitude_head());
+        System.out.println("  - Attitude Pitch (俯仰轴角度): " + message.getHost().getAttitude_pitch());
+        System.out.println("  - Attitude Roll (横滚轴角度): " + message.getHost().getAttitude_roll());
     }
 }
 
@@ -140,6 +144,11 @@ public class Main {
         String[] deviceSNs = {
             "8UUXN2D00A00VL",
             "1581F8HGD24BN0010286",
+            "8UUDMAQ00A0121",
+            "6QCDL820020093",
+            "8PHDM8L0010322",
+            "8UUDMAQ00A0138",
+            "8UUDMAQ00A0047",
         };
         NotificationFrequency frequency = NotificationFrequency.PUSH_1S;
         

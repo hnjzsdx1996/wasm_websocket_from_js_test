@@ -886,13 +886,27 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
+// 定义新的DeviceOsdHost类
+class DeviceOsdHost {
+public:
+    int mode_code; // 模式代码
+    double attitude_head; // 机头朝向角度
+    double attitude_pitch; // 俯仰轴角度
+    double attitude_roll; // 横滚轴角度
+    
+    DeviceOsdHost() : mode_code(0), attitude_head(0.0), attitude_pitch(0.0), attitude_roll(0.0) {}
+    DeviceOsdHost(int mode_code, double attitude_head, double attitude_pitch, double attitude_roll) 
+        : mode_code(mode_code), attitude_head(attitude_head), attitude_pitch(attitude_pitch), attitude_roll(attitude_roll) {}
+};
+
 // 定义新的DeviceOsd类
 class DeviceOsd {
 public:
-    int mode_code; // 模式代码
+    DeviceOsdHost host; // 主机信息
+    std::string sn; // 设备序列号
     
-    DeviceOsd() : mode_code(0) {}
-    DeviceOsd(int mode_code) : mode_code(mode_code) {}
+    DeviceOsd() {}
+    DeviceOsd(const DeviceOsdHost& host, const std::string& sn) : host(host), sn(sn) {}
 };
 
 // 定义通知频率枚举
@@ -1075,7 +1089,9 @@ SWIGINTERN long BusinessManager_ListenDeviceOsd__SWIG_1(BusinessManager *self,De
         auto msg_cb = [onSubscribeMessageCallback](const DeviceOsdMsg& msg) {
             if (onSubscribeMessageCallback) {
                 // 将DeviceOsdMsg转换为DeviceOsd
-                DeviceOsd device_osd(msg.mode_code);
+                DeviceOsdHost host(msg.host.mode_code, msg.host.attitude_head, 
+                                 msg.host.attitude_pitch, msg.host.attitude_roll);
+                DeviceOsd device_osd(host, msg.sn);
                 onSubscribeMessageCallback->invoke(device_osd);
             }
         };
@@ -1892,30 +1908,221 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
-SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1mode_1code_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
-  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1mode_1code_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
   int arg2 ;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
-  arg1 = *(DeviceOsd **)&jarg1; 
+  arg1 = *(DeviceOsdHost **)&jarg1; 
   arg2 = (int)jarg2; 
   if (arg1) (arg1)->mode_code = arg2;
 }
 
 
-SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1mode_1code_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1mode_1code_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
-  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
   int result;
   
   (void)jenv;
   (void)jcls;
   (void)jarg1_;
-  arg1 = *(DeviceOsd **)&jarg1; 
+  arg1 = *(DeviceOsdHost **)&jarg1; 
   result = (int) ((arg1)->mode_code);
   jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1head_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->attitude_head = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1head_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  result = (double) ((arg1)->attitude_head);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1pitch_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->attitude_pitch = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1pitch_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  result = (double) ((arg1)->attitude_pitch);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1roll_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->attitude_roll = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdHost_1attitude_1roll_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  result = (double) ((arg1)->attitude_roll);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsdHost_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  DeviceOsdHost *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (DeviceOsdHost *)new DeviceOsdHost();
+  *(DeviceOsdHost **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsdHost_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1, jdouble jarg2, jdouble jarg3, jdouble jarg4) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  double arg2 ;
+  double arg3 ;
+  double arg4 ;
+  DeviceOsdHost *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  arg2 = (double)jarg2; 
+  arg3 = (double)jarg3; 
+  arg4 = (double)jarg4; 
+  result = (DeviceOsdHost *)new DeviceOsdHost(arg1,arg2,arg3,arg4);
+  *(DeviceOsdHost **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1DeviceOsdHost(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  DeviceOsdHost *arg1 = (DeviceOsdHost *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(DeviceOsdHost **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1host_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  DeviceOsdHost *arg2 = (DeviceOsdHost *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  arg2 = *(DeviceOsdHost **)&jarg2; 
+  if (arg1) (arg1)->host = *arg2;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1host_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  DeviceOsdHost *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  result = (DeviceOsdHost *)& ((arg1)->host);
+  *(DeviceOsdHost **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1sn_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return ;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return ;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  if (arg1) (arg1)->sn = *arg2;
+}
+
+
+SWIGEXPORT jstring JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsd_1sn_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jstring jresult = 0 ;
+  DeviceOsd *arg1 = (DeviceOsd *) 0 ;
+  std::string *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DeviceOsd **)&jarg1; 
+  result = (std::string *) & ((arg1)->sn);
+  jresult = jenv->NewStringUTF(result->c_str()); 
   return jresult;
 }
 
@@ -1932,15 +2139,30 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
-SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsd_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1) {
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DeviceOsd_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
   jlong jresult = 0 ;
-  int arg1 ;
+  DeviceOsdHost *arg1 = 0 ;
+  std::string *arg2 = 0 ;
   DeviceOsd *result = 0 ;
   
   (void)jenv;
   (void)jcls;
-  arg1 = (int)jarg1; 
-  result = (DeviceOsd *)new DeviceOsd(arg1);
+  (void)jarg1_;
+  arg1 = *(DeviceOsdHost **)&jarg1;
+  if (!arg1) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "DeviceOsdHost const & is null");
+    return 0;
+  } 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (DeviceOsd *)new DeviceOsd((DeviceOsdHost const &)*arg1,(std::string const &)*arg2);
   *(DeviceOsd **)&jresult = result; 
   return jresult;
 }

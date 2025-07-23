@@ -137,7 +137,7 @@ void TopicManager::OnWebSocketMessage(const std::string& json) {
 void TopicManager::OnSubscribe(const std::string &json) {
     // 收到 subscribe 消息，是来自服务端对 SDK 发起的 subscribe 的回复
     // 匹配之前发出的消息
-    auto subscribe_msg = std::make_shared<TopicMessageWrapper>();
+    auto subscribe_msg = std::make_shared<SubscribeTopicReplyWrapper>();
     subscribe_msg->FromJsonString(json);
 
     NC_LOG_INFO("[TopicManager] OnSubscribe subscribe_msg: %s", subscribe_msg->ToJsonString().c_str());
@@ -146,7 +146,12 @@ void TopicManager::OnSubscribe(const std::string &json) {
         NC_LOG_ERROR("[TopicManager] OnSubscribe unknown: %s", json.c_str());
         return;
     }
-    // todo:sdk 判断订阅是否成功，现在是只要服务端返回数据就说明订阅成功
+    // 判断订阅是否成功，现在是只要服务端返回数据就说明订阅成功
+    TopicManagerErrorCode error_code = TopicManager_NoError;
+    if (subscribe_msg->message_data.code !=0 ) {
+        NC_LOG_ERROR("[TopicManager] OnSubscribe error");
+        error_code = TopicManager_ErrorServerError;
+    }
     // subscribe 是服务端回复的，没有人监听，只会先发起，然后等待回复
     // 1. 响应回调
     if (pending_requests_.count(subscribe_msg->message_id)) {
@@ -156,8 +161,7 @@ void TopicManager::OnSubscribe(const std::string &json) {
             cb = pending_requests_[subscribe_msg->message_id];
             pending_requests_.erase(subscribe_msg->message_id);
         }
-        cb(TopicManager_NoError, subscribe_msg);
-        return;
+        cb(error_code, subscribe_msg);
     }
 
 }
@@ -286,6 +290,7 @@ int TopicManager::SendSubscribe(const SubscribeTopicTuple& tuple, NotifactionFre
             }
             return;
         }
+        NC_LOG_INFO("[TopicManager] SendSubscribe, sn: %s, topic: %s, error: %d", tuple.sn.c_str(), tuple.topic.c_str(), err);
         
         // 订阅失败，清理监听回调
         {

@@ -18,6 +18,7 @@ enum TopicManagerErrorCode {
     TopicManager_NoError = 0,
     TopicManager_ErrorNoWebsocket = -1,
     TopicManager_ErrorTimeout = -2,
+    TopicManager_ErrorServerError = -3,
 };
 
 // 订阅消息二元组

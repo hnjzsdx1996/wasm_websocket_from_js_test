@@ -48,20 +48,29 @@ public class DeviceOsd {
     }
   }
 
-  public void setMode_code(int value) {
-    notificationcenterJNI.DeviceOsd_mode_code_set(swigCPtr, this, value);
+  public void setHost(DeviceOsdHost value) {
+    notificationcenterJNI.DeviceOsd_host_set(swigCPtr, this, DeviceOsdHost.getCPtr(value), value);
   }
 
-  public int getMode_code() {
-    return notificationcenterJNI.DeviceOsd_mode_code_get(swigCPtr, this);
+  public DeviceOsdHost getHost() {
+    long cPtr = notificationcenterJNI.DeviceOsd_host_get(swigCPtr, this);
+    return (cPtr == 0) ? null : new DeviceOsdHost(cPtr, false);
+  }
+
+  public void setSn(String value) {
+    notificationcenterJNI.DeviceOsd_sn_set(swigCPtr, this, value);
+  }
+
+  public String getSn() {
+    return notificationcenterJNI.DeviceOsd_sn_get(swigCPtr, this);
   }
 
   public DeviceOsd() {
     this(notificationcenterJNI.new_DeviceOsd__SWIG_0(), true);
   }
 
-  public DeviceOsd(int mode_code) {
-    this(notificationcenterJNI.new_DeviceOsd__SWIG_1(mode_code), true);
+  public DeviceOsd(DeviceOsdHost host, String sn) {
+    this(notificationcenterJNI.new_DeviceOsd__SWIG_1(DeviceOsdHost.getCPtr(host), host, sn), true);
   }
 
 }

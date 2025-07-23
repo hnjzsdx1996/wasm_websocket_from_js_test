@@ -35,8 +35,6 @@
 
 // Ignore methods we don't want to expose
 %ignore SDKManager::setWebSocket;
-%ignore SDKManager::getTopicManager;
-%ignore SDKManager::getWebSocketHolder;
 
 // 定义新的AircraftLocation类
 %inline %{
@@ -75,13 +73,27 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
+// 定义新的DeviceOsdHost类
+class DeviceOsdHost {
+public:
+    int mode_code; // 模式代码
+    double attitude_head; // 机头朝向角度
+    double attitude_pitch; // 俯仰轴角度
+    double attitude_roll; // 横滚轴角度
+    
+    DeviceOsdHost() : mode_code(0), attitude_head(0.0), attitude_pitch(0.0), attitude_roll(0.0) {}
+    DeviceOsdHost(int mode_code, double attitude_head, double attitude_pitch, double attitude_roll) 
+        : mode_code(mode_code), attitude_head(attitude_head), attitude_pitch(attitude_pitch), attitude_roll(attitude_roll) {}
+};
+
 // 定义新的DeviceOsd类
 class DeviceOsd {
 public:
-    int mode_code; // 模式代码
+    DeviceOsdHost host; // 主机信息
+    std::string sn; // 设备序列号
     
-    DeviceOsd() : mode_code(0) {}
-    DeviceOsd(int mode_code) : mode_code(mode_code) {}
+    DeviceOsd() {}
+    DeviceOsd(const DeviceOsdHost& host, const std::string& sn) : host(host), sn(sn) {}
 };
 
 // 定义通知频率枚举
@@ -286,7 +298,9 @@ public:
         auto msg_cb = [onSubscribeMessageCallback](const DeviceOsdMsg& msg) {
             if (onSubscribeMessageCallback) {
                 // 将DeviceOsdMsg转换为DeviceOsd
-                DeviceOsd device_osd(msg.mode_code);
+                DeviceOsdHost host(msg.host.mode_code, msg.host.attitude_head, 
+                                 msg.host.attitude_pitch, msg.host.attitude_roll);
+                DeviceOsd device_osd(host, msg.sn);
                 onSubscribeMessageCallback->invoke(device_osd);
             }
         };

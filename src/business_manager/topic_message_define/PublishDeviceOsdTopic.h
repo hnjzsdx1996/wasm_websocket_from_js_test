@@ -2,11 +2,23 @@
 
 #include "topic_engine/TopicMessageWrapper.h"
 
-class DeviceOsdMsg {
+class DeviceOsdHostMsg {
 public:
     int mode_code = 0;
 
-    AIGC_JSON_HELPER(mode_code);
+    double attitude_head = 0.0;
+    double attitude_pitch = 0.0;
+    double attitude_roll = 0.0;
+
+    AIGC_JSON_HELPER(mode_code, attitude_head, attitude_pitch, attitude_roll);
+};
+
+class DeviceOsdMsg {
+public:
+    DeviceOsdHostMsg host;
+    std::string sn;
+
+    AIGC_JSON_HELPER(sn, host);
 };
 
 class PublishDeviceOsdTopic : public PublishTopicWrapper {
