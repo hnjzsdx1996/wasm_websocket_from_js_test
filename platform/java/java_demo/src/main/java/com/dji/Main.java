@@ -3,7 +3,6 @@ package com.dji;
 import com.dji.notificationcentersdk.generated.*;
 import com.dji.notificationcentersdk.core.NotificationCenterSDK;
 
-// 1. 创建连接监听器类
 class MyConnectionListener extends ConnectionListener {
     @Override
     public void OnOpen() {
@@ -26,40 +25,6 @@ class MyConnectionListener extends ConnectionListener {
     }
 }
 
-// 2. 创建飞机位置消息回调类
-class MyAircraftLocationMessageCallback extends AircraftLocationCallback {
-    @Override
-    public void invoke(AircraftLocation message) {
-        System.out.println("[Java] Received aircraft location message:");
-        System.out.println("  - Height (椭球高度): " + message.getHeight());
-        System.out.println("  - Elevation (相对起飞点高度): " + message.getElevation());
-        System.out.println("  - Latitude (纬度): " + message.getLatitude());
-        System.out.println("  - Longitude (经度): " + message.getLongitude());
-    }
-}
-
-// 3. 创建飞机姿态消息回调类
-class MyAircraftAttitudeMessageCallback extends AircraftAttitudeCallback {
-    @Override
-    public void invoke(AircraftAttitude message) {
-        System.out.println("[Java] Received aircraft attitude message:");
-        System.out.println("  - Attitude Head (机头朝向角度): " + message.getAttitude_head());
-        System.out.println("  - Attitude Pitch (俯仰轴角度): " + message.getAttitude_pitch());
-        System.out.println("  - Attitude Roll (横滚轴角度): " + message.getAttitude_roll());
-    }
-}
-
-// 4. 创建飞机速度消息回调类
-class MyAircraftSpeedMessageCallback extends AircraftSpeedCallback {
-    @Override
-    public void invoke(AircraftSpeed message) {
-        System.out.println("[Java] Received aircraft speed message:");
-        System.out.println("  - Horizontal Speed (水平速度 m/s): " + message.getHorizontal_speed());
-        System.out.println("  - Vertical Speed (垂直速度 m/s): " + message.getVertical_speed());
-    }
-}
-
-// 5. 创建设备OSD消息回调类
 class MyDeviceOsdMessageCallback extends DeviceOsdCallback {
     @Override
     public void invoke(DeviceOsd message) {
@@ -68,7 +33,6 @@ class MyDeviceOsdMessageCallback extends DeviceOsdCallback {
     }
 }
 
-// 6. 创建订阅结果回调类
 class MyAircraftLocationResultCallback extends SDKSubscribeResultCallback {
     @Override
     public void invoke(NotificationCenterErrorCode errorCode) {
@@ -133,19 +97,19 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("[Java] Starting NotificationCenterSDK Demo...");
 
-        // 1. 获取SDK实例（自动加载JNI库）
+        // 获取SDK实例（自动加载JNI库）
         NotificationCenterSDK sdk = NotificationCenterSDK.getInstance();
         System.out.println("[Java] NotificationCenterSDK instance created.");
 
-        // 2. 创建连接监听器（在SDK初始化之后）
+        // 创建连接监听器（在SDK初始化之后）
         MyConnectionListener listener = new MyConnectionListener();
 
-        // 3. 初始化SDK
+        // 初始化SDK
         SdkInitializeInfo initInfo = new SdkInitializeInfo("", SdkLogLevel.INFO);
         sdk.init(initInfo);
         System.out.println("[Java] SDK initialized successfully.");
 
-        // 4. 设置连接监听器
+        // 设置连接监听器
         sdk.setWebsocketEventListener(listener);
         System.out.println("[Java] Websocket event listener set.");
 
@@ -153,11 +117,11 @@ public class Main {
         System.out.println("[Java] Connecting to " + url + "...");
         sdk.connect(url);
 
-        // 5. 等待连接建立
+        // 等待连接建立
         System.out.println("[Java] Waiting for connection to establish...");
         Thread.sleep(2000); // 等待2秒让连接建立
 
-        // 6. 获取BusinessManager并演示监听功能
+        // 获取BusinessManager并演示监听功能
         BusinessManager businessManager = sdk.getBusinessManager();
         if (businessManager == null) {
             System.err.println("[Java] Failed to get BusinessManager - it is null!");
@@ -165,95 +129,51 @@ public class Main {
         }
         System.out.println("[Java] BusinessManager obtained successfully.");
 
-        // 7. 创建回调对象
-        MyAircraftLocationMessageCallback locationMessageCallback = new MyAircraftLocationMessageCallback();
-        MyAircraftLocationResultCallback locationResultCallback = new MyAircraftLocationResultCallback();
-        
-        MyAircraftAttitudeMessageCallback attitudeMessageCallback = new MyAircraftAttitudeMessageCallback();
-        MyAircraftAttitudeResultCallback attitudeResultCallback = new MyAircraftAttitudeResultCallback();
-        
-        MyAircraftSpeedMessageCallback speedMessageCallback = new MyAircraftSpeedMessageCallback();
-        MyAircraftSpeedResultCallback speedResultCallback = new MyAircraftSpeedResultCallback();
-        
+        // 创建回调对象
         MyDeviceOsdMessageCallback deviceOsdMessageCallback = new MyDeviceOsdMessageCallback();
         MyDeviceOsdResultCallback deviceOsdResultCallback = new MyDeviceOsdResultCallback();
 
-        // 8. 演示监听飞机位置消息
+        // 演示监听飞机位置消息
         System.out.println("[Java] Starting aircraft location monitoring...");
         
-        // 9. 监听单个设备
-        String deviceSN = "8UUDMAQ00A0121";
-        NotificationFrequency frequency = NotificationFrequency.ANY;
+        // 监听多个设备
+        String[] deviceSNs = {
+            "8UUXN2D00A00VL",
+            "1581F8HGD24BN0010286",
+        };
+        NotificationFrequency frequency = NotificationFrequency.PUSH_1S;
         
-        // long locationListenId = businessManager.ListenAircraftLocation(
-        //     locationMessageCallback, 
-        //     locationResultCallback, 
-        //     deviceSN, 
-        //     frequency
-        // );
+        // 演示监听设备OSD消息
+        System.out.println("[Java] Starting device OSD monitoring for multiple devices...");
         
-        // System.out.println("[Java] Started monitoring aircraft location for device " + deviceSN + 
-        //                  " with frequency " + frequency + 
-        //                  " (Listen ID: " + locationListenId + ")");
+        // 存储所有监听ID，用于后续取消订阅
+        long[] deviceOsdListenIds = new long[deviceSNs.length];
         
-        // // 10. 演示监听飞机姿态消息
-        // System.out.println("[Java] Starting aircraft attitude monitoring...");
+        for (int i = 0; i < deviceSNs.length; i++) {
+            String deviceSN = deviceSNs[i];
+            System.out.println("[Java] Starting device OSD monitoring for device " + (i + 1) + ": " + deviceSN);
+            
+            deviceOsdListenIds[i] = businessManager.ListenDeviceOsd(
+                deviceOsdMessageCallback, 
+                deviceOsdResultCallback, 
+                deviceSN, 
+                frequency
+            );
+            
+            System.out.println("[Java] Started monitoring device OSD for device " + deviceSN + 
+                             " with frequency " + frequency + 
+                             " (Listen ID: " + deviceOsdListenIds[i] + ")");
+        }
         
-        // long attitudeListenId = businessManager.ListenAircraftAttitude(
-        //     attitudeMessageCallback, 
-        //     attitudeResultCallback, 
-        //     deviceSN, 
-        //     frequency
-        // );
-        
-        // System.out.println("[Java] Started monitoring aircraft attitude for device " + deviceSN + 
-        //                  " with frequency " + frequency + 
-        //                  " (Listen ID: " + attitudeListenId + ")");
-        
-        // // 11. 演示监听飞机速度消息
-        // System.out.println("[Java] Starting aircraft speed monitoring...");
-        
-        // long speedListenId = businessManager.ListenAircraftSpeed(
-        //     speedMessageCallback, 
-        //     speedResultCallback, 
-        //     deviceSN, 
-        //     frequency
-        // );
-        
-        // System.out.println("[Java] Started monitoring aircraft speed for device " + deviceSN + 
-        //                  " with frequency " + frequency + 
-        //                  " (Listen ID: " + speedListenId + ")");
-        
-        // 12. 演示监听设备OSD消息
-        System.out.println("[Java] Starting device OSD monitoring...");
-        
-        long deviceOsdListenId = businessManager.ListenDeviceOsd(
-            deviceOsdMessageCallback, 
-            deviceOsdResultCallback, 
-            deviceSN, 
-            frequency
-        );
-        
-        System.out.println("[Java] Started monitoring device OSD for device " + deviceSN + 
-                         " with frequency " + frequency + 
-                         " (Listen ID: " + deviceOsdListenId + ")");
-        
-        // 13. 等待一段时间让自动poll处理消息
+        // 等待一段时间让自动poll处理消息
         System.out.println("[Java] Waiting for messages (auto-poll is running)...");
-        Thread.sleep(10000); // 等待10秒
+        Thread.sleep(1000000); // 等待1000秒
         
-        // 取消订阅
-        // businessManager.cancelObserve((int)locationListenId);
-        // System.out.println("[Java] Cancelled location monitoring for device " + deviceSN);
-        
-        // businessManager.cancelObserve((int)attitudeListenId);
-        // System.out.println("[Java] Cancelled attitude monitoring for device " + deviceSN);
-        
-        // businessManager.cancelObserve((int)speedListenId);
-        // System.out.println("[Java] Cancelled speed monitoring for device " + deviceSN);
-        
-        businessManager.cancelObserve((int)deviceOsdListenId);
-        System.out.println("[Java] Cancelled device OSD monitoring for device " + deviceSN);
+        // 取消所有设备的OSD监听
+        for (int i = 0; i < deviceSNs.length; i++) {
+            businessManager.cancelObserve((int)deviceOsdListenIds[i]);
+            System.out.println("[Java] Cancelled device OSD monitoring for device " + deviceSNs[i]);
+        }
 
         // 继续等待一段时间
         System.out.println("[Java] Continuing to wait for cleanup...");

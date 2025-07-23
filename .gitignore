@@ -17,6 +17,6 @@ platform/java/gradle
 platform/java/java_demo/.gradle
 platform/java/java_demo/build
 platform/java/java_demo/build
-platform/java/java_demo/notification_center_sdk.log
+platform/java/java_demo/*.log
 
 cmake-build-debug/

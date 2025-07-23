@@ -140,7 +140,7 @@ void TopicManager::OnSubscribe(const std::string &json) {
     auto subscribe_msg = std::make_shared<TopicMessageWrapper>();
     subscribe_msg->FromJsonString(json);
 
-    NC_LOG_ERROR("[TopicManager] OnSubscribe subscribe_msg: %s", subscribe_msg->ToJsonString().c_str());
+    NC_LOG_INFO("[TopicManager] OnSubscribe subscribe_msg: %s", subscribe_msg->ToJsonString().c_str());
 
     if (subscribe_msg->isValid() == false) {
         NC_LOG_ERROR("[TopicManager] OnSubscribe unknown: %s", json.c_str());
