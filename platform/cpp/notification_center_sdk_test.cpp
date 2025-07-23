@@ -164,16 +164,65 @@ int main() {
         //     frequency
         // );
 
-        // listenId = g_business_manager->ListenAircraftSpeed(
-        //     [](const AircraftSpeedMsg &msg)-> void {
-        //         NC_LOG_INFO("[C++] ListenAircraftSpeed: h: %.2f, v: %.2f", msg.horizontal_speed, msg.vertical_speed);
-        //     },
-        //     [](const NotificationCenterErrorCode &error_code)-> void {
-        //         NC_LOG_INFO("[C++] ListenAircraftSpeed subscribe error_code: %d", error_code);
-        //     },
-        //     deviceSN,
-        //     frequency
-        // );
+        listenId = g_business_manager->ListenAircraftSpeed(
+            [](const AircraftSpeedMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftSpeed: h: %.2f, v: %.2f", msg.horizontal_speed, msg.vertical_speed);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftSpeed subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenAircraftModeCode(
+            [](const AircraftModeCodeMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftModeCode: %d", msg.mode_code);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftModeCode subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenAircraftControlCode(
+            [](const AircraftControlCodeMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftControlCode: %d", msg.control_mode);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftControlCode subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenAircraftControlCode(
+            [](const AircraftControlCodeMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftControlCode: %d", msg.control_mode);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftControlCode subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenAircraftWindSpeed(
+            [](const AircraftWindSpeedMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftWindSpeed: dir: %d, speed: %.2f", msg.wind_direction, msg.wind_speed);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftWindSpeed subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
 
         // listenId = g_business_manager->ListenDeviceOsd(
         //     on_device_osd_message,
