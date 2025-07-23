@@ -55,7 +55,7 @@ private:
             is_valid_ = false;
             return;
         }
-        // 解析机场 osd 消息
+        // 解析飞机 osd 消息
         DeviceOsdAircraft aircraft_parser(message_data);
         if (aircraft_parser.isParsedSuccessfully() == false) {
             is_valid_ = false;

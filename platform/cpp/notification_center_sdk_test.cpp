@@ -73,8 +73,8 @@ void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
     }
 }
 
-constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-// constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
 
 int main() {
     // 初始化日志
@@ -159,6 +159,17 @@ int main() {
         //     },
         //     [](const NotificationCenterErrorCode &error_code)-> void {
         //         NC_LOG_INFO("[C++] ListenAircraftLocation subscribe error_code: %d", error_code);
+        //     },
+        //     deviceSN,
+        //     frequency
+        // );
+
+        // listenId = g_business_manager->ListenAircraftSpeed(
+        //     [](const AircraftSpeedMsg &msg)-> void {
+        //         NC_LOG_INFO("[C++] ListenAircraftSpeed: h: %.2f, v: %.2f", msg.horizontal_speed, msg.vertical_speed);
+        //     },
+        //     [](const NotificationCenterErrorCode &error_code)-> void {
+        //         NC_LOG_INFO("[C++] ListenAircraftSpeed subscribe error_code: %d", error_code);
         //     },
         //     deviceSN,
         //     frequency
