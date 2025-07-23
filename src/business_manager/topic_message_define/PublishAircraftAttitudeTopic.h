@@ -1,5 +1,8 @@
 #pragma once
 
+#include "parser/DeviceOsdAircraft.h"
+#include "parser/DeviceOsdDock.h"
+#include "parser/DeviceOsdType.h"
 #include "topic_engine/TopicMessageWrapper.h"
 
 class AircraftAttitudeMsg {
@@ -13,6 +16,9 @@ public:
 
 class PublishAircraftAttitudeTopic : public PublishTopicWrapper {
 public:
+    bool isValid() override {
+        return is_valid_;
+    }
 
     explicit PublishAircraftAttitudeTopic(const std::shared_ptr<PublishTopicWrapper>& publish_msg) {
         message_topic = publish_msg->message_topic;
@@ -23,11 +29,7 @@ public:
         timestamp = publish_msg->timestamp;
         version = publish_msg->version;
 
-        std::string err;
-        aigc::JsonHelper::JsonToObject(msg, publish_msg->message_data, {}, &err);
-        if (!err.empty()) {
-            NC_LOG_ERROR("PublishAircraftAttitudeTopic ctor error, err: %s, json: %s", err.c_str(), publish_msg->ToJsonString().c_str());
-        }
+        MessageParserHook();
     }
 
     AircraftAttitudeMsg msg;
@@ -43,5 +45,27 @@ public:
     void FromJsonString(const std::string& json) override {
         std::string err;
         aigc::JsonHelper::JsonToObject(*this, json, {}, &err);
+    }
+private:
+    bool is_valid_ = true;
+
+    void MessageParserHook() {
+        // hook 消息解析
+        DeviceOsdType device_type(message_data);
+        if (device_type.isDrone() == false) {
+            // 机场的 osd，不处理
+            is_valid_ = false;
+            return;
+        }
+        // 解析机场 osd 消息
+        DeviceOsdAircraft aircraft_parser(message_data);
+        if (aircraft_parser.isParsedSuccessfully() == false) {
+            is_valid_ = false;
+            return;
+        }
+        // 获取需要的字段
+        msg.attitude_head = aircraft_parser.getAttitudeHead();
+        msg.attitude_pitch = aircraft_parser.getAttitudePitch();
+        msg.attitude_roll = aircraft_parser.getAttitudeRoll();
     }
 };
