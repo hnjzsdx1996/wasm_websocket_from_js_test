@@ -31,11 +31,15 @@ private:
         const SubscribeTopicTuple tuple{device_sn, topic_name};
 
         WeakDummy(weak_ptr);
-        auto listen_id = strong_topic_mgr->Observe(tuple, freq, [this, weak_ptr, on_msg_cb = on_messages_callback](const std::shared_ptr<PublishTopicWrapper>& message)->void {
+        auto listen_id = strong_topic_mgr->Observe(tuple, freq, [this, weak_ptr, on_msg_cb = on_messages_callback, device_sn, topic_name](const std::shared_ptr<PublishTopicWrapper>& message)->void {
             WeakDummyReturn(weak_ptr);
             if (on_msg_cb && message) {
                 const auto msg = std::make_shared<TopicType>(message);
-                NC_LOG_INFO("[BusinessManager] ListenTopic observe: %s", msg->ToJsonString().c_str());
+                if (msg->isValid() == false) {
+                    NC_LOG_ERROR("[BusinessManager] ListenTopic [%s - %s] invalid! observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
+                    return;
+                }
+                NC_LOG_INFO("[BusinessManager] ListenTopic [%s - %s] observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
                 on_msg_cb(msg->msg);
             }
         }, [this, weak_ptr, on_result_cb = on_result_callback](int err)->void {
@@ -61,6 +65,7 @@ public:
     DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "aircraft_location")
     DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "aircraft_speed")
     DEFINE_LISTEN_METHOD(ListenDeviceOsd, DeviceOsdMsg, DeviceOsdMsgCallback, PublishDeviceOsdTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenDroneInDock, DroneInDockMsg, DroneInDockMsgCallback, PublishDroneInDockTopic, "device_osd")
 
     #undef DEFINE_LISTEN_METHOD
 };

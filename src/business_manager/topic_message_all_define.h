@@ -4,4 +4,5 @@
 #include "topic_message_define/PublishAircraftLocationTopic.h"
 #include "topic_message_define/PublishAircraftSpeedTopic.h"
 #include "topic_message_define/PublishDeviceOsdTopic.h"
+#include "topic_message_define/PublishDroneInDockTopic.h"
 

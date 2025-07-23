@@ -41,6 +41,10 @@ void on_device_osd_message(const DeviceOsdMsg& message) {
     NC_LOG_INFO("[C++]   - Attitude Roll (横滚轴角度): %f", message.host.attitude_roll);
 }
 
+void on_device_osd_drone_in_dock_message(const DroneInDockMsg& message) {
+    NC_LOG_INFO("[C++] Received device OSD Drone In Dock message: %d", message.drone_in_dock);
+}
+
 // 订阅结果回调函数
 void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
     if (error_code == NotificationCenterErrorCode_NoError) {
@@ -69,7 +73,8 @@ void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
     }
 }
 
-constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
 
 int main() {
     // 初始化日志
@@ -135,14 +140,22 @@ int main() {
     for (size_t i = 0; i < deviceSNs.size(); i++) {
         const std::string& deviceSN = deviceSNs[i];
         NC_LOG_INFO("[C++] Starting device OSD monitoring for device %zu: %s", i + 1, deviceSN.c_str());
-        
+
         ListenId listenId = g_business_manager->ListenDeviceOsd(
-            on_device_osd_message, 
-            on_device_osd_result, 
-            deviceSN, 
+            on_device_osd_message,
+            on_device_osd_result,
+            deviceSN,
             frequency
         );
-        
+
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenDroneInDock(
+            on_device_osd_drone_in_dock_message,
+            on_device_osd_result,
+            deviceSN,
+            frequency
+        );
         deviceOsdListenIds.push_back(listenId);
         
         NC_LOG_INFO("[C++] Started monitoring device OSD for device %s with frequency %d (Listen ID: %ld)", deviceSN.c_str(), frequency, listenId);

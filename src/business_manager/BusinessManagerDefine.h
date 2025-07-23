@@ -30,6 +30,7 @@ using AircraftAttitudeMsgCallback = std::function<void(const AircraftAttitudeMsg
 using AircraftLocationMsgCallback = std::function<void(const AircraftLocationMsg& msg)>;
 using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
 using DeviceOsdMsgCallback = std::function<void(const DeviceOsdMsg& msg)>;
+using DroneInDockMsgCallback = std::function<void(const DroneInDockMsg& msg)>;
 
 
 
