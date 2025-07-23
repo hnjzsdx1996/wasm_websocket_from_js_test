@@ -224,6 +224,18 @@ int main() {
         );
         deviceOsdListenIds.push_back(listenId);
 
+        listenId = g_business_manager->ListenAircraftBatteryInfo(
+            [](const AircraftBatteryInfoMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftBatteryInfo: capacity_percent: %d, ", msg.capacity_percent);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftBatteryInfo subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
+
         // listenId = g_business_manager->ListenDeviceOsd(
         //     on_device_osd_message,
         //     on_device_osd_result,

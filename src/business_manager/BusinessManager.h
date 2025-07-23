@@ -62,6 +62,7 @@ private:
 public:
     // 具体的监听接口，使用宏定义
     DEFINE_LISTEN_METHOD(ListenAircraftAttitude, AircraftAttitudeMsg, AircraftAttitudeMsgCallback, PublishAircraftAttitudeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftBatteryInfo, AircraftBatteryInfoMsg, AircraftBatteryInfoMsgCallback, PublishAircraftBatteryInfoTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftControlCode, AircraftControlCodeMsg, AircraftControlCodeMsgCallback, PublishAircraftControlCodeTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "device_osd")
