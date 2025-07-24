@@ -196,7 +196,7 @@ void TopicManager::OnPublish(const std::string &json) {
     auto publish_msg = std::make_shared<PublishTopicWrapper>();
     publish_msg->FromJsonString(json);
 
-    NC_LOG_INFO("[TopicManager] OnPublish publish_msg: %s", json.c_str());
+    NC_LOG_DEBUG("[TopicManager] OnPublish publish_msg: %s", json.c_str());
 
     if (publish_msg->isValid() == false) {
         // 收到非法 publish 消息

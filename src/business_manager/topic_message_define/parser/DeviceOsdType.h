@@ -42,10 +42,10 @@ private:
         // 判断设备类型：如果 sn 开头是 1581F，那么就是飞机
         if (sn.sn.length() >= 5 && sn.sn.substr(0, 5) == "1581F") {
             is_drone_ = true;
-            NC_LOG_INFO("DeviceOsdType: detected drone device with SN: %s", sn.sn.c_str());
+            NC_LOG_DEBUG("DeviceOsdType: detected drone device with SN: %s", sn.sn.c_str());
         } else {
             is_drone_ = false;
-            NC_LOG_INFO("DeviceOsdType: detected non-drone device with SN: %s", sn.sn.c_str());
+            NC_LOG_DEBUG("DeviceOsdType: detected non-drone device with SN: %s", sn.sn.c_str());
         }
     }
 

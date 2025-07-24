@@ -601,8 +601,7 @@ private:
         parseGimbalInfo();
         
         parsed_successfully_ = true;
-        NC_LOG_INFO("DeviceOsdAircraft: successfully parsed aircraft data for SN: %s, mode_code: %d", 
-                   msg.sn.c_str(), msg.host.mode_code);
+        NC_LOG_DEBUG("DeviceOsdAircraft: successfully parsed aircraft data for SN: %s, mode_code: %d", msg.sn.c_str(), msg.host.mode_code);
     }
 
     void parseGimbalInfo() {
@@ -652,7 +651,7 @@ private:
                     
                     if (gimbal_err.empty()) {
                         gimbal_info_map_[payload_index] = gimbal_info;
-                        NC_LOG_INFO("DeviceOsdAircraft: parsed gimbal info for payload_index: %s", payload_index.c_str());
+                        NC_LOG_DEBUG("DeviceOsdAircraft: parsed gimbal info for payload_index: %s", payload_index.c_str());
                     } else {
                         NC_LOG_ERROR("DeviceOsdAircraft: failed to parse gimbal info for payload_index %s, error: %s", 
                                     payload_index.c_str(), gimbal_err.c_str());

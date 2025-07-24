@@ -136,18 +136,6 @@ void start_device_monitoring() {
         );
         deviceOsdListenIds.push_back(listenId);
 
-        listenId = g_business_manager->ListenAircraftControlCode(
-            [](const AircraftControlCodeMsg &msg)-> void {
-                NC_LOG_INFO("[C++] ListenAircraftControlCode: %d", msg.control_mode);
-            },
-            [](const NotificationCenterErrorCode &error_code)-> void {
-                NC_LOG_INFO("[C++] ListenAircraftControlCode subscribe error_code: %d", error_code);
-            },
-            deviceSN,
-            frequency
-        );
-        deviceOsdListenIds.push_back(listenId);
-
         listenId = g_business_manager->ListenAircraftWindSpeed(
             [](const AircraftWindSpeedMsg &msg)-> void {
                 NC_LOG_INFO("[C++] ListenAircraftWindSpeed: dir: %d, speed: %.2f", msg.wind_direction, msg.wind_speed);
@@ -247,7 +235,8 @@ public:
 }
 
 // constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+constexpr auto address = "ws://localhost:3001";
 
 int main() {
     // 初始化日志

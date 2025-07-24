@@ -36,10 +36,10 @@ private:
             if (on_msg_cb && message) {
                 const auto msg = std::make_shared<TopicType>(message);
                 if (msg->isValid() == false) {
-                    NC_LOG_ERROR("[BusinessManager] ListenTopic [%s - %s] invalid! observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
+                    NC_LOG_DEBUG("[BusinessManager] ListenTopic [%s - %s] invalid! observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
                     return;
                 }
-                NC_LOG_INFO("[BusinessManager] ListenTopic [%s - %s] observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
+                NC_LOG_DEBUG("[BusinessManager] ListenTopic [%s - %s] observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
                 on_msg_cb(msg->msg);
             }
         }, [this, weak_ptr, on_result_cb = on_result_callback](int err)->void {
