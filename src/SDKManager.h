@@ -41,7 +41,6 @@ private:
     std::atomic<bool> is_init_ = false;
 
     void initExecutors();
-    std::shared_ptr<Timer> main_poller_timer_ = std::make_shared<Timer>();
 
     std::shared_ptr<WebsocketEvent> websocket_event_listener_;
     std::shared_ptr<WebSocketHolder> wsHolder_ = std::make_shared<WebSocketHolder>();
