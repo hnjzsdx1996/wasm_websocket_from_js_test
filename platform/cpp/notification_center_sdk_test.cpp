@@ -199,6 +199,18 @@ void start_device_monitoring() {
 
         g_device_osd_listen_ids.push_back(listenId);
 
+        listenId = g_business_manager->ListenDockLocation(
+            [](const DockLocationMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenDockLocation: heading: %.2f, height: %.2f, lon: %.2f, lat: %.2f", msg.heading, msg.height, msg.longitude, msg.latitude);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenDockLocation subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
+
         listenId = g_business_manager->ListenDroneInDock(
             on_device_osd_drone_in_dock_message,
             on_device_osd_result,

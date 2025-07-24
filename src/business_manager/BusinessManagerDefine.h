@@ -34,6 +34,7 @@ using AircraftModeCodeMsgCallback = std::function<void(const AircraftModeCodeMsg
 using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
 using AircraftWindSpeedMsgCallback = std::function<void(const AircraftWindSpeedMsg& msg)>;
 using DeviceOsdMsgCallback = std::function<void(const DeviceOsdMsg& msg)>;
+using DockLocationMsgCallback = std::function<void(const DockLocationMsg& msg)>;
 using DroneInDockMsgCallback = std::function<void(const DroneInDockMsg& msg)>;
 
 
