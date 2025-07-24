@@ -6,30 +6,12 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+#include <atomic>
 
 // 全局变量用于在回调中访问
 std::shared_ptr<SDKManager> g_sdk_manager = nullptr;
 std::shared_ptr<BusinessManager> g_business_manager = nullptr;
-
-// WebSocket 事件回调类
-class MyWebsocketEventListener : public WebsocketEvent {
-public:
-    void OnOpen() override {
-        NC_LOG_INFO("[C++] Connection opened.");
-    }
-
-    void OnClose() override {
-        NC_LOG_INFO("[C++] Connection closed.");
-    }
-
-    void OnError(const std::string& error) override {
-        NC_LOG_INFO("[C++] An error occurred: %s", error.c_str());
-    }
-
-    void OnMessage(const std::string& message) override {
-        NC_LOG_INFO("[C++] Received message: %s", message.c_str());
-    }
-};
+std::atomic<bool> g_connection_established(false);
 
 // 设备OSD消息回调函数
 void on_device_osd_message(const DeviceOsdMsg& message) {
@@ -66,58 +48,12 @@ void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
     }
 }
 
-[[noreturn]] void runloop() {
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        SDKManager::poll();
-    }
-}
-
-// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-
-int main() {
-    // 初始化日志
-    nc_logger::init(plog::info, "notification_center_sdk_test.log");
-
-    NC_LOG_INFO("[C++] Starting NotificationCenterSDK Demo...");
-
-    // 创建 SDK 实例
-    g_sdk_manager = std::make_shared<SDKManager>();
-    if (!g_sdk_manager) {
-        NC_LOG_ERROR("[C++] Failed to create SDK instance");
-        return -1;
-    }
-    NC_LOG_INFO("[C++] NotificationCenterSDK instance created.");
-
-    // 创建连接监听器
-    auto listener = std::make_shared<MyWebsocketEventListener>();
-
-    // 初始化 SDK
-    SdkInitializeInfo init_info;
-    init_info.log_path = "";
-    init_info.log_level = SdkLogLevel::INFO;
-    g_sdk_manager->init(init_info);
-    NC_LOG_INFO("[C++] SDK initialized successfully.");
-
-    // 设置连接监听器
-    g_sdk_manager->setWebsocketEventListener(listener);
-    NC_LOG_INFO("[C++] Websocket event listener set.");
-
-    NC_LOG_INFO("[C++] Connecting to %s...", address);
-    g_sdk_manager->connect(address);
-
-    // 等待连接建立
-    NC_LOG_INFO("[C++] Waiting for connection to establish...");
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    // 获取BusinessManager并演示监听功能
-    g_business_manager = g_sdk_manager->getBusinessManager();
+// 开始监听设备消息的函数
+void start_device_monitoring() {
     if (!g_business_manager) {
-        NC_LOG_ERROR("[C++] Failed to get BusinessManager - it is null!");
-        return -1;
+        NC_LOG_ERROR("[C++] BusinessManager is null, cannot start monitoring");
+        return;
     }
-    NC_LOG_INFO("[C++] BusinessManager obtained successfully.");
 
     // 监听多个设备
     std::vector<std::string> deviceSNs = {
@@ -256,19 +192,110 @@ int main() {
         NC_LOG_INFO("[C++] Started monitoring device OSD for device %s with frequency %d (Listen ID: %ld)", deviceSN.c_str(), frequency, listenId);
     }
     
+    NC_LOG_INFO("[C++] Device monitoring started successfully.");
+}
+
+// WebSocket 事件回调类
+class MyWebsocketEventListener : public WebsocketEvent {
+private:
+    std::atomic<bool> m_has_started_monitoring{false};
+
+public:
+    void OnOpen() override {
+        NC_LOG_INFO("[C++] Connection opened.");
+        
+        // 防止重复启动监听
+        bool expected = false;
+        if (m_has_started_monitoring.compare_exchange_strong(expected, true)) {
+            NC_LOG_INFO("[C++] Starting device monitoring after connection established...");
+            
+            // 获取BusinessManager
+            g_business_manager = g_sdk_manager->getBusinessManager();
+            if (!g_business_manager) {
+                NC_LOG_ERROR("[C++] Failed to get BusinessManager - it is null!");
+                return;
+            }
+            NC_LOG_INFO("[C++] BusinessManager obtained successfully.");
+            
+            // 开始监听设备消息
+            start_device_monitoring();
+            
+            g_connection_established = true;
+        }
+    }
+
+    void OnClose() override {
+        NC_LOG_INFO("[C++] Connection closed.");
+        g_connection_established = false;
+    }
+
+    void OnError(const std::string& error) override {
+        NC_LOG_INFO("[C++] An error occurred: %s", error.c_str());
+        g_connection_established = false;
+    }
+
+    void OnMessage(const std::string& message) override {
+        // NC_LOG_INFO("[C++] Received message: %s", message.c_str());
+    }
+};
+
+[[noreturn]] void runloop() {
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        SDKManager::poll();
+    }
+}
+
+// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+
+int main() {
+    // 初始化日志
+    nc_logger::init(plog::info, "notification_center_sdk_test.log");
+
+    NC_LOG_INFO("[C++] Starting NotificationCenterSDK Demo...");
+
+    // 创建 SDK 实例
+    g_sdk_manager = std::make_shared<SDKManager>();
+    if (!g_sdk_manager) {
+        NC_LOG_ERROR("[C++] Failed to create SDK instance");
+        return -1;
+    }
+    NC_LOG_INFO("[C++] NotificationCenterSDK instance created.");
+
+    // 创建连接监听器
+    auto listener = std::make_shared<MyWebsocketEventListener>();
+
+    // 初始化 SDK
+    SdkInitializeInfo init_info;
+    init_info.log_path = "";
+    init_info.log_level = SdkLogLevel::INFO;
+    g_sdk_manager->init(init_info);
+    NC_LOG_INFO("[C++] SDK initialized successfully.");
+
+    // 设置连接监听器
+    g_sdk_manager->setWebsocketEventListener(listener);
+    NC_LOG_INFO("[C++] Websocket event listener set.");
+
+    NC_LOG_INFO("[C++] Connecting to %s...", address);
+    g_sdk_manager->connect(address);
+
+    // 等待连接建立
+    NC_LOG_INFO("[C++] Waiting for connection to establish...");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
     // 等待一段时间让自动poll处理消息
     NC_LOG_INFO("[C++] Waiting for messages (auto-poll is running)...");
-
 
     runloop();
 
     // 下面代码先不执行了
     
     // 取消所有设备的OSD监听
-    for (size_t i = 0; i < deviceSNs.size(); i++) {
-        g_business_manager->CancelObserve(deviceOsdListenIds[i]);
-        NC_LOG_INFO("[C++] Cancelled device OSD monitoring for device %s", deviceSNs[i].c_str());
-    }
+    // for (size_t i = 0; i < deviceSNs.size(); i++) {
+    //     g_business_manager->CancelObserve(deviceOsdListenIds[i]);
+    //     NC_LOG_INFO("[C++] Cancelled device OSD monitoring for device %s", deviceSNs[i].c_str());
+    // }
 
     // 继续等待一段时间
     NC_LOG_INFO("[C++] Continuing to wait for cleanup...");
