@@ -18,8 +18,6 @@ public:
     }
 
     explicit PublishDroneInDockTopic(const std::shared_ptr<PublishTopicWrapper>& publish_msg) {
-        NC_LOG_INFO("PublishDroneInDockTopic message_data: %s", publish_msg->message_data.c_str());
-
         message_topic = publish_msg->message_topic;
         message_data = publish_msg->message_data;
         need_replay = publish_msg->need_replay;

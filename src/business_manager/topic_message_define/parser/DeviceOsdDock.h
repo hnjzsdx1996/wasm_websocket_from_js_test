@@ -325,8 +325,7 @@ private:
         }
         
         parsed_successfully_ = true;
-        NC_LOG_INFO("DeviceOsdDock: successfully parsed dock data for SN: %s, drone_in_dock: %d", 
-                   msg.sn.c_str(), msg.host.drone_in_dock);
+        NC_LOG_DEBUG("DeviceOsdDock: successfully parsed dock data for SN: %s, drone_in_dock: %d", msg.sn.c_str(), msg.host.drone_in_dock);
     }
 
     std::string json_string_;

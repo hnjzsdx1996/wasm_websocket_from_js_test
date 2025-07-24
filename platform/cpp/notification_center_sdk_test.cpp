@@ -160,22 +160,22 @@ void start_device_monitoring() {
         );
         deviceOsdListenIds.push_back(listenId);
 
-        // listenId = g_business_manager->ListenDeviceOsd(
-        //     on_device_osd_message,
-        //     on_device_osd_result,
-        //     deviceSN,
-        //     frequency
-        // );
-        //
-        // deviceOsdListenIds.push_back(listenId);
-        //
-        // listenId = g_business_manager->ListenDroneInDock(
-        //     on_device_osd_drone_in_dock_message,
-        //     on_device_osd_result,
-        //     deviceSN,
-        //     frequency
-        // );
-        // deviceOsdListenIds.push_back(listenId);
+        listenId = g_business_manager->ListenDeviceOsd(
+            on_device_osd_message,
+            on_device_osd_result,
+            deviceSN,
+            frequency
+        );
+
+        deviceOsdListenIds.push_back(listenId);
+
+        listenId = g_business_manager->ListenDroneInDock(
+            on_device_osd_drone_in_dock_message,
+            on_device_osd_result,
+            deviceSN,
+            frequency
+        );
+        deviceOsdListenIds.push_back(listenId);
         
         NC_LOG_INFO("[C++] Started monitoring device OSD for device %s with frequency %d (Listen ID: %ld)", deviceSN.c_str(), frequency, listenId);
     }
