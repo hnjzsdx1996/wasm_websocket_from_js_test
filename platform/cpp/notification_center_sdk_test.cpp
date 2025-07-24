@@ -7,11 +7,18 @@
 #include <chrono>
 #include <vector>
 #include <atomic>
+#include <mutex> // Added for mutex
+
+#include "../src/base/async/thread_pool_executor.h"
 
 // 全局变量用于在回调中访问
 std::shared_ptr<SDKManager> g_sdk_manager = nullptr;
 std::shared_ptr<BusinessManager> g_business_manager = nullptr;
 std::atomic<bool> g_connection_established(false);
+
+// 存储所有监听ID，用于后续取消订阅
+std::vector<ListenId> g_device_osd_listen_ids;
+std::mutex g_listen_ids_mutex;
 
 // 设备OSD消息回调函数
 void on_device_osd_message(const DeviceOsdMsg& message) {
@@ -48,12 +55,36 @@ void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
     }
 }
 
+// 取消所有订阅的函数
+void cancel_all_subscriptions() {
+    if (!g_business_manager) {
+        NC_LOG_WARN("[C++] BusinessManager is null, cannot cancel subscriptions");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(g_listen_ids_mutex);
+    if (g_device_osd_listen_ids.empty()) {
+        NC_LOG_INFO("[C++] No active subscriptions to cancel");
+        return;
+    }
+
+    NC_LOG_INFO("[C++] Cancelling %zu active subscriptions...", g_device_osd_listen_ids.size());
+    for (const auto& listenId : g_device_osd_listen_ids) {
+        g_business_manager->CancelObserve(listenId);
+    }
+    g_device_osd_listen_ids.clear();
+    NC_LOG_INFO("[C++] All subscriptions cancelled successfully");
+}
+
 // 开始监听设备消息的函数
 void start_device_monitoring() {
     if (!g_business_manager) {
         NC_LOG_ERROR("[C++] BusinessManager is null, cannot start monitoring");
         return;
     }
+
+    // 先取消之前的订阅
+    cancel_all_subscriptions();
 
     // 监听多个设备
     std::vector<std::string> deviceSNs = {
@@ -70,8 +101,7 @@ void start_device_monitoring() {
     // 演示监听设备OSD消息
     NC_LOG_INFO("[C++] Starting device OSD monitoring for multiple devices...");
     
-    // 存储所有监听ID，用于后续取消订阅
-    std::vector<ListenId> deviceOsdListenIds;
+    std::lock_guard<std::mutex> lock(g_listen_ids_mutex);
     
     for (size_t i = 0; i < deviceSNs.size(); i++) {
         const std::string& deviceSN = deviceSNs[i];
@@ -110,7 +140,7 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenAircraftModeCode(
             [](const AircraftModeCodeMsg &msg)-> void {
@@ -122,7 +152,7 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenAircraftControlCode(
             [](const AircraftControlCodeMsg &msg)-> void {
@@ -134,7 +164,7 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenAircraftWindSpeed(
             [](const AircraftWindSpeedMsg &msg)-> void {
@@ -146,7 +176,7 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenAircraftBatteryInfo(
             [](const AircraftBatteryInfoMsg &msg)-> void {
@@ -158,7 +188,7 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenDeviceOsd(
             on_device_osd_message,
@@ -167,7 +197,7 @@ void start_device_monitoring() {
             frequency
         );
 
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenDroneInDock(
             on_device_osd_drone_in_dock_message,
@@ -175,20 +205,28 @@ void start_device_monitoring() {
             deviceSN,
             frequency
         );
-        deviceOsdListenIds.push_back(listenId);
+        g_device_osd_listen_ids.push_back(listenId);
         
         NC_LOG_INFO("[C++] Started monitoring device OSD for device %s with frequency %d (Listen ID: %ld)", deviceSN.c_str(), frequency, listenId);
     }
     
-    NC_LOG_INFO("[C++] Device monitoring started successfully.");
+    NC_LOG_INFO("[C++] Device monitoring started successfully. Total subscriptions: %zu", g_device_osd_listen_ids.size());
 }
 
 // WebSocket 事件回调类
 class MyWebsocketEventListener : public WebsocketEvent {
 private:
     std::atomic<bool> m_has_started_monitoring{false};
+    std::atomic<bool> m_is_reconnecting{false};
+    std::thread m_reconnect_thread;
 
 public:
+    ~MyWebsocketEventListener() {
+        if (m_reconnect_thread.joinable()) {
+            m_reconnect_thread.join();
+        }
+    }
+
     void OnOpen() override {
         NC_LOG_INFO("[C++] Connection opened.");
         
@@ -209,28 +247,101 @@ public:
             start_device_monitoring();
             
             g_connection_established = true;
+            NC_LOG_INFO("[C++] Connection established and monitoring started successfully.");
+        } else {
+            NC_LOG_INFO("[C++] Monitoring already started, skipping...");
         }
     }
 
     void OnClose() override {
-        NC_LOG_INFO("[C++] Connection closed.");
+        NC_LOG_INFO("[C++] Connection closed. Current reconnecting state: %s", m_is_reconnecting.load() ? "true" : "false");
         g_connection_established = false;
+        
+        // 启动重连逻辑
+        schedule_reconnect();
     }
 
     void OnError(const std::string& error) override {
-        NC_LOG_INFO("[C++] An error occurred: %s", error.c_str());
+        NC_LOG_INFO("[C++] An error occurred: %s. Current reconnecting state: %s", error.c_str(), m_is_reconnecting.load() ? "true" : "false");
         g_connection_established = false;
+        
+        // 启动重连逻辑
+        schedule_reconnect();
     }
 
     void OnMessage(const std::string& message) override {
         // NC_LOG_INFO("[C++] Received message: %s", message.c_str());
     }
+
+private:
+        void schedule_reconnect() {
+        // 防止重复重连
+        bool expected = false;
+        if (!m_is_reconnecting.compare_exchange_strong(expected, true)) {
+            NC_LOG_INFO("[C++] Reconnection already in progress, skipping...");
+            return;
+        }
+
+        NC_LOG_INFO("[C++] Starting reconnection process...");
+
+        // 取消之前的订阅
+        cancel_all_subscriptions();
+
+        // 在独立线程中执行重连
+        if (m_reconnect_thread.joinable()) {
+            m_reconnect_thread.join();
+        }
+
+        m_reconnect_thread = std::thread([this]() {
+            NC_LOG_INFO("[C++] Waiting 10 seconds before attempting to reconnect...");
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+            
+            // 在主线程中执行重连
+            ThreadPoolExecutor::Main().post([this]()->void {
+                NC_LOG_INFO("[C++] Executing reconnection in main thread...");
+                
+                if (g_sdk_manager) {
+                    NC_LOG_INFO("[C++] Attempting to reconnect...");
+                    
+                    // 重置监听标志，允许重新建立监听
+                    m_has_started_monitoring = false;
+                    
+                    // 确保连接状态已重置
+                    g_connection_established = false;
+                    
+                    // 等待一小段时间确保之前的连接完全关闭
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    
+                    // 执行重连
+                    g_sdk_manager->connect("ws://localhost:3001");
+                    
+                    NC_LOG_INFO("[C++] Reconnection request sent, waiting for connection events...");
+                    
+                    // 设置一个超时检查
+                    ThreadPoolExecutor::Main().post([this]()->void {
+                        std::this_thread::sleep_for(std::chrono::seconds(5));
+                        if (!g_connection_established) {
+                            NC_LOG_WARN("[C++] Reconnection timeout - no connection established within 5 seconds");
+                        }
+                    });
+                } else {
+                    NC_LOG_ERROR("[C++] SDKManager is null during reconnection!");
+                }
+                
+                m_is_reconnecting = false;
+            });
+        });
+    }
 };
 
 [[noreturn]] void runloop() {
+    NC_LOG_INFO("[C++] Starting main event loop...");
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        SDKManager::poll();
+        size_t tasks_processed = SDKManager::poll();
+        if (tasks_processed > 0) {
+            NC_LOG_DEBUG("[C++] Processed %zu tasks in main thread", tasks_processed);
+        }
     }
 }
 
@@ -240,7 +351,7 @@ constexpr auto address = "ws://localhost:3001";
 
 int main() {
     // 初始化日志
-    nc_logger::init(plog::info, "notification_center_sdk_test.log");
+    nc_logger::init(plog::debug, "notification_center_sdk_test.log");
 
     NC_LOG_INFO("[C++] Starting NotificationCenterSDK Demo...");
 
