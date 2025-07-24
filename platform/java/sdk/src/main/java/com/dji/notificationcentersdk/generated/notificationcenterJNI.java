@@ -54,6 +54,62 @@ public class notificationcenterJNI {
   public final static native long new_DeviceOsd__SWIG_0();
   public final static native long new_DeviceOsd__SWIG_1(long jarg1, DeviceOsdHost jarg1_, String jarg2);
   public final static native void delete_DeviceOsd(long jarg1);
+  public final static native void BatteryInfo_capacity_percent_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_capacity_percent_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_firmware_version_set(long jarg1, BatteryInfo jarg1_, String jarg2);
+  public final static native String BatteryInfo_firmware_version_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_high_voltage_storage_days_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_high_voltage_storage_days_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_index_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_index_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_loop_times_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_loop_times_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_sn_set(long jarg1, BatteryInfo jarg1_, String jarg2);
+  public final static native String BatteryInfo_sn_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_sub_type_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_sub_type_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_temperature_set(long jarg1, BatteryInfo jarg1_, double jarg2);
+  public final static native double BatteryInfo_temperature_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_type_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_type_get(long jarg1, BatteryInfo jarg1_);
+  public final static native void BatteryInfo_voltage_set(long jarg1, BatteryInfo jarg1_, int jarg2);
+  public final static native int BatteryInfo_voltage_get(long jarg1, BatteryInfo jarg1_);
+  public final static native long new_BatteryInfo();
+  public final static native void delete_BatteryInfo(long jarg1);
+  public final static native void AircraftBatteryInfo_batteries_set(long jarg1, AircraftBatteryInfo jarg1_, long jarg2);
+  public final static native long AircraftBatteryInfo_batteries_get(long jarg1, AircraftBatteryInfo jarg1_);
+  public final static native void AircraftBatteryInfo_capacity_percent_set(long jarg1, AircraftBatteryInfo jarg1_, int jarg2);
+  public final static native int AircraftBatteryInfo_capacity_percent_get(long jarg1, AircraftBatteryInfo jarg1_);
+  public final static native void AircraftBatteryInfo_landing_power_set(long jarg1, AircraftBatteryInfo jarg1_, int jarg2);
+  public final static native int AircraftBatteryInfo_landing_power_get(long jarg1, AircraftBatteryInfo jarg1_);
+  public final static native void AircraftBatteryInfo_remain_flight_time_set(long jarg1, AircraftBatteryInfo jarg1_, int jarg2);
+  public final static native int AircraftBatteryInfo_remain_flight_time_get(long jarg1, AircraftBatteryInfo jarg1_);
+  public final static native void AircraftBatteryInfo_return_home_power_set(long jarg1, AircraftBatteryInfo jarg1_, int jarg2);
+  public final static native int AircraftBatteryInfo_return_home_power_get(long jarg1, AircraftBatteryInfo jarg1_);
+  public final static native long new_AircraftBatteryInfo();
+  public final static native void delete_AircraftBatteryInfo(long jarg1);
+  public final static native void AircraftControlCode_control_mode_set(long jarg1, AircraftControlCode jarg1_, int jarg2);
+  public final static native int AircraftControlCode_control_mode_get(long jarg1, AircraftControlCode jarg1_);
+  public final static native long new_AircraftControlCode__SWIG_0();
+  public final static native long new_AircraftControlCode__SWIG_1(int jarg1);
+  public final static native void delete_AircraftControlCode(long jarg1);
+  public final static native void AircraftWindSpeed_wind_direction_set(long jarg1, AircraftWindSpeed jarg1_, int jarg2);
+  public final static native int AircraftWindSpeed_wind_direction_get(long jarg1, AircraftWindSpeed jarg1_);
+  public final static native void AircraftWindSpeed_wind_speed_set(long jarg1, AircraftWindSpeed jarg1_, double jarg2);
+  public final static native double AircraftWindSpeed_wind_speed_get(long jarg1, AircraftWindSpeed jarg1_);
+  public final static native long new_AircraftWindSpeed__SWIG_0();
+  public final static native long new_AircraftWindSpeed__SWIG_1(int jarg1, double jarg2);
+  public final static native void delete_AircraftWindSpeed(long jarg1);
+  public final static native void AircraftModeCode_mode_code_set(long jarg1, AircraftModeCode jarg1_, int jarg2);
+  public final static native int AircraftModeCode_mode_code_get(long jarg1, AircraftModeCode jarg1_);
+  public final static native long new_AircraftModeCode__SWIG_0();
+  public final static native long new_AircraftModeCode__SWIG_1(int jarg1);
+  public final static native void delete_AircraftModeCode(long jarg1);
+  public final static native void DroneInDock_drone_in_dock_set(long jarg1, DroneInDock jarg1_, int jarg2);
+  public final static native int DroneInDock_drone_in_dock_get(long jarg1, DroneInDock jarg1_);
+  public final static native long new_DroneInDock__SWIG_0();
+  public final static native long new_DroneInDock__SWIG_1(int jarg1);
+  public final static native void delete_DroneInDock(long jarg1);
   public final static native void delete_AircraftLocationCallback(long jarg1);
   public final static native void AircraftLocationCallback_invoke(long jarg1, AircraftLocationCallback jarg1_, long jarg2, AircraftLocation jarg2_);
   public final static native long new_AircraftLocationCallback();
@@ -74,6 +130,31 @@ public class notificationcenterJNI {
   public final static native long new_DeviceOsdCallback();
   public final static native void DeviceOsdCallback_director_connect(DeviceOsdCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void DeviceOsdCallback_change_ownership(DeviceOsdCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftBatteryInfoCallback(long jarg1);
+  public final static native void AircraftBatteryInfoCallback_invoke(long jarg1, AircraftBatteryInfoCallback jarg1_, long jarg2, AircraftBatteryInfo jarg2_);
+  public final static native long new_AircraftBatteryInfoCallback();
+  public final static native void AircraftBatteryInfoCallback_director_connect(AircraftBatteryInfoCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftBatteryInfoCallback_change_ownership(AircraftBatteryInfoCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftControlCodeCallback(long jarg1);
+  public final static native void AircraftControlCodeCallback_invoke(long jarg1, AircraftControlCodeCallback jarg1_, long jarg2, AircraftControlCode jarg2_);
+  public final static native long new_AircraftControlCodeCallback();
+  public final static native void AircraftControlCodeCallback_director_connect(AircraftControlCodeCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftControlCodeCallback_change_ownership(AircraftControlCodeCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftWindSpeedCallback(long jarg1);
+  public final static native void AircraftWindSpeedCallback_invoke(long jarg1, AircraftWindSpeedCallback jarg1_, long jarg2, AircraftWindSpeed jarg2_);
+  public final static native long new_AircraftWindSpeedCallback();
+  public final static native void AircraftWindSpeedCallback_director_connect(AircraftWindSpeedCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftWindSpeedCallback_change_ownership(AircraftWindSpeedCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftModeCodeCallback(long jarg1);
+  public final static native void AircraftModeCodeCallback_invoke(long jarg1, AircraftModeCodeCallback jarg1_, long jarg2, AircraftModeCode jarg2_);
+  public final static native long new_AircraftModeCodeCallback();
+  public final static native void AircraftModeCodeCallback_director_connect(AircraftModeCodeCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftModeCodeCallback_change_ownership(AircraftModeCodeCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_DroneInDockCallback(long jarg1);
+  public final static native void DroneInDockCallback_invoke(long jarg1, DroneInDockCallback jarg1_, long jarg2, DroneInDock jarg2_);
+  public final static native long new_DroneInDockCallback();
+  public final static native void DroneInDockCallback_director_connect(DroneInDockCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void DroneInDockCallback_change_ownership(DroneInDockCallback obj, long cptr, boolean take_or_release);
   public final static native void delete_SDKSubscribeResultCallback(long jarg1);
   public final static native void SDKSubscribeResultCallback_invoke(long jarg1, SDKSubscribeResultCallback jarg1_, int jarg2);
   public final static native long new_SDKSubscribeResultCallback();
@@ -98,13 +179,23 @@ public class notificationcenterJNI {
   public final static native long new_BusinessManager(long jarg1);
   public final static native void BusinessManager_CancelObserve(long jarg1, BusinessManager jarg1_, long jarg2);
   public final static native long BusinessManager_ListenAircraftAttitude__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftBatteryInfo__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftControlCode__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftLocation__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftSpeed__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftWindSpeed__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftModeCode__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenDeviceOsd__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenDroneInDock__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native int BusinessManager_ListenAircraftLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftLocationCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftAttitude__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftAttitudeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftSpeed__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftSpeedCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenDeviceOsd__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, DeviceOsdCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftBatteryInfo__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftBatteryInfoCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftControlCode__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftControlCodeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftWindSpeed__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftWindSpeedCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftModeCode__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftModeCodeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenDroneInDock__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, DroneInDockCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserve(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -127,6 +218,21 @@ public class notificationcenterJNI {
   }
   public static void SwigDirector_DeviceOsdCallback_invoke(DeviceOsdCallback jself, long message) {
     jself.invoke(new DeviceOsd(message, false));
+  }
+  public static void SwigDirector_AircraftBatteryInfoCallback_invoke(AircraftBatteryInfoCallback jself, long message) {
+    jself.invoke(new AircraftBatteryInfo(message, false));
+  }
+  public static void SwigDirector_AircraftControlCodeCallback_invoke(AircraftControlCodeCallback jself, long message) {
+    jself.invoke(new AircraftControlCode(message, false));
+  }
+  public static void SwigDirector_AircraftWindSpeedCallback_invoke(AircraftWindSpeedCallback jself, long message) {
+    jself.invoke(new AircraftWindSpeed(message, false));
+  }
+  public static void SwigDirector_AircraftModeCodeCallback_invoke(AircraftModeCodeCallback jself, long message) {
+    jself.invoke(new AircraftModeCode(message, false));
+  }
+  public static void SwigDirector_DroneInDockCallback_invoke(DroneInDockCallback jself, long message) {
+    jself.invoke(new DroneInDock(message, false));
   }
   public static void SwigDirector_SDKSubscribeResultCallback_invoke(SDKSubscribeResultCallback jself, int result) {
     jself.invoke(NotificationCenterErrorCode.swigToEnum(result));

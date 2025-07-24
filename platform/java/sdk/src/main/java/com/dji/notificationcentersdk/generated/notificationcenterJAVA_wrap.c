@@ -785,7 +785,7 @@ namespace Swig {
 namespace Swig {
   namespace {
     jclass jclass_notificationcenterJNI = NULL;
-    jmethodID director_method_ids[9];
+    jmethodID director_method_ids[14];
   }
 }
 
@@ -841,14 +841,28 @@ template <typename T> T SwigValueInit() {
 #include "BusinessManager.h"
 #include "WebsocketEvent.h"
 #include "business_manager/BusinessManagerDefine.h"
+#include "topic_engine/TopicMessageWrapper.h"
 #include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftAttitudeTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftSpeedTopic.h"
 #include "business_manager/topic_message_define/PublishDeviceOsdTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftBatteryInfoTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftControlCodeTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftWindSpeedTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftModeCodeTopic.h"
+#include "business_manager/topic_message_define/PublishDroneInDockTopic.h"
 #include "message_define/common.h"
 
 
 #include <string>
+
+
+#include <typeinfo>
+#include <stdexcept>
+
+
+#include <vector>
+#include <stdexcept>
 
 
 class AircraftLocation {
@@ -886,7 +900,7 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
-// 定义新的DeviceOsdHost类
+// 定义新的DeviceOsdHost类（用于Java接口）
 class DeviceOsdHost {
 public:
     int mode_code; // 模式代码
@@ -899,7 +913,7 @@ public:
         : mode_code(mode_code), attitude_head(attitude_head), attitude_pitch(attitude_pitch), attitude_roll(attitude_roll) {}
 };
 
-// 定义新的DeviceOsd类
+// 定义新的DeviceOsd类（用于Java接口）
 class DeviceOsd {
 public:
     DeviceOsdHost host; // 主机信息
@@ -907,6 +921,74 @@ public:
     
     DeviceOsd() {}
     DeviceOsd(const DeviceOsdHost& host, const std::string& sn) : host(host), sn(sn) {}
+};
+
+// 定义新的BatteryInfo类
+class BatteryInfo {
+public:
+    int capacity_percent;
+    std::string firmware_version;
+    int high_voltage_storage_days;
+    int index;
+    int loop_times;
+    std::string sn;
+    int sub_type;
+    double temperature;
+    int type;
+    int voltage;
+    
+    BatteryInfo() : capacity_percent(0), high_voltage_storage_days(0), index(0), 
+                   loop_times(0), sub_type(0), temperature(0.0), type(0), voltage(0) {}
+};
+
+// 定义新的AircraftBatteryInfo类
+class AircraftBatteryInfo {
+public:
+    std::vector<BatteryInfo> batteries;
+    int capacity_percent;
+    int landing_power;
+    int remain_flight_time;
+    int return_home_power;
+    
+    AircraftBatteryInfo() : capacity_percent(0), landing_power(0), 
+                           remain_flight_time(0), return_home_power(0) {}
+};
+
+// 定义新的AircraftControlCode类
+class AircraftControlCode {
+public:
+    int control_mode; // "0": "航线控制-执行态", "1": "指令控制-手动飞行", "2": "指令控制-自动飞行", "3": "航线控制-中断态"
+    
+    AircraftControlCode() : control_mode(0) {}
+    AircraftControlCode(int control_mode) : control_mode(control_mode) {}
+};
+
+// 定义新的AircraftWindSpeed类
+class AircraftWindSpeed {
+public:
+    int wind_direction; // 当前风向 "enum_desc": "1:正北  2：东北  3:东  4:东南  5:南  6:西南  7:西   8:西北"
+    double wind_speed; // 风速估计，该风速是通过飞机姿态推测出的，有一定的误差，仅供参考，不能作为气象数据使用
+    
+    AircraftWindSpeed() : wind_direction(0), wind_speed(0.0) {}
+    AircraftWindSpeed(int wind_direction, double wind_speed) : wind_direction(wind_direction), wind_speed(wind_speed) {}
+};
+
+// 定义新的AircraftModeCode类
+class AircraftModeCode {
+public:
+    int mode_code;
+    
+    AircraftModeCode() : mode_code(0) {}
+    AircraftModeCode(int mode_code) : mode_code(mode_code) {}
+};
+
+// 定义新的DroneInDock类
+class DroneInDock {
+public:
+    int drone_in_dock;
+    
+    DroneInDock() : drone_in_dock(0) {}
+    DroneInDock(int drone_in_dock) : drone_in_dock(drone_in_dock) {}
 };
 
 // 定义通知频率枚举
@@ -946,6 +1028,36 @@ class DeviceOsdCallback {
 public:
     virtual ~DeviceOsdCallback() {}
     virtual void invoke(const DeviceOsd& message) = 0;
+};
+
+class AircraftBatteryInfoCallback {
+public:
+    virtual ~AircraftBatteryInfoCallback() {}
+    virtual void invoke(const AircraftBatteryInfo& message) = 0;
+};
+
+class AircraftControlCodeCallback {
+public:
+    virtual ~AircraftControlCodeCallback() {}
+    virtual void invoke(const AircraftControlCode& message) = 0;
+};
+
+class AircraftWindSpeedCallback {
+public:
+    virtual ~AircraftWindSpeedCallback() {}
+    virtual void invoke(const AircraftWindSpeed& message) = 0;
+};
+
+class AircraftModeCodeCallback {
+public:
+    virtual ~AircraftModeCodeCallback() {}
+    virtual void invoke(const AircraftModeCode& message) = 0;
+};
+
+class DroneInDockCallback {
+public:
+    virtual ~DroneInDockCallback() {}
+    virtual void invoke(const DroneInDock& message) = 0;
 };
 
 class SDKSubscribeResultCallback {
@@ -1119,6 +1231,197 @@ SWIGINTERN long BusinessManager_ListenDeviceOsd__SWIG_1(BusinessManager *self,De
         }
         
         return self->ListenDeviceOsd(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftBatteryInfo__SWIG_1(BusinessManager *self,AircraftBatteryInfoCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftBatteryInfoMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftBatteryInfoMsg转换为AircraftBatteryInfo
+                AircraftBatteryInfo aircraft_battery_info;
+                aircraft_battery_info.capacity_percent = msg.capacity_percent;
+                aircraft_battery_info.landing_power = msg.landing_power;
+                aircraft_battery_info.remain_flight_time = msg.remain_flight_time;
+                aircraft_battery_info.return_home_power = msg.return_home_power;
+                
+                // 转换电池信息
+                for (const auto& battery : msg.batteries) {
+                    BatteryInfo battery_info;
+                    battery_info.capacity_percent = battery.capacity_percent;
+                    battery_info.firmware_version = battery.firmware_version;
+                    battery_info.high_voltage_storage_days = battery.high_voltage_storage_days;
+                    battery_info.index = battery.index;
+                    battery_info.loop_times = battery.loop_times;
+                    battery_info.sn = battery.sn;
+                    battery_info.sub_type = battery.sub_type;
+                    battery_info.temperature = battery.temperature;
+                    battery_info.type = battery.type;
+                    battery_info.voltage = battery.voltage;
+                    aircraft_battery_info.batteries.push_back(battery_info);
+                }
+                
+                onSubscribeMessageCallback->invoke(aircraft_battery_info);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftBatteryInfo(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftControlCode__SWIG_1(BusinessManager *self,AircraftControlCodeCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftControlCodeMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftControlCodeMsg转换为AircraftControlCode
+                AircraftControlCode aircraft_control_code(msg.control_mode);
+                onSubscribeMessageCallback->invoke(aircraft_control_code);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftControlCode(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftWindSpeed__SWIG_1(BusinessManager *self,AircraftWindSpeedCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftWindSpeedMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftWindSpeedMsg转换为AircraftWindSpeed
+                AircraftWindSpeed aircraft_wind_speed(msg.wind_direction, msg.wind_speed);
+                onSubscribeMessageCallback->invoke(aircraft_wind_speed);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftWindSpeed(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftModeCode__SWIG_1(BusinessManager *self,AircraftModeCodeCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftModeCodeMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftModeCodeMsg转换为AircraftModeCode
+                AircraftModeCode aircraft_mode_code(msg.mode_code);
+                onSubscribeMessageCallback->invoke(aircraft_mode_code);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftModeCode(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenDroneInDock__SWIG_1(BusinessManager *self,DroneInDockCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const DroneInDockMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将DroneInDockMsg转换为DroneInDock
+                DroneInDock drone_in_dock(msg.drone_in_dock);
+                onSubscribeMessageCallback->invoke(drone_in_dock);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenDroneInDock(msg_cb, result_cb, sn, notify_freq);
     }
 SWIGINTERN void BusinessManager_cancelObserve(BusinessManager *self,long listen_id){
         self->CancelObserve(listen_id);
@@ -1347,6 +1650,276 @@ void SwigDirector_DeviceOsdCallback::swig_connect_director(JNIEnv *jenv, jobject
 }
 
 
+SwigDirector_AircraftBatteryInfoCallback::SwigDirector_AircraftBatteryInfoCallback(JNIEnv *jenv) : AircraftBatteryInfoCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftBatteryInfoCallback::~SwigDirector_AircraftBatteryInfoCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftBatteryInfoCallback::invoke(AircraftBatteryInfo const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftBatteryInfoCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftBatteryInfo **)&jmessage = (AircraftBatteryInfo *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[4], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftBatteryInfoCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftBatteryInfoCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftBatteryInfoCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftBatteryInfo;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
+SwigDirector_AircraftControlCodeCallback::SwigDirector_AircraftControlCodeCallback(JNIEnv *jenv) : AircraftControlCodeCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftControlCodeCallback::~SwigDirector_AircraftControlCodeCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftControlCodeCallback::invoke(AircraftControlCode const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftControlCodeCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftControlCode **)&jmessage = (AircraftControlCode *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[5], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftControlCodeCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftControlCodeCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftControlCodeCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftControlCode;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
+SwigDirector_AircraftWindSpeedCallback::SwigDirector_AircraftWindSpeedCallback(JNIEnv *jenv) : AircraftWindSpeedCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftWindSpeedCallback::~SwigDirector_AircraftWindSpeedCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftWindSpeedCallback::invoke(AircraftWindSpeed const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftWindSpeedCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftWindSpeed **)&jmessage = (AircraftWindSpeed *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[6], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftWindSpeedCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftWindSpeedCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftWindSpeedCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftWindSpeed;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
+SwigDirector_AircraftModeCodeCallback::SwigDirector_AircraftModeCodeCallback(JNIEnv *jenv) : AircraftModeCodeCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftModeCodeCallback::~SwigDirector_AircraftModeCodeCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftModeCodeCallback::invoke(AircraftModeCode const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftModeCodeCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftModeCode **)&jmessage = (AircraftModeCode *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[7], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftModeCodeCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftModeCodeCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftModeCodeCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftModeCode;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
+SwigDirector_DroneInDockCallback::SwigDirector_DroneInDockCallback(JNIEnv *jenv) : DroneInDockCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_DroneInDockCallback::~SwigDirector_DroneInDockCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_DroneInDockCallback::invoke(DroneInDock const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method DroneInDockCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(DroneInDock **)&jmessage = (DroneInDock *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[8], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in DroneInDockCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_DroneInDockCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/DroneInDockCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/DroneInDock;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
 SwigDirector_SDKSubscribeResultCallback::SwigDirector_SDKSubscribeResultCallback(JNIEnv *jenv) : SDKSubscribeResultCallback(), Swig::Director(jenv) {
 }
 
@@ -1368,7 +1941,7 @@ void SwigDirector_SDKSubscribeResultCallback::invoke(NotificationCenterErrorCode
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jresult = (jint)result;
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[4], swigjobj, jresult);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[9], swigjobj, jresult);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1423,7 +1996,7 @@ void SwigDirector_ConnectionListener::OnMessage(std::string const &message) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jmessage = jenv->NewStringUTF((&message)->c_str());
     Swig::LocalRefGuard message_refguard(jenv, jmessage); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[5], swigjobj, jmessage);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[10], swigjobj, jmessage);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1446,7 +2019,7 @@ void SwigDirector_ConnectionListener::OnOpen() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[6], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[11], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1469,7 +2042,7 @@ void SwigDirector_ConnectionListener::OnClose() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[7], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[12], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -1495,7 +2068,7 @@ void SwigDirector_ConnectionListener::OnError(std::string const &error) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jerror = jenv->NewStringUTF((&error)->c_str());
     Swig::LocalRefGuard error_refguard(jenv, jerror); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[8], swigjobj, jerror);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[13], swigjobj, jerror);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -2178,6 +2751,772 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1capacity_1percent_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->capacity_percent = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1capacity_1percent_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->capacity_percent);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1firmware_1version_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return ;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return ;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  if (arg1) (arg1)->firmware_version = *arg2;
+}
+
+
+SWIGEXPORT jstring JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1firmware_1version_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jstring jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  std::string *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (std::string *) & ((arg1)->firmware_version);
+  jresult = jenv->NewStringUTF(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1high_1voltage_1storage_1days_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->high_voltage_storage_days = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1high_1voltage_1storage_1days_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->high_voltage_storage_days);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1index_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->index = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1index_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->index);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1loop_1times_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->loop_times = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1loop_1times_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->loop_times);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1sn_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return ;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return ;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  if (arg1) (arg1)->sn = *arg2;
+}
+
+
+SWIGEXPORT jstring JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1sn_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jstring jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  std::string *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (std::string *) & ((arg1)->sn);
+  jresult = jenv->NewStringUTF(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1sub_1type_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->sub_type = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1sub_1type_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->sub_type);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1temperature_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->temperature = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1temperature_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (double) ((arg1)->temperature);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1type_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->type = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1type_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->type);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1voltage_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->voltage = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BatteryInfo_1voltage_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->voltage);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1BatteryInfo(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  BatteryInfo *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (BatteryInfo *)new BatteryInfo();
+  *(BatteryInfo **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1BatteryInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  BatteryInfo *arg1 = (BatteryInfo *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(BatteryInfo **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1batteries_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  std::vector< BatteryInfo > *arg2 = (std::vector< BatteryInfo > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  arg2 = *(std::vector< BatteryInfo > **)&jarg2; 
+  if (arg1) (arg1)->batteries = *arg2;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1batteries_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  std::vector< BatteryInfo > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  result = (std::vector< BatteryInfo > *)& ((arg1)->batteries);
+  *(std::vector< BatteryInfo > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1capacity_1percent_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->capacity_percent = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1capacity_1percent_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->capacity_percent);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1landing_1power_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->landing_power = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1landing_1power_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->landing_power);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1remain_1flight_1time_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->remain_flight_time = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1remain_1flight_1time_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->remain_flight_time);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1return_1home_1power_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->return_home_power = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfo_1return_1home_1power_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  result = (int) ((arg1)->return_home_power);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftBatteryInfo(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftBatteryInfo *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftBatteryInfo *)new AircraftBatteryInfo();
+  *(AircraftBatteryInfo **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftBatteryInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftBatteryInfo *arg1 = (AircraftBatteryInfo *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftBatteryInfo **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftControlCode_1control_1mode_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftControlCode *arg1 = (AircraftControlCode *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftControlCode **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->control_mode = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftControlCode_1control_1mode_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftControlCode *arg1 = (AircraftControlCode *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftControlCode **)&jarg1; 
+  result = (int) ((arg1)->control_mode);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftControlCode_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftControlCode *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftControlCode *)new AircraftControlCode();
+  *(AircraftControlCode **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftControlCode_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  AircraftControlCode *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  result = (AircraftControlCode *)new AircraftControlCode(arg1);
+  *(AircraftControlCode **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftControlCode(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftControlCode *arg1 = (AircraftControlCode *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftControlCode **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeed_1wind_1direction_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftWindSpeed *arg1 = (AircraftWindSpeed *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftWindSpeed **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->wind_direction = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeed_1wind_1direction_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftWindSpeed *arg1 = (AircraftWindSpeed *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftWindSpeed **)&jarg1; 
+  result = (int) ((arg1)->wind_direction);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeed_1wind_1speed_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+  AircraftWindSpeed *arg1 = (AircraftWindSpeed *) 0 ;
+  double arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftWindSpeed **)&jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->wind_speed = arg2;
+}
+
+
+SWIGEXPORT jdouble JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeed_1wind_1speed_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jdouble jresult = 0 ;
+  AircraftWindSpeed *arg1 = (AircraftWindSpeed *) 0 ;
+  double result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftWindSpeed **)&jarg1; 
+  result = (double) ((arg1)->wind_speed);
+  jresult = (jdouble)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftWindSpeed_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftWindSpeed *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftWindSpeed *)new AircraftWindSpeed();
+  *(AircraftWindSpeed **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftWindSpeed_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1, jdouble jarg2) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  double arg2 ;
+  AircraftWindSpeed *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  arg2 = (double)jarg2; 
+  result = (AircraftWindSpeed *)new AircraftWindSpeed(arg1,arg2);
+  *(AircraftWindSpeed **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftWindSpeed(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftWindSpeed *arg1 = (AircraftWindSpeed *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftWindSpeed **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftModeCode_1mode_1code_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  AircraftModeCode *arg1 = (AircraftModeCode *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftModeCode **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->mode_code = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftModeCode_1mode_1code_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  AircraftModeCode *arg1 = (AircraftModeCode *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftModeCode **)&jarg1; 
+  result = (int) ((arg1)->mode_code);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftModeCode_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftModeCode *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftModeCode *)new AircraftModeCode();
+  *(AircraftModeCode **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftModeCode_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  AircraftModeCode *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  result = (AircraftModeCode *)new AircraftModeCode(arg1);
+  *(AircraftModeCode **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftModeCode(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftModeCode *arg1 = (AircraftModeCode *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftModeCode **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DroneInDock_1drone_1in_1dock_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+  DroneInDock *arg1 = (DroneInDock *) 0 ;
+  int arg2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DroneInDock **)&jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->drone_in_dock = arg2;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DroneInDock_1drone_1in_1dock_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  DroneInDock *arg1 = (DroneInDock *) 0 ;
+  int result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(DroneInDock **)&jarg1; 
+  result = (int) ((arg1)->drone_in_dock);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DroneInDock_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  DroneInDock *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (DroneInDock *)new DroneInDock();
+  *(DroneInDock **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DroneInDock_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jint jarg1) {
+  jlong jresult = 0 ;
+  int arg1 ;
+  DroneInDock *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = (int)jarg1; 
+  result = (DroneInDock *)new DroneInDock(arg1);
+  *(DroneInDock **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1DroneInDock(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  DroneInDock *arg1 = (DroneInDock *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(DroneInDock **)&jarg1; 
+  delete arg1;
+}
+
+
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftLocationCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   AircraftLocationCallback *arg1 = (AircraftLocationCallback *) 0 ;
   
@@ -2403,6 +3742,296 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DeviceOsdCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
   DeviceOsdCallback *obj = *((DeviceOsdCallback **)&objarg);
   SwigDirector_DeviceOsdCallback *director = dynamic_cast<SwigDirector_DeviceOsdCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftBatteryInfoCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftBatteryInfoCallback *arg1 = (AircraftBatteryInfoCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftBatteryInfoCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfoCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftBatteryInfoCallback *arg1 = (AircraftBatteryInfoCallback *) 0 ;
+  AircraftBatteryInfo *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftBatteryInfoCallback **)&jarg1; 
+  arg2 = *(AircraftBatteryInfo **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftBatteryInfo const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftBatteryInfo const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftBatteryInfoCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftBatteryInfoCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftBatteryInfoCallback *)new SwigDirector_AircraftBatteryInfoCallback(jenv);
+  *(AircraftBatteryInfoCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfoCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftBatteryInfoCallback *obj = *((AircraftBatteryInfoCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftBatteryInfoCallback *director = static_cast<SwigDirector_AircraftBatteryInfoCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftBatteryInfoCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftBatteryInfoCallback *obj = *((AircraftBatteryInfoCallback **)&objarg);
+  SwigDirector_AircraftBatteryInfoCallback *director = dynamic_cast<SwigDirector_AircraftBatteryInfoCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftControlCodeCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftControlCodeCallback *arg1 = (AircraftControlCodeCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftControlCodeCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftControlCodeCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftControlCodeCallback *arg1 = (AircraftControlCodeCallback *) 0 ;
+  AircraftControlCode *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftControlCodeCallback **)&jarg1; 
+  arg2 = *(AircraftControlCode **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftControlCode const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftControlCode const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftControlCodeCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftControlCodeCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftControlCodeCallback *)new SwigDirector_AircraftControlCodeCallback(jenv);
+  *(AircraftControlCodeCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftControlCodeCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftControlCodeCallback *obj = *((AircraftControlCodeCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftControlCodeCallback *director = static_cast<SwigDirector_AircraftControlCodeCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftControlCodeCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftControlCodeCallback *obj = *((AircraftControlCodeCallback **)&objarg);
+  SwigDirector_AircraftControlCodeCallback *director = dynamic_cast<SwigDirector_AircraftControlCodeCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftWindSpeedCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftWindSpeedCallback *arg1 = (AircraftWindSpeedCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftWindSpeedCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeedCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftWindSpeedCallback *arg1 = (AircraftWindSpeedCallback *) 0 ;
+  AircraftWindSpeed *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftWindSpeedCallback **)&jarg1; 
+  arg2 = *(AircraftWindSpeed **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftWindSpeed const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftWindSpeed const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftWindSpeedCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftWindSpeedCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftWindSpeedCallback *)new SwigDirector_AircraftWindSpeedCallback(jenv);
+  *(AircraftWindSpeedCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeedCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftWindSpeedCallback *obj = *((AircraftWindSpeedCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftWindSpeedCallback *director = static_cast<SwigDirector_AircraftWindSpeedCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftWindSpeedCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftWindSpeedCallback *obj = *((AircraftWindSpeedCallback **)&objarg);
+  SwigDirector_AircraftWindSpeedCallback *director = dynamic_cast<SwigDirector_AircraftWindSpeedCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftModeCodeCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftModeCodeCallback *arg1 = (AircraftModeCodeCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftModeCodeCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftModeCodeCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftModeCodeCallback *arg1 = (AircraftModeCodeCallback *) 0 ;
+  AircraftModeCode *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftModeCodeCallback **)&jarg1; 
+  arg2 = *(AircraftModeCode **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftModeCode const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftModeCode const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftModeCodeCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftModeCodeCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftModeCodeCallback *)new SwigDirector_AircraftModeCodeCallback(jenv);
+  *(AircraftModeCodeCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftModeCodeCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftModeCodeCallback *obj = *((AircraftModeCodeCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftModeCodeCallback *director = static_cast<SwigDirector_AircraftModeCodeCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftModeCodeCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftModeCodeCallback *obj = *((AircraftModeCodeCallback **)&objarg);
+  SwigDirector_AircraftModeCodeCallback *director = dynamic_cast<SwigDirector_AircraftModeCodeCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1DroneInDockCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  DroneInDockCallback *arg1 = (DroneInDockCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(DroneInDockCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DroneInDockCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  DroneInDockCallback *arg1 = (DroneInDockCallback *) 0 ;
+  DroneInDock *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(DroneInDockCallback **)&jarg1; 
+  arg2 = *(DroneInDock **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "DroneInDock const & is null");
+    return ;
+  } 
+  (arg1)->invoke((DroneInDock const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1DroneInDockCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  DroneInDockCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (DroneInDockCallback *)new SwigDirector_DroneInDockCallback(jenv);
+  *(DroneInDockCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DroneInDockCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  DroneInDockCallback *obj = *((DroneInDockCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_DroneInDockCallback *director = static_cast<SwigDirector_DroneInDockCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_DroneInDockCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  DroneInDockCallback *obj = *((DroneInDockCallback **)&objarg);
+  SwigDirector_DroneInDockCallback *director = dynamic_cast<SwigDirector_DroneInDockCallback *>(obj);
   (void)jcls;
   if (director) {
     director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
@@ -2827,6 +4456,102 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftBatteryInfo_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftBatteryInfoMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftBatteryInfoMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftBatteryInfoMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenAircraftBatteryInfo((AircraftBatteryInfoMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftControlCode_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftControlCodeMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftControlCodeMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftControlCodeMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenAircraftControlCode((AircraftControlCodeMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
 SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftLocation_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
   jlong jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
@@ -2923,6 +4648,102 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftWindSpeed_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftWindSpeedMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftWindSpeedMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftWindSpeedMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenAircraftWindSpeed((AircraftWindSpeedMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftModeCode_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftModeCodeMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftModeCodeMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftModeCodeMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenAircraftModeCode((AircraftModeCodeMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
 SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenDeviceOsd_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
   jlong jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
@@ -2966,6 +4787,54 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
   }
   arg5 = *argp5; 
   result = (arg1)->ListenDeviceOsd((DeviceOsdMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
+  *(ListenId **)&jresult = new ListenId(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenDroneInDock_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+  jlong jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  DroneInDockMsgCallback *arg2 = 0 ;
+  OnSubscribeResultCallback *arg3 = 0 ;
+  std::string *arg4 = 0 ;
+  NotifactionFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  NotifactionFrequency *argp5 ;
+  ListenId result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(DroneInDockMsgCallback **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "DroneInDockMsgCallback const & is null");
+    return 0;
+  } 
+  arg3 = *(OnSubscribeResultCallback **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "OnSubscribeResultCallback const & is null");
+    return 0;
+  } 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  argp5 = *(NotifactionFrequency **)&jarg5; 
+  if (!argp5) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null NotifactionFrequency");
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (arg1)->ListenDroneInDock((DroneInDockMsgCallback const &)*arg2,(OnSubscribeResultCallback const &)*arg3,(std::string const &)*arg4,SWIG_STD_MOVE(arg5));
   *(ListenId **)&jresult = new ListenId(result); 
   return jresult;
 }
@@ -3110,6 +4979,186 @@ SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
   arg5 = (NotificationFrequency)jarg5; 
   result = (long)BusinessManager_ListenDeviceOsd__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftBatteryInfo_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftBatteryInfoCallback *arg2 = (AircraftBatteryInfoCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftBatteryInfoCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftBatteryInfo__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftControlCode_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftControlCodeCallback *arg2 = (AircraftControlCodeCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftControlCodeCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftControlCode__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftWindSpeed_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftWindSpeedCallback *arg2 = (AircraftWindSpeedCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftWindSpeedCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftWindSpeed__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftModeCode_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftModeCodeCallback *arg2 = (AircraftModeCodeCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftModeCodeCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftModeCode__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenDroneInDock_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  DroneInDockCallback *arg2 = (DroneInDockCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(DroneInDockCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenDroneInDock__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
   jresult = (jint)result; 
   return jresult;
 }
@@ -3275,7 +5324,7 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   static struct {
     const char *method;
     const char *signature;
-  } methods[9] = {
+  } methods[14] = {
     {
       "SwigDirector_AircraftLocationCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftLocationCallback;J)V" 
     },
@@ -3287,6 +5336,21 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
     },
     {
       "SwigDirector_DeviceOsdCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/DeviceOsdCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftBatteryInfoCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftBatteryInfoCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftControlCodeCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftControlCodeCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftWindSpeedCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftWindSpeedCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftModeCodeCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftModeCodeCallback;J)V" 
+    },
+    {
+      "SwigDirector_DroneInDockCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/DroneInDockCallback;J)V" 
     },
     {
       "SwigDirector_SDKSubscribeResultCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/SDKSubscribeResultCallback;I)V" 

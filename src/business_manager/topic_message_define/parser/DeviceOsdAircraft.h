@@ -197,7 +197,7 @@ public:
 };
 
 // 电池信息
-class BatteryInfo {
+class SingleBatteryInfo {
 public:
     int capacity_percent = 0;
     std::string firmware_version;
@@ -217,7 +217,7 @@ public:
 // 电池组信息
 class BatteryGroup {
 public:
-    std::vector<BatteryInfo> batteries;
+    std::vector<SingleBatteryInfo> batteries;
     int capacity_percent = 0;
     int landing_power = 0;
     int remain_flight_time = 0;
@@ -361,7 +361,7 @@ public:
 };
 
 // 飞机主机信息
-class DeviceOsdAircraftHost {
+class DeviceOsdAircraftHostMsg {
 public:
     int64_t activation_time = 0;
     double attitude_head = 0.0;
@@ -412,7 +412,7 @@ public:
 // 飞机OSD消息结构
 class DeviceOsdAircraftMsg {
 public:
-    DeviceOsdAircraftHost host;
+    DeviceOsdAircraftHostMsg host;
     std::string sn;
 
     AIGC_JSON_HELPER(host, sn);
@@ -433,7 +433,7 @@ public:
     }
 
     // 获取主机信息
-    const DeviceOsdAircraftHost& getHost() const {
+    const DeviceOsdAircraftHostMsg& getHost() const {
         return msg.host;
     }
 

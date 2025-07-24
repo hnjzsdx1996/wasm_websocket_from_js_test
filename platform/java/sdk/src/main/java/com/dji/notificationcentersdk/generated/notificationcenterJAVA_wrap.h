@@ -69,6 +69,81 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
+class SwigDirector_AircraftBatteryInfoCallback : public AircraftBatteryInfoCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftBatteryInfoCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftBatteryInfoCallback();
+    virtual void invoke(AircraftBatteryInfo const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_AircraftControlCodeCallback : public AircraftControlCodeCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftControlCodeCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftControlCodeCallback();
+    virtual void invoke(AircraftControlCode const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_AircraftWindSpeedCallback : public AircraftWindSpeedCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftWindSpeedCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftWindSpeedCallback();
+    virtual void invoke(AircraftWindSpeed const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_AircraftModeCodeCallback : public AircraftModeCodeCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftModeCodeCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftModeCodeCallback();
+    virtual void invoke(AircraftModeCode const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_DroneInDockCallback : public DroneInDockCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_DroneInDockCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_DroneInDockCallback();
+    virtual void invoke(DroneInDock const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
 class SwigDirector_SDKSubscribeResultCallback : public SDKSubscribeResultCallback, public Swig::Director {
 
 public:
