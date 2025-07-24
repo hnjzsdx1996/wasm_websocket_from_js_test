@@ -351,7 +351,7 @@ constexpr auto address = "ws://localhost:3001";
 
 int main() {
     // 初始化日志
-    nc_logger::init(plog::debug, "notification_center_sdk_test.log");
+    nc_logger::init(plog::info, "notification_center_sdk_test.log");
 
     NC_LOG_INFO("[C++] Starting NotificationCenterSDK Demo...");
 
