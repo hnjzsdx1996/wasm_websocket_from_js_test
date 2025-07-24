@@ -75,6 +75,8 @@ public class Main {
         long[] controlCodeListenIds = new long[deviceSNs.length];
         long[] windSpeedListenIds = new long[deviceSNs.length];
         long[] batteryInfoListenIds = new long[deviceSNs.length];
+        long[] deviceOsdListenIds = new long[deviceSNs.length];
+        long[] droneInDockListenIds = new long[deviceSNs.length];
         
         System.out.println("[Java] Starting monitoring for multiple devices using Template API...");
         
@@ -236,6 +238,46 @@ public class Main {
                 frequency
             );
             
+            // 使用模板化API监听设备OSD信息
+            deviceOsdListenIds[i] = client.ListenDeviceOsd(
+                (DeviceOsd deviceOsd) -> {
+                    System.out.println("[Java] Received device OSD message for device " + deviceSN + ":");
+                    System.out.println("  - Device SN (设备序列号): " + deviceOsd.getSn());
+                    System.out.println("  - Mode Code (模式代码): " + deviceOsd.getHost().getMode_code());
+                    System.out.println("  - Attitude Head (机头朝向角度): " + deviceOsd.getHost().getAttitude_head());
+                    System.out.println("  - Attitude Pitch (俯仰轴角度): " + deviceOsd.getHost().getAttitude_pitch());
+                    System.out.println("  - Attitude Roll (横滚轴角度): " + deviceOsd.getHost().getAttitude_roll());
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Device OSD subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Device OSD subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
+            // 使用模板化API监听无人机在机场状态
+            droneInDockListenIds[i] = client.ListenDroneInDock(
+                (DroneInDock droneInDock) -> {
+                    System.out.println("[Java] Received drone in dock message for device " + deviceSN + ":");
+                    System.out.println("  - Drone In Dock (无人机在机场): " + droneInDock.getDrone_in_dock());
+                    String statusDesc = droneInDock.getDrone_in_dock() == 1 ? "在机场" : "不在机场";
+                    System.out.println("  - Status Description: " + statusDesc);
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Drone in dock subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Drone in dock subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
             System.out.println("[Java] Started monitoring for device " + deviceSN + 
                              " with frequency " + frequency + 
                              " (Listen IDs - Location: " + locationListenIds[i] + 
@@ -244,7 +286,9 @@ public class Main {
                              ", Mode: " + modeCodeListenIds[i] + 
                              ", Control: " + controlCodeListenIds[i] + 
                              ", Wind: " + windSpeedListenIds[i] + 
-                             ", Battery: " + batteryInfoListenIds[i] + ")");
+                             ", Battery: " + batteryInfoListenIds[i] + 
+                             ", OSD: " + deviceOsdListenIds[i] + 
+                             ", Dock: " + droneInDockListenIds[i] + ")");
         }
         
         // 等待一段时间让自动poll处理消息
@@ -257,6 +301,8 @@ public class Main {
         System.out.println("  - Aircraft Control Code (飞机控制代码)");
         System.out.println("  - Aircraft Wind Speed (飞机风速)");
         System.out.println("  - Aircraft Battery Info (飞机电池信息)");
+        System.out.println("  - Device OSD (设备OSD信息)");
+        System.out.println("  - Drone In Dock (无人机在机场状态)");
         Thread.sleep(1000000); // 等待1000秒
         
         // 取消所有设备的监听
@@ -269,6 +315,8 @@ public class Main {
             client.cancelListen(controlCodeListenIds[i]);
             client.cancelListen(windSpeedListenIds[i]);
             client.cancelListen(batteryInfoListenIds[i]);
+            client.cancelListen(deviceOsdListenIds[i]);
+            client.cancelListen(droneInDockListenIds[i]);
             System.out.println("[Java] Cancelled all monitoring for device " + deviceSNs[i]);
         }
 
