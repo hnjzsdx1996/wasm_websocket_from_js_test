@@ -2,26 +2,68 @@
 
 // Settings common to all projects (including the root).
 allprojects {
-    group 'com.dji'
+    group = 'com.dji'
     version = '1.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     // 自动修复：强制所有 Java 编译任务使用 UTF-8 编码，解决中文注释乱码警告
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    // 统一测试配置
+    tasks.withType(Test) {
+        useJUnitPlatform()
+        testLogging {
+            events "passed", "skipped", "failed"
+        }
     }
 }
 
-// Settings common to all subprojects (sdk, java_demo).
+// Settings common to all subprojects.
 subprojects {
     apply plugin: 'java'
-    sourceCompatibility = 1.8
+    apply plugin: 'maven-publish'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
     dependencies {
-        // A common test dependency for all subprojects.
-        testImplementation 'junit:junit:4.13.2'
+        // 统一测试依赖
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     }
+
+    // 发布配置
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+}
+
+// 根项目特定配置
+task cleanAll(type: Delete) {
+    delete rootProject.buildDir
+    subprojects.each { subproject ->
+        delete subproject.buildDir
+    }
+}
+
+task buildAll {
+    dependsOn subprojects.build
+    description = '构建所有子项目'
+}
+
+task testAll {
+    dependsOn subprojects.test
+    description = '测试所有子项目'
 } 
