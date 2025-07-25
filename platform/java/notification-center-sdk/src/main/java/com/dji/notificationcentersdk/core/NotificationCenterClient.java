@@ -603,6 +603,92 @@ public class NotificationCenterClient {
     }
     
     /**
+     * 订阅飞机载荷相机实时视图世界区域信息
+     */
+    public long ListenAircraftPayloadsCameraLiveviewWorldRegion(
+            OnSubscribeMessageCallback<AircraftPayloadsCameraLiveviewWorldRegion> onMessagesCallback, 
+            OnSubscribeResultCallback onResultCallback,
+            String deviceSn, 
+            NotificationFrequency freq) {
+        
+        try {
+            BusinessManager businessManager = sdk.getBusinessManager();
+            if (businessManager == null) {
+                throw new IllegalStateException("BusinessManager not available");
+            }
+            
+            return businessManager.ListenAircraftPayloadsCameraLiveviewWorldRegion(
+                new AircraftPayloadsCameraLiveviewWorldRegionCallback() {
+                    @Override
+                    public void invoke(AircraftPayloadsCameraLiveviewWorldRegion message) {
+                        if (onMessagesCallback != null) {
+                            onMessagesCallback.invoke(message);
+                        }
+                    }
+                },
+                new SDKSubscribeResultCallback() {
+                    @Override
+                    public void invoke(NotificationCenterErrorCode errorCode) {
+                        if (onResultCallback != null) {
+                            onResultCallback.invoke(errorCode);
+                        }
+                    }
+                },
+                deviceSn,
+                freq
+            );
+        } catch (Exception e) {
+            if (onResultCallback != null) {
+                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
+            }
+            return -1;
+        }
+    }
+    
+    /**
+     * 订阅飞机载荷云台姿态信息
+     */
+    public long ListenAircraftPayloadsGimbalAttitude(
+            OnSubscribeMessageCallback<AircraftPayloadsGimbalAttitude> onMessagesCallback, 
+            OnSubscribeResultCallback onResultCallback,
+            String deviceSn, 
+            NotificationFrequency freq) {
+        
+        try {
+            BusinessManager businessManager = sdk.getBusinessManager();
+            if (businessManager == null) {
+                throw new IllegalStateException("BusinessManager not available");
+            }
+            
+            return businessManager.ListenAircraftPayloadsGimbalAttitude(
+                new AircraftPayloadsGimbalAttitudeCallback() {
+                    @Override
+                    public void invoke(AircraftPayloadsGimbalAttitude message) {
+                        if (onMessagesCallback != null) {
+                            onMessagesCallback.invoke(message);
+                        }
+                    }
+                },
+                new SDKSubscribeResultCallback() {
+                    @Override
+                    public void invoke(NotificationCenterErrorCode errorCode) {
+                        if (onResultCallback != null) {
+                            onResultCallback.invoke(errorCode);
+                        }
+                    }
+                },
+                deviceSn,
+                freq
+            );
+        } catch (Exception e) {
+            if (onResultCallback != null) {
+                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
+            }
+            return -1;
+        }
+    }
+    
+    /**
      * 取消监听
      * @param listenId 监听ID
      */

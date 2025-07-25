@@ -80,6 +80,8 @@ public class Main {
         long[] deviceOnlineStatusListenIds = new long[deviceSNs.length];
         long[] aircraftPayloadsListListenIds = new long[deviceSNs.length];
         long[] dockLocationListenIds = new long[deviceSNs.length];
+        long[] aircraftPayloadsCameraLiveviewWorldRegionListenIds = new long[deviceSNs.length];
+        long[] aircraftPayloadsGimbalAttitudeListenIds = new long[deviceSNs.length];
         
         System.out.println("[Java] Starting monitoring for multiple devices using Template API...");
         
@@ -349,6 +351,65 @@ public class Main {
                 frequency
             );
             
+            // 使用模板化API监听飞机载荷相机实时视图世界区域
+            aircraftPayloadsCameraLiveviewWorldRegionListenIds[i] = client.ListenAircraftPayloadsCameraLiveviewWorldRegion(
+                (AircraftPayloadsCameraLiveviewWorldRegion cameraLiveviewWorldRegion) -> {
+                    System.out.println("[Java] Received aircraft payloads camera liveview world region message for device " + deviceSN + ":");
+                    CameraLiveviewWorldRegionMap payloadsList = cameraLiveviewWorldRegion.getPayloads_list();
+                    if (payloadsList != null && !payloadsList.isEmpty()) {
+                        System.out.println("  - Payloads Camera Liveview World Region (载荷相机实时视图世界区域):");
+                        for (String payloadIndex : payloadsList.keySet()) {
+                            CameraLiveviewWorldRegion region = payloadsList.get(payloadIndex);
+                            System.out.println("    Payload [" + payloadIndex + "]:");
+                            System.out.println("      - Bottom (底部): " + region.getBottom());
+                            System.out.println("      - Left (左侧): " + region.getLeft());
+                            System.out.println("      - Right (右侧): " + region.getRight());
+                            System.out.println("      - Top (顶部): " + region.getTop());
+                        }
+                    } else {
+                        System.out.println("  - Payloads Camera Liveview World Region: 空列表或无数据");
+                    }
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Aircraft payloads camera liveview world region subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Aircraft payloads camera liveview world region subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
+            // 使用模板化API监听飞机载荷云台姿态
+            aircraftPayloadsGimbalAttitudeListenIds[i] = client.ListenAircraftPayloadsGimbalAttitude(
+                (AircraftPayloadsGimbalAttitude gimbalAttitude) -> {
+                    System.out.println("[Java] Received aircraft payloads gimbal attitude message for device " + deviceSN + ":");
+                    AircraftPayloadGimbalAttitudeMap payloadsGimbalAttitude = gimbalAttitude.getPayloads_gimbal_attitude();
+                    if (payloadsGimbalAttitude != null && !payloadsGimbalAttitude.isEmpty()) {
+                        System.out.println("  - Payloads Gimbal Attitude (载荷云台姿态):");
+                        for (String payloadIndex : payloadsGimbalAttitude.keySet()) {
+                            AircraftPayloadGimbalAttitude attitude = payloadsGimbalAttitude.get(payloadIndex);
+                            System.out.println("    Payload [" + payloadIndex + "]:");
+                            System.out.println("      - Gimbal Pitch (云台俯仰): " + attitude.getGimbal_pitch() + "°");
+                            System.out.println("      - Gimbal Roll (云台横滚): " + attitude.getGimbal_roll() + "°");
+                            System.out.println("      - Gimbal Yaw (云台偏航): " + attitude.getGimbal_yaw() + "°");
+                        }
+                    } else {
+                        System.out.println("  - Payloads Gimbal Attitude: 空列表或无数据");
+                    }
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Aircraft payloads gimbal attitude subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Aircraft payloads gimbal attitude subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
             System.out.println("[Java] Started monitoring for device " + deviceSN + 
                              " with frequency " + frequency + 
                              " (Listen IDs - Location: " + locationListenIds[i] + 
@@ -362,7 +423,9 @@ public class Main {
                              ", Dock: " + droneInDockListenIds[i] + 
                              ", Online: " + deviceOnlineStatusListenIds[i] + 
                              ", PayloadsList: " + aircraftPayloadsListListenIds[i] + 
-                             ", DockLocation: " + dockLocationListenIds[i] + ")");
+                             ", DockLocation: " + dockLocationListenIds[i] + 
+                             ", CameraLiveviewWorldRegion: " + aircraftPayloadsCameraLiveviewWorldRegionListenIds[i] + 
+                             ", GimbalAttitude: " + aircraftPayloadsGimbalAttitudeListenIds[i] + ")");
         }
         
         // 等待一段时间让自动poll处理消息
@@ -380,6 +443,8 @@ public class Main {
         System.out.println("  - Device Online Status (设备在线状态)");
         System.out.println("  - Aircraft Payloads List (飞机载荷列表)");
         System.out.println("  - Dock Location (机场位置)");
+        System.out.println("  - Aircraft Payloads Camera Liveview World Region (飞机载荷相机实时视图世界区域)");
+        System.out.println("  - Aircraft Payloads Gimbal Attitude (飞机载荷云台姿态)");
         Thread.sleep(1000000); // 等待1000秒
         
         // 取消所有设备的监听
@@ -397,6 +462,8 @@ public class Main {
             client.cancelListen(deviceOnlineStatusListenIds[i]);
             client.cancelListen(aircraftPayloadsListListenIds[i]);
             client.cancelListen(dockLocationListenIds[i]);
+            client.cancelListen(aircraftPayloadsCameraLiveviewWorldRegionListenIds[i]);
+            client.cancelListen(aircraftPayloadsGimbalAttitudeListenIds[i]);
             System.out.println("[Java] Cancelled all monitoring for device " + deviceSNs[i]);
         }
 

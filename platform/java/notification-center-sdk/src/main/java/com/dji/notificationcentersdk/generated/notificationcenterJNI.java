@@ -182,6 +182,10 @@ public class notificationcenterJNI {
   public final static native long new_CameraLiveviewWorldRegion__SWIG_0();
   public final static native long new_CameraLiveviewWorldRegion__SWIG_1(double jarg1, double jarg2, double jarg3, double jarg4);
   public final static native void delete_CameraLiveviewWorldRegion(long jarg1);
+  public final static native void AircraftPayloadsCameraLiveviewWorldRegion_payloads_list_set(long jarg1, AircraftPayloadsCameraLiveviewWorldRegion jarg1_, long jarg2, CameraLiveviewWorldRegionMap jarg2_);
+  public final static native long AircraftPayloadsCameraLiveviewWorldRegion_payloads_list_get(long jarg1, AircraftPayloadsCameraLiveviewWorldRegion jarg1_);
+  public final static native long new_AircraftPayloadsCameraLiveviewWorldRegion();
+  public final static native void delete_AircraftPayloadsCameraLiveviewWorldRegion(long jarg1);
   public final static native void AircraftPayloadGimbalAttitude_gimbal_pitch_set(long jarg1, AircraftPayloadGimbalAttitude jarg1_, double jarg2);
   public final static native double AircraftPayloadGimbalAttitude_gimbal_pitch_get(long jarg1, AircraftPayloadGimbalAttitude jarg1_);
   public final static native void AircraftPayloadGimbalAttitude_gimbal_roll_set(long jarg1, AircraftPayloadGimbalAttitude jarg1_, double jarg2);
@@ -191,6 +195,10 @@ public class notificationcenterJNI {
   public final static native long new_AircraftPayloadGimbalAttitude__SWIG_0();
   public final static native long new_AircraftPayloadGimbalAttitude__SWIG_1(double jarg1, double jarg2, double jarg3);
   public final static native void delete_AircraftPayloadGimbalAttitude(long jarg1);
+  public final static native void AircraftPayloadsGimbalAttitude_payloads_gimbal_attitude_set(long jarg1, AircraftPayloadsGimbalAttitude jarg1_, long jarg2, AircraftPayloadGimbalAttitudeMap jarg2_);
+  public final static native long AircraftPayloadsGimbalAttitude_payloads_gimbal_attitude_get(long jarg1, AircraftPayloadsGimbalAttitude jarg1_);
+  public final static native long new_AircraftPayloadsGimbalAttitude();
+  public final static native void delete_AircraftPayloadsGimbalAttitude(long jarg1);
   public final static native void AircraftPayloadsList_payloads_list_set(long jarg1, AircraftPayloadsList jarg1_, long jarg2, StringVector jarg2_);
   public final static native long AircraftPayloadsList_payloads_list_get(long jarg1, AircraftPayloadsList jarg1_);
   public final static native long new_AircraftPayloadsList();
@@ -221,6 +229,16 @@ public class notificationcenterJNI {
   public final static native long new_DockLocationCallback();
   public final static native void DockLocationCallback_director_connect(DockLocationCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void DockLocationCallback_change_ownership(DockLocationCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftPayloadsCameraLiveviewWorldRegionCallback(long jarg1);
+  public final static native void AircraftPayloadsCameraLiveviewWorldRegionCallback_invoke(long jarg1, AircraftPayloadsCameraLiveviewWorldRegionCallback jarg1_, long jarg2, AircraftPayloadsCameraLiveviewWorldRegion jarg2_);
+  public final static native long new_AircraftPayloadsCameraLiveviewWorldRegionCallback();
+  public final static native void AircraftPayloadsCameraLiveviewWorldRegionCallback_director_connect(AircraftPayloadsCameraLiveviewWorldRegionCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftPayloadsCameraLiveviewWorldRegionCallback_change_ownership(AircraftPayloadsCameraLiveviewWorldRegionCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_AircraftPayloadsGimbalAttitudeCallback(long jarg1);
+  public final static native void AircraftPayloadsGimbalAttitudeCallback_invoke(long jarg1, AircraftPayloadsGimbalAttitudeCallback jarg1_, long jarg2, AircraftPayloadsGimbalAttitude jarg2_);
+  public final static native long new_AircraftPayloadsGimbalAttitudeCallback();
+  public final static native void AircraftPayloadsGimbalAttitudeCallback_director_connect(AircraftPayloadsGimbalAttitudeCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void AircraftPayloadsGimbalAttitudeCallback_change_ownership(AircraftPayloadsGimbalAttitudeCallback obj, long cptr, boolean take_or_release);
   public final static native long new_StringVector__SWIG_0();
   public final static native long new_StringVector__SWIG_1(long jarg1, StringVector jarg1_);
   public final static native boolean StringVector_isEmpty(long jarg1, StringVector jarg1_);
@@ -236,6 +254,42 @@ public class notificationcenterJNI {
   public final static native String StringVector_doSet(long jarg1, StringVector jarg1_, int jarg2, String jarg3);
   public final static native void StringVector_doRemoveRange(long jarg1, StringVector jarg1_, int jarg2, int jarg3);
   public final static native void delete_StringVector(long jarg1);
+  public final static native long new_CameraLiveviewWorldRegionMap__SWIG_0();
+  public final static native long new_CameraLiveviewWorldRegionMap__SWIG_1(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native long CameraLiveviewWorldRegionMap_Iterator_getNextUnchecked(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_);
+  public final static native boolean CameraLiveviewWorldRegionMap_Iterator_isNot(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_, long jarg2, CameraLiveviewWorldRegionMap.Iterator jarg2_);
+  public final static native String CameraLiveviewWorldRegionMap_Iterator_getKey(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_);
+  public final static native long CameraLiveviewWorldRegionMap_Iterator_getValue(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_);
+  public final static native void CameraLiveviewWorldRegionMap_Iterator_setValue(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_, long jarg2, CameraLiveviewWorldRegion jarg2_);
+  public final static native void delete_CameraLiveviewWorldRegionMap_Iterator(long jarg1);
+  public final static native boolean CameraLiveviewWorldRegionMap_isEmpty(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native void CameraLiveviewWorldRegionMap_clear(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native long CameraLiveviewWorldRegionMap_find(long jarg1, CameraLiveviewWorldRegionMap jarg1_, String jarg2);
+  public final static native long CameraLiveviewWorldRegionMap_begin(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native long CameraLiveviewWorldRegionMap_end(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native int CameraLiveviewWorldRegionMap_sizeImpl(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
+  public final static native boolean CameraLiveviewWorldRegionMap_containsImpl(long jarg1, CameraLiveviewWorldRegionMap jarg1_, String jarg2);
+  public final static native void CameraLiveviewWorldRegionMap_putUnchecked(long jarg1, CameraLiveviewWorldRegionMap jarg1_, String jarg2, long jarg3, CameraLiveviewWorldRegion jarg3_);
+  public final static native void CameraLiveviewWorldRegionMap_removeUnchecked(long jarg1, CameraLiveviewWorldRegionMap jarg1_, long jarg2, CameraLiveviewWorldRegionMap.Iterator jarg2_);
+  public final static native void delete_CameraLiveviewWorldRegionMap(long jarg1);
+  public final static native long new_AircraftPayloadGimbalAttitudeMap__SWIG_0();
+  public final static native long new_AircraftPayloadGimbalAttitudeMap__SWIG_1(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native long AircraftPayloadGimbalAttitudeMap_Iterator_getNextUnchecked(long jarg1, AircraftPayloadGimbalAttitudeMap.Iterator jarg1_);
+  public final static native boolean AircraftPayloadGimbalAttitudeMap_Iterator_isNot(long jarg1, AircraftPayloadGimbalAttitudeMap.Iterator jarg1_, long jarg2, AircraftPayloadGimbalAttitudeMap.Iterator jarg2_);
+  public final static native String AircraftPayloadGimbalAttitudeMap_Iterator_getKey(long jarg1, AircraftPayloadGimbalAttitudeMap.Iterator jarg1_);
+  public final static native long AircraftPayloadGimbalAttitudeMap_Iterator_getValue(long jarg1, AircraftPayloadGimbalAttitudeMap.Iterator jarg1_);
+  public final static native void AircraftPayloadGimbalAttitudeMap_Iterator_setValue(long jarg1, AircraftPayloadGimbalAttitudeMap.Iterator jarg1_, long jarg2, AircraftPayloadGimbalAttitude jarg2_);
+  public final static native void delete_AircraftPayloadGimbalAttitudeMap_Iterator(long jarg1);
+  public final static native boolean AircraftPayloadGimbalAttitudeMap_isEmpty(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native void AircraftPayloadGimbalAttitudeMap_clear(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native long AircraftPayloadGimbalAttitudeMap_find(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_, String jarg2);
+  public final static native long AircraftPayloadGimbalAttitudeMap_begin(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native long AircraftPayloadGimbalAttitudeMap_end(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native int AircraftPayloadGimbalAttitudeMap_sizeImpl(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_);
+  public final static native boolean AircraftPayloadGimbalAttitudeMap_containsImpl(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_, String jarg2);
+  public final static native void AircraftPayloadGimbalAttitudeMap_putUnchecked(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_, String jarg2, long jarg3, AircraftPayloadGimbalAttitude jarg3_);
+  public final static native void AircraftPayloadGimbalAttitudeMap_removeUnchecked(long jarg1, AircraftPayloadGimbalAttitudeMap jarg1_, long jarg2, AircraftPayloadGimbalAttitudeMap.Iterator jarg2_);
+  public final static native void delete_AircraftPayloadGimbalAttitudeMap(long jarg1);
   public final static native void SdkInitializeInfo_log_path_set(long jarg1, SdkInitializeInfo jarg1_, String jarg2);
   public final static native String SdkInitializeInfo_log_path_get(long jarg1, SdkInitializeInfo jarg1_);
   public final static native void SdkInitializeInfo_log_level_set(long jarg1, SdkInitializeInfo jarg1_, int jarg2);
@@ -259,8 +313,8 @@ public class notificationcenterJNI {
   public final static native long BusinessManager_ListenAircraftControlCode__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftLocation__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftModeCode__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
-  public final static native long BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
-  public final static native long BusinessManager_ListenAircraftPayloadsGimbalAttitude(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftPayloadsList__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftSpeed__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenAircraftWindSpeed__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
@@ -280,6 +334,8 @@ public class notificationcenterJNI {
   public final static native int BusinessManager_ListenDeviceOnlineStatus__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, DeviceOnlineStatusCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftPayloadsList__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftPayloadsListCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenDockLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, DockLocationCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftPayloadsCameraLiveviewWorldRegionCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftPayloadsGimbalAttitudeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserve(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -329,6 +385,12 @@ public class notificationcenterJNI {
   }
   public static void SwigDirector_DockLocationCallback_invoke(DockLocationCallback jself, long message) {
     jself.invoke(new DockLocation(message, false));
+  }
+  public static void SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback_invoke(AircraftPayloadsCameraLiveviewWorldRegionCallback jself, long message) {
+    jself.invoke(new AircraftPayloadsCameraLiveviewWorldRegion(message, false));
+  }
+  public static void SwigDirector_AircraftPayloadsGimbalAttitudeCallback_invoke(AircraftPayloadsGimbalAttitudeCallback jself, long message) {
+    jself.invoke(new AircraftPayloadsGimbalAttitude(message, false));
   }
   public static void SwigDirector_ConnectionListener_OnMessage(ConnectionListener jself, String message) {
     jself.OnMessage(message);

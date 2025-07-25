@@ -69,11 +69,11 @@ public class BusinessManager {
   }
 
   public SWIGTYPE_p_int64_t ListenAircraftPayloadsCameraLiveviewWorldRegion(SWIGTYPE_p_std__functionT_void_fAircraftPayloadsCameraLiveviewWorldRegionMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
-    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftPayloadsCameraLiveviewWorldRegionMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
+    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftPayloadsCameraLiveviewWorldRegionMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
 
   public SWIGTYPE_p_int64_t ListenAircraftPayloadsGimbalAttitude(SWIGTYPE_p_std__functionT_void_fAircraftPayloadsGimbalAttitudeMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
-    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftPayloadsGimbalAttitude(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftPayloadsGimbalAttitudeMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
+    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fAircraftPayloadsGimbalAttitudeMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
 
   public SWIGTYPE_p_int64_t ListenAircraftPayloadsList(SWIGTYPE_p_std__functionT_void_fAircraftPayloadsListMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
@@ -150,6 +150,14 @@ public class BusinessManager {
 
   public int ListenDockLocation(DockLocationCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
     return notificationcenterJNI.BusinessManager_ListenDockLocation__SWIG_1(swigCPtr, this, DockLocationCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SDKSubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
+  }
+
+  public int ListenAircraftPayloadsCameraLiveviewWorldRegion(AircraftPayloadsCameraLiveviewWorldRegionCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
+    return notificationcenterJNI.BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_1(swigCPtr, this, AircraftPayloadsCameraLiveviewWorldRegionCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SDKSubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
+  }
+
+  public int ListenAircraftPayloadsGimbalAttitude(AircraftPayloadsGimbalAttitudeCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
+    return notificationcenterJNI.BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_1(swigCPtr, this, AircraftPayloadsGimbalAttitudeCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SDKSubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
   }
 
   public void cancelObserve(int listen_id) {

@@ -785,7 +785,7 @@ namespace Swig {
 namespace Swig {
   namespace {
     jclass jclass_notificationcenterJNI = NULL;
-    jmethodID director_method_ids[17];
+    jmethodID director_method_ids[19];
   }
 }
 
@@ -851,6 +851,8 @@ template <typename T> T SwigValueInit() {
 #include "business_manager/topic_message_define/PublishAircraftWindSpeedTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftModeCodeTopic.h"
 #include "business_manager/topic_message_define/PublishDroneInDockTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftPayloadsCameraLiveviewWorldRegionTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftPayloadsGimbalAttitudeTopic.h"
 #include "message_define/common.h"
 
 
@@ -1098,6 +1100,14 @@ public:
         : bottom(bottom), left(left), right(right), top(top) {}
 };
 
+// 定义新的AircraftPayloadsCameraLiveviewWorldRegion类
+class AircraftPayloadsCameraLiveviewWorldRegion {
+public:
+    std::unordered_map<std::string, CameraLiveviewWorldRegion> payloads_list;
+    
+    AircraftPayloadsCameraLiveviewWorldRegion() {}
+};
+
 
 
 // 定义新的AircraftPayloadGimbalAttitude类
@@ -1110,6 +1120,14 @@ public:
     AircraftPayloadGimbalAttitude() : gimbal_pitch(0.0), gimbal_roll(0.0), gimbal_yaw(0.0) {}
     AircraftPayloadGimbalAttitude(double gimbal_pitch, double gimbal_roll, double gimbal_yaw) 
         : gimbal_pitch(gimbal_pitch), gimbal_roll(gimbal_roll), gimbal_yaw(gimbal_yaw) {}
+};
+
+// 定义新的AircraftPayloadsGimbalAttitude类
+class AircraftPayloadsGimbalAttitude {
+public:
+    std::unordered_map<std::string, AircraftPayloadGimbalAttitude> payloads_gimbal_attitude;
+    
+    AircraftPayloadsGimbalAttitude() {}
 };
 
 
@@ -1154,6 +1172,18 @@ class DockLocationCallback {
 public:
     virtual ~DockLocationCallback() {}
     virtual void invoke(const DockLocation& message) = 0;
+};
+
+class AircraftPayloadsCameraLiveviewWorldRegionCallback {
+public:
+    virtual ~AircraftPayloadsCameraLiveviewWorldRegionCallback() {}
+    virtual void invoke(const AircraftPayloadsCameraLiveviewWorldRegion& message) = 0;
+};
+
+class AircraftPayloadsGimbalAttitudeCallback {
+public:
+    virtual ~AircraftPayloadsGimbalAttitudeCallback() {}
+    virtual void invoke(const AircraftPayloadsGimbalAttitude& message) = 0;
 };
 
 
@@ -1232,6 +1262,80 @@ SWIGINTERN void std_vector_Sl_std_string_Sg__doRemoveRange(std::vector< std::str
         } else {
           throw std::out_of_range("vector index out of range");
         }
+      }
+SWIGINTERN std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getNextUnchecked(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *self){
+          std::unordered_map< std::string, CameraLiveviewWorldRegion >::iterator copy = (*self);
+          return ++copy;
+        }
+SWIGINTERN bool std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_isNot(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *self,std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator other){
+          return (*self != other);
+        }
+SWIGINTERN std::string std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getKey(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *self){
+          return (*self)->first;
+        }
+SWIGINTERN CameraLiveviewWorldRegion std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getValue(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *self){
+          return (*self)->second;
+        }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_setValue(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *self,CameraLiveviewWorldRegion const &newValue){
+          (*self)->second = newValue;
+        }
+
+  SWIGINTERN jint SWIG_MapSize(size_t size) {
+    jint sz = SWIG_JavaIntFromSize_t(size);
+    if (sz == -1) {
+      throw std::out_of_range("map size is too large to fit into a Java int");
+    }
+
+    return sz;
+  }
+
+SWIGINTERN jint std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__sizeImpl(std::unordered_map< std::string,CameraLiveviewWorldRegion > const *self){
+        return SWIG_MapSize(self->size());
+      }
+SWIGINTERN bool std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__containsImpl(std::unordered_map< std::string,CameraLiveviewWorldRegion > *self,std::string const &key){
+        return (self->count(key) > 0);
+      }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__putUnchecked(std::unordered_map< std::string,CameraLiveviewWorldRegion > *self,std::string const &key,CameraLiveviewWorldRegion const &value){
+#ifdef __cpp_lib_map_try_emplace
+        (*self).insert_or_assign(key, value);
+#else
+        (*self)[key] = value;
+#endif
+      }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__removeUnchecked(std::unordered_map< std::string,CameraLiveviewWorldRegion > *self,std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const itr){
+        self->erase(itr);
+      }
+SWIGINTERN std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getNextUnchecked(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *self){
+          std::unordered_map< std::string, AircraftPayloadGimbalAttitude >::iterator copy = (*self);
+          return ++copy;
+        }
+SWIGINTERN bool std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_isNot(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *self,std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator other){
+          return (*self != other);
+        }
+SWIGINTERN std::string std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getKey(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *self){
+          return (*self)->first;
+        }
+SWIGINTERN AircraftPayloadGimbalAttitude std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getValue(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *self){
+          return (*self)->second;
+        }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_setValue(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *self,AircraftPayloadGimbalAttitude const &newValue){
+          (*self)->second = newValue;
+        }
+SWIGINTERN jint std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__sizeImpl(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > const *self){
+        return SWIG_MapSize(self->size());
+      }
+SWIGINTERN bool std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__containsImpl(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *self,std::string const &key){
+        return (self->count(key) > 0);
+      }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__putUnchecked(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *self,std::string const &key,AircraftPayloadGimbalAttitude const &value){
+#ifdef __cpp_lib_map_try_emplace
+        (*self).insert_or_assign(key, value);
+#else
+        (*self)[key] = value;
+#endif
+      }
+SWIGINTERN void std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__removeUnchecked(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *self,std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const itr){
+        self->erase(itr);
       }
 SWIGINTERN SdkInitializeInfo *new_SdkInitializeInfo__SWIG_0(std::string const &log_path="",SdkLogLevel log_level=SdkLogLevel::NONE){
         SdkInitializeInfo* info = new SdkInitializeInfo();
@@ -1702,6 +1806,91 @@ SWIGINTERN long BusinessManager_ListenDockLocation__SWIG_1(BusinessManager *self
         }
         
         return self->ListenDockLocation(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_1(BusinessManager *self,AircraftPayloadsCameraLiveviewWorldRegionCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftPayloadsCameraLiveviewWorldRegionMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftPayloadsCameraLiveviewWorldRegionMsg转换为AircraftPayloadsCameraLiveviewWorldRegion
+                AircraftPayloadsCameraLiveviewWorldRegion aircraft_payloads_camera_liveview_world_region;
+                for (const auto& payload : msg.payloads_list) {
+                    CameraLiveviewWorldRegion camera_liveview_world_region(
+                        payload.second.bottom,
+                        payload.second.left,
+                        payload.second.right,
+                        payload.second.top
+                    );
+                    aircraft_payloads_camera_liveview_world_region.payloads_list[payload.first] = camera_liveview_world_region;
+                }
+                onSubscribeMessageCallback->invoke(aircraft_payloads_camera_liveview_world_region);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftPayloadsCameraLiveviewWorldRegion(msg_cb, result_cb, sn, notify_freq);
+    }
+SWIGINTERN long BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_1(BusinessManager *self,AircraftPayloadsGimbalAttitudeCallback *onSubscribeMessageCallback,SDKSubscribeResultCallback *onSubscribeResultCallback,std::string const &sn,NotificationFrequency notificationFrequency){
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftPayloadsGimbalAttitudeMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftPayloadsGimbalAttitudeMsg转换为AircraftPayloadsGimbalAttitude
+                AircraftPayloadsGimbalAttitude aircraft_payloads_gimbal_attitude;
+                for (const auto& payload : msg.payloads_gimbal_attitude) {
+                    AircraftPayloadGimbalAttitude aircraft_payload_gimbal_attitude(
+                        payload.second.gimbal_pitch,
+                        payload.second.gimbal_roll,
+                        payload.second.gimbal_yaw
+                    );
+                    aircraft_payloads_gimbal_attitude.payloads_gimbal_attitude[payload.first] = aircraft_payload_gimbal_attitude;
+                }
+                onSubscribeMessageCallback->invoke(aircraft_payloads_gimbal_attitude);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return self->ListenAircraftPayloadsGimbalAttitude(msg_cb, result_cb, sn, notify_freq);
     }
 SWIGINTERN void BusinessManager_cancelObserve(BusinessManager *self,long listen_id){
         self->CancelObserve(listen_id);
@@ -2416,6 +2605,114 @@ void SwigDirector_DockLocationCallback::swig_connect_director(JNIEnv *jenv, jobj
 }
 
 
+SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback::SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback(JNIEnv *jenv) : AircraftPayloadsCameraLiveviewWorldRegionCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback::~SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback::invoke(AircraftPayloadsCameraLiveviewWorldRegion const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftPayloadsCameraLiveviewWorldRegionCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftPayloadsCameraLiveviewWorldRegion **)&jmessage = (AircraftPayloadsCameraLiveviewWorldRegion *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[13], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftPayloadsCameraLiveviewWorldRegionCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftPayloadsCameraLiveviewWorldRegionCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftPayloadsCameraLiveviewWorldRegion;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
+SwigDirector_AircraftPayloadsGimbalAttitudeCallback::SwigDirector_AircraftPayloadsGimbalAttitudeCallback(JNIEnv *jenv) : AircraftPayloadsGimbalAttitudeCallback(), Swig::Director(jenv) {
+}
+
+SwigDirector_AircraftPayloadsGimbalAttitudeCallback::~SwigDirector_AircraftPayloadsGimbalAttitudeCallback() {
+  swig_disconnect_director_self("swigDirectorDisconnect");
+}
+
+
+void SwigDirector_AircraftPayloadsGimbalAttitudeCallback::invoke(AircraftPayloadsGimbalAttitude const &message) {
+  JNIEnvWrapper swigjnienv(this) ;
+  JNIEnv * jenv = swigjnienv.getJNIEnv() ;
+  jobject swigjobj = (jobject) NULL ;
+  jlong jmessage = 0 ;
+  
+  if (!swig_override[0]) {
+    SWIG_JavaThrowException(JNIEnvWrapper(this).getJNIEnv(), SWIG_JavaDirectorPureVirtual, "Attempted to invoke pure virtual method AircraftPayloadsGimbalAttitudeCallback::invoke.");
+    return;
+  }
+  swigjobj = swig_get_self(jenv);
+  if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
+    *(AircraftPayloadsGimbalAttitude **)&jmessage = (AircraftPayloadsGimbalAttitude *) &message; 
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[14], swigjobj, jmessage);
+    jthrowable swigerror = jenv->ExceptionOccurred();
+    if (swigerror) {
+      Swig::DirectorException::raise(jenv, swigerror);
+    }
+    
+  } else {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null upcall object in AircraftPayloadsGimbalAttitudeCallback::invoke ");
+  }
+  if (swigjobj) jenv->DeleteLocalRef(swigjobj);
+}
+
+void SwigDirector_AircraftPayloadsGimbalAttitudeCallback::swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global) {
+  static jclass baseclass = swig_new_global_ref(jenv, "com/dji/notificationcentersdk/generated/AircraftPayloadsGimbalAttitudeCallback");
+  if (!baseclass) return;
+  static SwigDirectorMethod methods[] = {
+    SwigDirectorMethod(jenv, baseclass, "invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftPayloadsGimbalAttitude;)V")
+  };
+  
+  if (swig_set_self(jenv, jself, swig_mem_own, weak_global)) {
+    bool derived = (jenv->IsSameObject(baseclass, jcls) ? false : true);
+    for (int i = 0; i < 1; ++i) {
+      swig_override[i] = false;
+      if (derived) {
+        jmethodID methid = jenv->GetMethodID(jcls, methods[i].name, methods[i].desc);
+        swig_override[i] = methods[i].methid && (methid != methods[i].methid);
+        jenv->ExceptionClear();
+      }
+    }
+  }
+}
+
+
 SwigDirector_ConnectionListener::SwigDirector_ConnectionListener(JNIEnv *jenv) : WebsocketEvent(), Swig::Director(jenv) {
 }
 
@@ -2438,7 +2735,7 @@ void SwigDirector_ConnectionListener::OnMessage(std::string const &message) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jmessage = jenv->NewStringUTF((&message)->c_str());
     Swig::LocalRefGuard message_refguard(jenv, jmessage); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[13], swigjobj, jmessage);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[15], swigjobj, jmessage);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -2461,7 +2758,7 @@ void SwigDirector_ConnectionListener::OnOpen() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[14], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[16], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -2484,7 +2781,7 @@ void SwigDirector_ConnectionListener::OnClose() {
   }
   swigjobj = swig_get_self(jenv);
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[15], swigjobj);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[17], swigjobj);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -2510,7 +2807,7 @@ void SwigDirector_ConnectionListener::OnError(std::string const &error) {
   if (swigjobj && jenv->IsSameObject(swigjobj, NULL) == JNI_FALSE) {
     jerror = jenv->NewStringUTF((&error)->c_str());
     Swig::LocalRefGuard error_refguard(jenv, jerror); 
-    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[16], swigjobj, jerror);
+    jenv->CallStaticVoidMethod(Swig::jclass_notificationcenterJNI, Swig::director_method_ids[18], swigjobj, jerror);
     jthrowable swigerror = jenv->ExceptionOccurred();
     if (swigerror) {
       Swig::DirectorException::raise(jenv, swigerror);
@@ -4892,6 +5189,57 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsCameraLiveviewWorldRegion_1payloads_1list_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftPayloadsCameraLiveviewWorldRegion *arg1 = (AircraftPayloadsCameraLiveviewWorldRegion *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg2 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftPayloadsCameraLiveviewWorldRegion **)&jarg1; 
+  arg2 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg2; 
+  if (arg1) (arg1)->payloads_list = *arg2;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsCameraLiveviewWorldRegion_1payloads_1list_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  AircraftPayloadsCameraLiveviewWorldRegion *arg1 = (AircraftPayloadsCameraLiveviewWorldRegion *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftPayloadsCameraLiveviewWorldRegion **)&jarg1; 
+  result = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *)& ((arg1)->payloads_list);
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadsCameraLiveviewWorldRegion(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftPayloadsCameraLiveviewWorldRegion *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftPayloadsCameraLiveviewWorldRegion *)new AircraftPayloadsCameraLiveviewWorldRegion();
+  *(AircraftPayloadsCameraLiveviewWorldRegion **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadsCameraLiveviewWorldRegion(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftPayloadsCameraLiveviewWorldRegion *arg1 = (AircraftPayloadsCameraLiveviewWorldRegion *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftPayloadsCameraLiveviewWorldRegion **)&jarg1; 
+  delete arg1;
+}
+
+
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitude_1gimbal_1pitch_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   AircraftPayloadGimbalAttitude *arg1 = (AircraftPayloadGimbalAttitude *) 0 ;
   double arg2 ;
@@ -5012,6 +5360,57 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   (void)jenv;
   (void)jcls;
   arg1 = *(AircraftPayloadGimbalAttitude **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsGimbalAttitude_1payloads_1gimbal_1attitude_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftPayloadsGimbalAttitude *arg1 = (AircraftPayloadsGimbalAttitude *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg2 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftPayloadsGimbalAttitude **)&jarg1; 
+  arg2 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg2; 
+  if (arg1) (arg1)->payloads_gimbal_attitude = *arg2;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsGimbalAttitude_1payloads_1gimbal_1attitude_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  AircraftPayloadsGimbalAttitude *arg1 = (AircraftPayloadsGimbalAttitude *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(AircraftPayloadsGimbalAttitude **)&jarg1; 
+  result = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *)& ((arg1)->payloads_gimbal_attitude);
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadsGimbalAttitude(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftPayloadsGimbalAttitude *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftPayloadsGimbalAttitude *)new AircraftPayloadsGimbalAttitude();
+  *(AircraftPayloadsGimbalAttitude **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadsGimbalAttitude(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftPayloadsGimbalAttitude *arg1 = (AircraftPayloadsGimbalAttitude *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftPayloadsGimbalAttitude **)&jarg1; 
   delete arg1;
 }
 
@@ -5395,6 +5794,122 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadsCameraLiveviewWorldRegionCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *arg1 = (AircraftPayloadsCameraLiveviewWorldRegionCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftPayloadsCameraLiveviewWorldRegionCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsCameraLiveviewWorldRegionCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *arg1 = (AircraftPayloadsCameraLiveviewWorldRegionCallback *) 0 ;
+  AircraftPayloadsCameraLiveviewWorldRegion *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftPayloadsCameraLiveviewWorldRegionCallback **)&jarg1; 
+  arg2 = *(AircraftPayloadsCameraLiveviewWorldRegion **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftPayloadsCameraLiveviewWorldRegion const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftPayloadsCameraLiveviewWorldRegion const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadsCameraLiveviewWorldRegionCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftPayloadsCameraLiveviewWorldRegionCallback *)new SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback(jenv);
+  *(AircraftPayloadsCameraLiveviewWorldRegionCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsCameraLiveviewWorldRegionCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *obj = *((AircraftPayloadsCameraLiveviewWorldRegionCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback *director = static_cast<SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsCameraLiveviewWorldRegionCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *obj = *((AircraftPayloadsCameraLiveviewWorldRegionCallback **)&objarg);
+  SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback *director = dynamic_cast<SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadsGimbalAttitudeCallback(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  AircraftPayloadsGimbalAttitudeCallback *arg1 = (AircraftPayloadsGimbalAttitudeCallback *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(AircraftPayloadsGimbalAttitudeCallback **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsGimbalAttitudeCallback_1invoke(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  AircraftPayloadsGimbalAttitudeCallback *arg1 = (AircraftPayloadsGimbalAttitudeCallback *) 0 ;
+  AircraftPayloadsGimbalAttitude *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(AircraftPayloadsGimbalAttitudeCallback **)&jarg1; 
+  arg2 = *(AircraftPayloadsGimbalAttitude **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftPayloadsGimbalAttitude const & is null");
+    return ;
+  } 
+  (arg1)->invoke((AircraftPayloadsGimbalAttitude const &)*arg2);
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadsGimbalAttitudeCallback(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  AircraftPayloadsGimbalAttitudeCallback *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (AircraftPayloadsGimbalAttitudeCallback *)new SwigDirector_AircraftPayloadsGimbalAttitudeCallback(jenv);
+  *(AircraftPayloadsGimbalAttitudeCallback **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsGimbalAttitudeCallback_1director_1connect(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jswig_mem_own, jboolean jweak_global) {
+  AircraftPayloadsGimbalAttitudeCallback *obj = *((AircraftPayloadsGimbalAttitudeCallback **)&objarg);
+  (void)jcls;
+  SwigDirector_AircraftPayloadsGimbalAttitudeCallback *director = static_cast<SwigDirector_AircraftPayloadsGimbalAttitudeCallback *>(obj);
+  director->swig_connect_director(jenv, jself, jenv->GetObjectClass(jself), (jswig_mem_own == JNI_TRUE), (jweak_global == JNI_TRUE));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadsGimbalAttitudeCallback_1change_1ownership(JNIEnv *jenv, jclass jcls, jobject jself, jlong objarg, jboolean jtake_or_release) {
+  AircraftPayloadsGimbalAttitudeCallback *obj = *((AircraftPayloadsGimbalAttitudeCallback **)&objarg);
+  SwigDirector_AircraftPayloadsGimbalAttitudeCallback *director = dynamic_cast<SwigDirector_AircraftPayloadsGimbalAttitudeCallback *>(obj);
+  (void)jcls;
+  if (director) {
+    director->swig_java_change_ownership(jenv, jself, jtake_or_release ? true : false);
+  }
+}
+
+
 SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1StringVector_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   std::vector< std::string > *result = 0 ;
@@ -5693,6 +6208,630 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   (void)jenv;
   (void)jcls;
   arg1 = *(std::vector< std::string > **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1CameraLiveviewWorldRegionMap_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *)new std::unordered_map< std::string,CameraLiveviewWorldRegion >();
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1CameraLiveviewWorldRegionMap_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1;
+  if (!arg1) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "std::unordered_map< std::string,CameraLiveviewWorldRegion > const & is null");
+    return 0;
+  } 
+  result = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *)new std::unordered_map< std::string,CameraLiveviewWorldRegion >((std::unordered_map< std::string,CameraLiveviewWorldRegion > const &)*arg1);
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1Iterator_1getNextUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getNextUnchecked(arg1);
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jresult = new std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1Iterator_1isNot(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator arg2 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *argp2 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  argp2 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg2; 
+  if (!argp2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator");
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (bool)std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_isNot((std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *)arg1,SWIG_STD_MOVE(arg2));
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jstring JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1Iterator_1getKey(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jstring jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  std::string result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getKey((std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *)arg1);
+  jresult = jenv->NewStringUTF((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1Iterator_1getValue(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  CameraLiveviewWorldRegion result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_getValue((std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *)arg1);
+  *(CameraLiveviewWorldRegion **)&jresult = new CameraLiveviewWorldRegion(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1Iterator_1setValue(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  CameraLiveviewWorldRegion *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  arg2 = *(CameraLiveviewWorldRegion **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "CameraLiveviewWorldRegion const & is null");
+    return ;
+  } 
+  std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__iterator_setValue(arg1,(CameraLiveviewWorldRegion const &)*arg2);
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1CameraLiveviewWorldRegionMap_1Iterator(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1isEmpty(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  result = (bool)((std::unordered_map< std::string,CameraLiveviewWorldRegion > const *)arg1)->empty();
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1clear(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  (arg1)->clear();
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1find(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::string *arg2 = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (arg1)->find((std::string const &)*arg2);
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jresult = new std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1begin(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  result = (arg1)->begin();
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jresult = new std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1end(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  result = (arg1)->end();
+  *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jresult = new std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1sizeImpl(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  jint result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  try {
+    result = std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__sizeImpl((std::unordered_map< std::string,CameraLiveviewWorldRegion > const *)arg1);
+  } catch(std::out_of_range &_e) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, (&_e)->what());
+    return 0;
+  }
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1containsImpl(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (bool)std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__containsImpl(arg1,(std::string const &)*arg2);
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1putUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2, jlong jarg3, jobject jarg3_) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::string *arg2 = 0 ;
+  CameraLiveviewWorldRegion *arg3 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg3_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return ;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return ;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  arg3 = *(CameraLiveviewWorldRegion **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "CameraLiveviewWorldRegion const & is null");
+    return ;
+  } 
+  std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__putUnchecked(arg1,(std::string const &)*arg2,(CameraLiveviewWorldRegion const &)*arg3);
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_CameraLiveviewWorldRegionMap_1removeUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator arg2 ;
+  std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const *argp2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  argp2 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator **)&jarg2; 
+  if (!argp2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null std::unordered_map< std::string,CameraLiveviewWorldRegion >::iterator const");
+    return ;
+  }
+  arg2 = *argp2; 
+  std_unordered_map_Sl_std_string_Sc_CameraLiveviewWorldRegion_Sg__removeUnchecked(arg1,SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1CameraLiveviewWorldRegionMap(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  std::unordered_map< std::string,CameraLiveviewWorldRegion > *arg1 = (std::unordered_map< std::string,CameraLiveviewWorldRegion > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(std::unordered_map< std::string,CameraLiveviewWorldRegion > **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadGimbalAttitudeMap_1_1SWIG_10(JNIEnv *jenv, jclass jcls) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  result = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *)new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >();
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_new_1AircraftPayloadGimbalAttitudeMap_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *result = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1;
+  if (!arg1) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "std::unordered_map< std::string,AircraftPayloadGimbalAttitude > const & is null");
+    return 0;
+  } 
+  result = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *)new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >((std::unordered_map< std::string,AircraftPayloadGimbalAttitude > const &)*arg1);
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1Iterator_1getNextUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getNextUnchecked(arg1);
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jresult = new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1Iterator_1isNot(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator arg2 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *argp2 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  argp2 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg2; 
+  if (!argp2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator");
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (bool)std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_isNot((std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *)arg1,SWIG_STD_MOVE(arg2));
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jstring JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1Iterator_1getKey(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jstring jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  std::string result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getKey((std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *)arg1);
+  jresult = jenv->NewStringUTF((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1Iterator_1getValue(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  AircraftPayloadGimbalAttitude result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  result = std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_getValue((std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *)arg1);
+  *(AircraftPayloadGimbalAttitude **)&jresult = new AircraftPayloadGimbalAttitude(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1Iterator_1setValue(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  AircraftPayloadGimbalAttitude *arg2 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  arg2 = *(AircraftPayloadGimbalAttitude **)&jarg2;
+  if (!arg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftPayloadGimbalAttitude const & is null");
+    return ;
+  } 
+  std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__iterator_setValue(arg1,(AircraftPayloadGimbalAttitude const &)*arg2);
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadGimbalAttitudeMap_1Iterator(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1isEmpty(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  result = (bool)((std::unordered_map< std::string,AircraftPayloadGimbalAttitude > const *)arg1)->empty();
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1clear(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  (arg1)->clear();
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1find(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::string *arg2 = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (arg1)->find((std::string const &)*arg2);
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jresult = new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1begin(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  result = (arg1)->begin();
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jresult = new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1end(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jlong jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  result = (arg1)->end();
+  *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jresult = new std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1sizeImpl(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+  jint jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  jint result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  try {
+    result = std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__sizeImpl((std::unordered_map< std::string,AircraftPayloadGimbalAttitude > const *)arg1);
+  } catch(std::out_of_range &_e) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaIndexOutOfBoundsException, (&_e)->what());
+    return 0;
+  }
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jboolean JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1containsImpl(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  jboolean jresult = 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (bool)std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__containsImpl(arg1,(std::string const &)*arg2);
+  jresult = (jboolean)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1putUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2, jlong jarg3, jobject jarg3_) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::string *arg2 = 0 ;
+  AircraftPayloadGimbalAttitude *arg3 = 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg3_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return ;
+  }
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return ;
+  std::string arg2_str(arg2_pstr);
+  arg2 = &arg2_str;
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  arg3 = *(AircraftPayloadGimbalAttitude **)&jarg3;
+  if (!arg3) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "AircraftPayloadGimbalAttitude const & is null");
+    return ;
+  } 
+  std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__putUnchecked(arg1,(std::string const &)*arg2,(AircraftPayloadGimbalAttitude const &)*arg3);
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_AircraftPayloadGimbalAttitudeMap_1removeUnchecked(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator arg2 ;
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const *argp2 ;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
+  argp2 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator **)&jarg2; 
+  if (!argp2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "Attempt to dereference null std::unordered_map< std::string,AircraftPayloadGimbalAttitude >::iterator const");
+    return ;
+  }
+  arg2 = *argp2; 
+  std_unordered_map_Sl_std_string_Sc_AircraftPayloadGimbalAttitude_Sg__removeUnchecked(arg1,SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_delete_1AircraftPayloadGimbalAttitudeMap(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+  std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *arg1 = (std::unordered_map< std::string,AircraftPayloadGimbalAttitude > *) 0 ;
+  
+  (void)jenv;
+  (void)jcls;
+  arg1 = *(std::unordered_map< std::string,AircraftPayloadGimbalAttitude > **)&jarg1; 
   delete arg1;
 }
 
@@ -6251,7 +7390,7 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
-SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsCameraLiveviewWorldRegion(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsCameraLiveviewWorldRegion_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
   jlong jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
   AircraftPayloadsCameraLiveviewWorldRegionMsgCallback *arg2 = 0 ;
@@ -6299,7 +7438,7 @@ SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificati
 }
 
 
-SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsGimbalAttitude(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
+SWIGEXPORT jlong JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsGimbalAttitude_1_1SWIG_10(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jlong jarg3, jstring jarg4, jlong jarg5) {
   jlong jresult = 0 ;
   BusinessManager *arg1 = (BusinessManager *) 0 ;
   AircraftPayloadsGimbalAttitudeMsgCallback *arg2 = 0 ;
@@ -7115,6 +8254,78 @@ SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
 }
 
 
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsCameraLiveviewWorldRegion_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftPayloadsCameraLiveviewWorldRegionCallback *arg2 = (AircraftPayloadsCameraLiveviewWorldRegionCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftPayloadsCameraLiveviewWorldRegionCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT jint JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1ListenAircraftPayloadsGimbalAttitude_1_1SWIG_11(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jstring jarg4, jint jarg5) {
+  jint jresult = 0 ;
+  BusinessManager *arg1 = (BusinessManager *) 0 ;
+  AircraftPayloadsGimbalAttitudeCallback *arg2 = (AircraftPayloadsGimbalAttitudeCallback *) 0 ;
+  SDKSubscribeResultCallback *arg3 = (SDKSubscribeResultCallback *) 0 ;
+  std::string *arg4 = 0 ;
+  NotificationFrequency arg5 ;
+  std::shared_ptr< BusinessManager > *smartarg1 = 0 ;
+  long result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  (void)jarg2_;
+  (void)jarg3_;
+  
+  smartarg1 = *(std::shared_ptr<  BusinessManager > **)&jarg1;
+  arg1 = (BusinessManager *)(smartarg1 ? smartarg1->get() : 0); 
+  arg2 = *(AircraftPayloadsGimbalAttitudeCallback **)&jarg2; 
+  arg3 = *(SDKSubscribeResultCallback **)&jarg3; 
+  if(!jarg4) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  }
+  const char *arg4_pstr = (const char *)jenv->GetStringUTFChars(jarg4, 0); 
+  if (!arg4_pstr) return 0;
+  std::string arg4_str(arg4_pstr);
+  arg4 = &arg4_str;
+  jenv->ReleaseStringUTFChars(jarg4, arg4_pstr); 
+  arg5 = (NotificationFrequency)jarg5; 
+  result = (long)BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_1(arg1,arg2,arg3,(std::string const &)*arg4,arg5);
+  jresult = (jint)result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificationcenterJNI_BusinessManager_1cancelObserve(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   BusinessManager *arg1 = (BusinessManager *) 0 ;
   long arg2 ;
@@ -7275,7 +8486,7 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
   static struct {
     const char *method;
     const char *signature;
-  } methods[17] = {
+  } methods[19] = {
     {
       "SwigDirector_AircraftLocationCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftLocationCallback;J)V" 
     },
@@ -7314,6 +8525,12 @@ SWIGEXPORT void JNICALL Java_com_dji_notificationcentersdk_generated_notificatio
     },
     {
       "SwigDirector_DockLocationCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/DockLocationCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftPayloadsCameraLiveviewWorldRegionCallback;J)V" 
+    },
+    {
+      "SwigDirector_AircraftPayloadsGimbalAttitudeCallback_invoke", "(Lcom/dji/notificationcentersdk/generated/AircraftPayloadsGimbalAttitudeCallback;J)V" 
     },
     {
       "SwigDirector_ConnectionListener_OnMessage", "(Lcom/dji/notificationcentersdk/generated/ConnectionListener;Ljava/lang/String;)V" 

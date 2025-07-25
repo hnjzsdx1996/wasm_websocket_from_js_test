@@ -204,6 +204,36 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
+class SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback : public AircraftPayloadsCameraLiveviewWorldRegionCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftPayloadsCameraLiveviewWorldRegionCallback();
+    virtual void invoke(AircraftPayloadsCameraLiveviewWorldRegion const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_AircraftPayloadsGimbalAttitudeCallback : public AircraftPayloadsGimbalAttitudeCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftPayloadsGimbalAttitudeCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftPayloadsGimbalAttitudeCallback();
+    virtual void invoke(AircraftPayloadsGimbalAttitude const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
 class SwigDirector_ConnectionListener : public WebsocketEvent, public Swig::Director {
 
 public:

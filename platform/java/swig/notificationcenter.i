@@ -22,6 +22,8 @@
 #include "business_manager/topic_message_define/PublishAircraftWindSpeedTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftModeCodeTopic.h"
 #include "business_manager/topic_message_define/PublishDroneInDockTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftPayloadsCameraLiveviewWorldRegionTopic.h"
+#include "business_manager/topic_message_define/PublishAircraftPayloadsGimbalAttitudeTopic.h"
 #include "message_define/common.h"
 %}
 
@@ -275,6 +277,14 @@ public:
         : bottom(bottom), left(left), right(right), top(top) {}
 };
 
+// 定义新的AircraftPayloadsCameraLiveviewWorldRegion类
+class AircraftPayloadsCameraLiveviewWorldRegion {
+public:
+    std::unordered_map<std::string, CameraLiveviewWorldRegion> payloads_list;
+    
+    AircraftPayloadsCameraLiveviewWorldRegion() {}
+};
+
 
 
 // 定义新的AircraftPayloadGimbalAttitude类
@@ -287,6 +297,14 @@ public:
     AircraftPayloadGimbalAttitude() : gimbal_pitch(0.0), gimbal_roll(0.0), gimbal_yaw(0.0) {}
     AircraftPayloadGimbalAttitude(double gimbal_pitch, double gimbal_roll, double gimbal_yaw) 
         : gimbal_pitch(gimbal_pitch), gimbal_roll(gimbal_roll), gimbal_yaw(gimbal_yaw) {}
+};
+
+// 定义新的AircraftPayloadsGimbalAttitude类
+class AircraftPayloadsGimbalAttitude {
+public:
+    std::unordered_map<std::string, AircraftPayloadGimbalAttitude> payloads_gimbal_attitude;
+    
+    AircraftPayloadsGimbalAttitude() {}
 };
 
 
@@ -332,6 +350,18 @@ public:
     virtual ~DockLocationCallback() {}
     virtual void invoke(const DockLocation& message) = 0;
 };
+
+class AircraftPayloadsCameraLiveviewWorldRegionCallback {
+public:
+    virtual ~AircraftPayloadsCameraLiveviewWorldRegionCallback() {}
+    virtual void invoke(const AircraftPayloadsCameraLiveviewWorldRegion& message) = 0;
+};
+
+class AircraftPayloadsGimbalAttitudeCallback {
+public:
+    virtual ~AircraftPayloadsGimbalAttitudeCallback() {}
+    virtual void invoke(const AircraftPayloadsGimbalAttitude& message) = 0;
+};
 %}
 
 // Create Java-friendly callback interfaces and data structures
@@ -349,8 +379,12 @@ public:
 
 %feature("director") AircraftPayloadsListCallback;
 %feature("director") DockLocationCallback;
+%feature("director") AircraftPayloadsCameraLiveviewWorldRegionCallback;
+%feature("director") AircraftPayloadsGimbalAttitudeCallback;
 
 %template(StringVector) std::vector<std::string>;
+%template(CameraLiveviewWorldRegionMap) std::unordered_map<std::string, CameraLiveviewWorldRegion>;
+%template(AircraftPayloadGimbalAttitudeMap) std::unordered_map<std::string, AircraftPayloadGimbalAttitude>;
 
 // Include the type definitions and enums
 %include "message_define/common.h"
@@ -879,6 +913,101 @@ public:
         }
         
         return $self->ListenDockLocation(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenAircraftPayloadsCameraLiveviewWorldRegion(
+        AircraftPayloadsCameraLiveviewWorldRegionCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftPayloadsCameraLiveviewWorldRegionMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftPayloadsCameraLiveviewWorldRegionMsg转换为AircraftPayloadsCameraLiveviewWorldRegion
+                AircraftPayloadsCameraLiveviewWorldRegion aircraft_payloads_camera_liveview_world_region;
+                for (const auto& payload : msg.payloads_list) {
+                    CameraLiveviewWorldRegion camera_liveview_world_region(
+                        payload.second.bottom,
+                        payload.second.left,
+                        payload.second.right,
+                        payload.second.top
+                    );
+                    aircraft_payloads_camera_liveview_world_region.payloads_list[payload.first] = camera_liveview_world_region;
+                }
+                onSubscribeMessageCallback->invoke(aircraft_payloads_camera_liveview_world_region);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenAircraftPayloadsCameraLiveviewWorldRegion(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenAircraftPayloadsGimbalAttitude(
+        AircraftPayloadsGimbalAttitudeCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftPayloadsGimbalAttitudeMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftPayloadsGimbalAttitudeMsg转换为AircraftPayloadsGimbalAttitude
+                AircraftPayloadsGimbalAttitude aircraft_payloads_gimbal_attitude;
+                for (const auto& payload : msg.payloads_gimbal_attitude) {
+                    AircraftPayloadGimbalAttitude aircraft_payload_gimbal_attitude(
+                        payload.second.gimbal_pitch,
+                        payload.second.gimbal_roll,
+                        payload.second.gimbal_yaw
+                    );
+                    aircraft_payloads_gimbal_attitude.payloads_gimbal_attitude[payload.first] = aircraft_payload_gimbal_attitude;
+                }
+                onSubscribeMessageCallback->invoke(aircraft_payloads_gimbal_attitude);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenAircraftPayloadsGimbalAttitude(msg_cb, result_cb, sn, notify_freq);
     }
     
     void cancelObserve(long listen_id) {
