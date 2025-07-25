@@ -94,14 +94,14 @@ void start_device_monitoring() {
     std::vector<std::string> deviceSNs = {
         "8UUXN2D00A00VL",
         "1581F6Q8D242100CPKTJ",
-        // "1581F8HHD24B10010084",
-        // "8UUDMAQ00A0121",
-        // "6QCDL820020093",
-        // "8PHDM8L0010322",
-        // "8UUDMAQ00A0138",
-        // "8UUDMAQ00A0047",
-        // "8UUDMAQ00A0152",
-        // "8UUDMAQ00A0076",
+        "1581F8HHD24B10010084",
+        "8UUDMAQ00A0121",
+        "6QCDL820020093",
+        "8PHDM8L0010322",
+        "8UUDMAQ00A0138",
+        "8UUDMAQ00A0047",
+        "8UUDMAQ00A0152",
+        "8UUDMAQ00A0076",
     };
     NotifactionFrequency frequency = NotifactionFrequency_Push_1s;
     
@@ -115,27 +115,29 @@ void start_device_monitoring() {
         NC_LOG_INFO("[C++] Starting device OSD monitoring for device %zu: %s", i + 1, deviceSN.c_str());
         ListenId listenId;
 
-        // listenId = g_business_manager->ListenAircraftAttitude(
-        //     [](const AircraftAttitudeMsg &msg)-> void {
-        //         NC_LOG_INFO("[C++] ListenAircraftAttitude: %.2f, %.2f, %.2f", msg.attitude_head, msg.attitude_pitch, msg.attitude_roll);
-        //     },
-        //     [](const NotificationCenterErrorCode& error_code)->void {
-        //         NC_LOG_INFO("[C++] ListenAircraftAttitude subscribe error_code: %d", error_code);
-        //     },
-        //     deviceSN,
-        //     frequency
-        // );
+        listenId = g_business_manager->ListenAircraftAttitude(
+            [](const AircraftAttitudeMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftAttitude: %.2f, %.2f, %.2f", msg.attitude_head, msg.attitude_pitch, msg.attitude_roll);
+            },
+            [](const NotificationCenterErrorCode& error_code)->void {
+                NC_LOG_INFO("[C++] ListenAircraftAttitude subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
 
-        // listenId = g_business_manager->ListenAircraftLocation(
-        //     [](const AircraftLocationMsg &msg)-> void {
-        //         NC_LOG_INFO("[C++] ListenAircraftLocation: h: %.2f, e: %.2f, lon: %.2f, lat: %.2f", msg.height, msg.elevation, msg.longitude, msg.latitude);
-        //     },
-        //     [](const NotificationCenterErrorCode &error_code)-> void {
-        //         NC_LOG_INFO("[C++] ListenAircraftLocation subscribe error_code: %d", error_code);
-        //     },
-        //     deviceSN,
-        //     frequency
-        // );
+        listenId = g_business_manager->ListenAircraftLocation(
+            [](const AircraftLocationMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftLocation: h: %.2f, e: %.2f, lon: %.2f, lat: %.2f", msg.height, msg.elevation, msg.longitude, msg.latitude);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftLocation subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenAircraftSpeed(
             [](const AircraftSpeedMsg &msg)-> void {
