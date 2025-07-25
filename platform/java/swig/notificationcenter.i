@@ -23,6 +23,7 @@
 #include "business_manager/topic_message_define/PublishDroneInDockTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftPayloadsCameraLiveviewWorldRegionTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftPayloadsGimbalAttitudeTopic.h"
+#include "business_manager/topic_message_define/PublishFlightTasksTopic.h"
 #include "message_define/common.h"
 %}
 
@@ -279,7 +280,49 @@ public:
     AircraftPayloadsGimbalAttitude() {}
 };
 
+// 定义新的FolderInfoData类
+class FolderInfoData {
+public:
+    int folder_id; // 媒体文件夹id
+    int expected_file_count; // 媒体文件总数
+    int uploaded_file_count; // 媒体文件上传总数
+    
+    FolderInfoData() : folder_id(0), expected_file_count(0), uploaded_file_count(0) {}
+    FolderInfoData(int folder_id, int expected_file_count, int uploaded_file_count) 
+        : folder_id(folder_id), expected_file_count(expected_file_count), uploaded_file_count(uploaded_file_count) {}
+};
 
+// 定义新的FlightTask类
+class FlightTask {
+public:
+    std::string uuid;
+    std::string name;
+    int task_type;
+    int status;
+    int progress;
+    std::string sn;
+    FolderInfoData folder_info;
+    long run_at; // 任务实际运行时间
+    long complete_at; // 任务结束时间
+    int total_waypoints; // 总航线数
+    int current_waypoint_index; // 已飞完的航点数
+    int progress_version; // 消息的时间戳，用来处理乱序问题
+    int resumable_status; // ResumableStatus
+    int obstacle_avoidance_notify; // ObstacleNotifyType
+    std::string wayline_uuid;
+    
+    FlightTask() : task_type(0), status(0), progress(0), run_at(0), complete_at(0), 
+                   total_waypoints(0), current_waypoint_index(0), progress_version(0), 
+                   resumable_status(0), obstacle_avoidance_notify(0) {}
+};
+
+// 定义新的FlightTasks类
+class FlightTasks {
+public:
+    std::vector<FlightTask> flight_tasks;
+    
+    FlightTasks() {}
+};
 
 // 定义新的AircraftPayloadsList类
 class AircraftPayloadsList {
@@ -334,6 +377,12 @@ public:
     virtual ~AircraftPayloadsGimbalAttitudeCallback() {}
     virtual void invoke(const AircraftPayloadsGimbalAttitude& message) = 0;
 };
+
+class FlightTasksCallback {
+public:
+    virtual ~FlightTasksCallback() {}
+    virtual void invoke(const FlightTasks& message) = 0;
+};
 %}
 
 // Create Java-friendly callback interfaces and data structures
@@ -352,8 +401,10 @@ public:
 %feature("director") DockLocationCallback;
 %feature("director") AircraftPayloadsCameraLiveviewWorldRegionCallback;
 %feature("director") AircraftPayloadsGimbalAttitudeCallback;
+%feature("director") FlightTasksCallback;
 
 %template(StringVector) std::vector<std::string>;
+%template(FlightTaskVector) std::vector<FlightTask>;
 %template(CameraLiveviewWorldRegionMap) std::unordered_map<std::string, CameraLiveviewWorldRegion>;
 %template(AircraftPayloadGimbalAttitudeMap) std::unordered_map<std::string, AircraftPayloadGimbalAttitude>;
 
@@ -938,6 +989,68 @@ public:
         }
         
         return $self->ListenAircraftPayloadsGimbalAttitude(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenFlightTasks(
+        FlightTasksCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const FlightTasksMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将FlightTasksMsg转换为FlightTasks
+                FlightTasks flight_tasks;
+                for (const auto& task : msg.flight_tasks) {
+                    FlightTask flight_task;
+                    flight_task.uuid = task.uuid;
+                    flight_task.name = task.name;
+                    flight_task.task_type = task.task_type;
+                    flight_task.status = task.status;
+                    flight_task.progress = task.progress;
+                    flight_task.sn = task.sn;
+                    flight_task.folder_info = FolderInfoData(
+                        task.folder_info.folder_id,
+                        task.folder_info.expected_file_count,
+                        task.folder_info.uploaded_file_count
+                    );
+                    flight_task.run_at = task.run_at;
+                    flight_task.complete_at = task.complete_at;
+                    flight_task.total_waypoints = task.total_waypoints;
+                    flight_task.current_waypoint_index = task.current_waypoint_index;
+                    flight_task.progress_version = task.progress_version;
+                    flight_task.resumable_status = task.resumable_status;
+                    flight_task.obstacle_avoidance_notify = task.obstacle_avoidance_notify;
+                    flight_task.wayline_uuid = task.wayline_uuid;
+                    flight_tasks.flight_tasks.push_back(flight_task);
+                }
+                onSubscribeMessageCallback->invoke(flight_tasks);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenFlightTasks(msg_cb, result_cb, sn, notify_freq);
     }
     
     void cancelObserve(long listen_id) {

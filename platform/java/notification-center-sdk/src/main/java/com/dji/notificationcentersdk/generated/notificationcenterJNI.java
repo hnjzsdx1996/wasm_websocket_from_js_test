@@ -176,6 +176,51 @@ public class notificationcenterJNI {
   public final static native long AircraftPayloadsGimbalAttitude_payloads_gimbal_attitude_get(long jarg1, AircraftPayloadsGimbalAttitude jarg1_);
   public final static native long new_AircraftPayloadsGimbalAttitude();
   public final static native void delete_AircraftPayloadsGimbalAttitude(long jarg1);
+  public final static native void FolderInfoData_folder_id_set(long jarg1, FolderInfoData jarg1_, int jarg2);
+  public final static native int FolderInfoData_folder_id_get(long jarg1, FolderInfoData jarg1_);
+  public final static native void FolderInfoData_expected_file_count_set(long jarg1, FolderInfoData jarg1_, int jarg2);
+  public final static native int FolderInfoData_expected_file_count_get(long jarg1, FolderInfoData jarg1_);
+  public final static native void FolderInfoData_uploaded_file_count_set(long jarg1, FolderInfoData jarg1_, int jarg2);
+  public final static native int FolderInfoData_uploaded_file_count_get(long jarg1, FolderInfoData jarg1_);
+  public final static native long new_FolderInfoData__SWIG_0();
+  public final static native long new_FolderInfoData__SWIG_1(int jarg1, int jarg2, int jarg3);
+  public final static native void delete_FolderInfoData(long jarg1);
+  public final static native void FlightTask_uuid_set(long jarg1, FlightTask jarg1_, String jarg2);
+  public final static native String FlightTask_uuid_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_name_set(long jarg1, FlightTask jarg1_, String jarg2);
+  public final static native String FlightTask_name_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_task_type_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_task_type_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_status_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_status_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_progress_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_progress_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_sn_set(long jarg1, FlightTask jarg1_, String jarg2);
+  public final static native String FlightTask_sn_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_folder_info_set(long jarg1, FlightTask jarg1_, long jarg2, FolderInfoData jarg2_);
+  public final static native long FlightTask_folder_info_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_run_at_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_run_at_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_complete_at_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_complete_at_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_total_waypoints_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_total_waypoints_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_current_waypoint_index_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_current_waypoint_index_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_progress_version_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_progress_version_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_resumable_status_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_resumable_status_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_obstacle_avoidance_notify_set(long jarg1, FlightTask jarg1_, int jarg2);
+  public final static native int FlightTask_obstacle_avoidance_notify_get(long jarg1, FlightTask jarg1_);
+  public final static native void FlightTask_wayline_uuid_set(long jarg1, FlightTask jarg1_, String jarg2);
+  public final static native String FlightTask_wayline_uuid_get(long jarg1, FlightTask jarg1_);
+  public final static native long new_FlightTask();
+  public final static native void delete_FlightTask(long jarg1);
+  public final static native void FlightTasks_flight_tasks_set(long jarg1, FlightTasks jarg1_, long jarg2, FlightTaskVector jarg2_);
+  public final static native long FlightTasks_flight_tasks_get(long jarg1, FlightTasks jarg1_);
+  public final static native long new_FlightTasks();
+  public final static native void delete_FlightTasks(long jarg1);
   public final static native void AircraftPayloadsList_payloads_list_set(long jarg1, AircraftPayloadsList jarg1_, long jarg2, StringVector jarg2_);
   public final static native long AircraftPayloadsList_payloads_list_get(long jarg1, AircraftPayloadsList jarg1_);
   public final static native long new_AircraftPayloadsList();
@@ -216,6 +261,11 @@ public class notificationcenterJNI {
   public final static native long new_AircraftPayloadsGimbalAttitudeCallback();
   public final static native void AircraftPayloadsGimbalAttitudeCallback_director_connect(AircraftPayloadsGimbalAttitudeCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void AircraftPayloadsGimbalAttitudeCallback_change_ownership(AircraftPayloadsGimbalAttitudeCallback obj, long cptr, boolean take_or_release);
+  public final static native void delete_FlightTasksCallback(long jarg1);
+  public final static native void FlightTasksCallback_invoke(long jarg1, FlightTasksCallback jarg1_, long jarg2, FlightTasks jarg2_);
+  public final static native long new_FlightTasksCallback();
+  public final static native void FlightTasksCallback_director_connect(FlightTasksCallback obj, long cptr, boolean mem_own, boolean weak_global);
+  public final static native void FlightTasksCallback_change_ownership(FlightTasksCallback obj, long cptr, boolean take_or_release);
   public final static native long new_StringVector__SWIG_0();
   public final static native long new_StringVector__SWIG_1(long jarg1, StringVector jarg1_);
   public final static native boolean StringVector_isEmpty(long jarg1, StringVector jarg1_);
@@ -231,6 +281,21 @@ public class notificationcenterJNI {
   public final static native String StringVector_doSet(long jarg1, StringVector jarg1_, int jarg2, String jarg3);
   public final static native void StringVector_doRemoveRange(long jarg1, StringVector jarg1_, int jarg2, int jarg3);
   public final static native void delete_StringVector(long jarg1);
+  public final static native long new_FlightTaskVector__SWIG_0();
+  public final static native long new_FlightTaskVector__SWIG_1(long jarg1, FlightTaskVector jarg1_);
+  public final static native boolean FlightTaskVector_isEmpty(long jarg1, FlightTaskVector jarg1_);
+  public final static native void FlightTaskVector_clear(long jarg1, FlightTaskVector jarg1_);
+  public final static native long new_FlightTaskVector__SWIG_2(int jarg1, long jarg2, FlightTask jarg2_);
+  public final static native int FlightTaskVector_doCapacity(long jarg1, FlightTaskVector jarg1_);
+  public final static native void FlightTaskVector_doReserve(long jarg1, FlightTaskVector jarg1_, int jarg2);
+  public final static native int FlightTaskVector_doSize(long jarg1, FlightTaskVector jarg1_);
+  public final static native void FlightTaskVector_doAdd__SWIG_0(long jarg1, FlightTaskVector jarg1_, long jarg2, FlightTask jarg2_);
+  public final static native void FlightTaskVector_doAdd__SWIG_1(long jarg1, FlightTaskVector jarg1_, int jarg2, long jarg3, FlightTask jarg3_);
+  public final static native long FlightTaskVector_doRemove(long jarg1, FlightTaskVector jarg1_, int jarg2);
+  public final static native long FlightTaskVector_doGet(long jarg1, FlightTaskVector jarg1_, int jarg2);
+  public final static native long FlightTaskVector_doSet(long jarg1, FlightTaskVector jarg1_, int jarg2, long jarg3, FlightTask jarg3_);
+  public final static native void FlightTaskVector_doRemoveRange(long jarg1, FlightTaskVector jarg1_, int jarg2, int jarg3);
+  public final static native void delete_FlightTaskVector(long jarg1);
   public final static native long new_CameraLiveviewWorldRegionMap__SWIG_0();
   public final static native long new_CameraLiveviewWorldRegionMap__SWIG_1(long jarg1, CameraLiveviewWorldRegionMap jarg1_);
   public final static native long CameraLiveviewWorldRegionMap_Iterator_getNextUnchecked(long jarg1, CameraLiveviewWorldRegionMap.Iterator jarg1_);
@@ -298,6 +363,7 @@ public class notificationcenterJNI {
   public final static native long BusinessManager_ListenDeviceOnlineStatus__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenDockLocation__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native long BusinessManager_ListenDroneInDock__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
+  public final static native long BusinessManager_ListenFlightTasks__SWIG_0(long jarg1, BusinessManager jarg1_, long jarg2, long jarg3, String jarg4, long jarg5);
   public final static native int BusinessManager_ListenAircraftLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftLocationCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftAttitude__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftAttitudeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftSpeed__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftSpeedCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
@@ -311,6 +377,7 @@ public class notificationcenterJNI {
   public final static native int BusinessManager_ListenDockLocation__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, DockLocationCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftPayloadsCameraLiveviewWorldRegion__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftPayloadsCameraLiveviewWorldRegionCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native int BusinessManager_ListenAircraftPayloadsGimbalAttitude__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, AircraftPayloadsGimbalAttitudeCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
+  public final static native int BusinessManager_ListenFlightTasks__SWIG_1(long jarg1, BusinessManager jarg1_, long jarg2, FlightTasksCallback jarg2_, long jarg3, SDKSubscribeResultCallback jarg3_, String jarg4, int jarg5);
   public final static native void BusinessManager_cancelObserve(long jarg1, BusinessManager jarg1_, int jarg2);
   public final static native void delete_BusinessManager(long jarg1);
   public final static native void delete_ConnectionListener(long jarg1);
@@ -363,6 +430,9 @@ public class notificationcenterJNI {
   }
   public static void SwigDirector_AircraftPayloadsGimbalAttitudeCallback_invoke(AircraftPayloadsGimbalAttitudeCallback jself, long message) {
     jself.invoke(new AircraftPayloadsGimbalAttitude(message, false));
+  }
+  public static void SwigDirector_FlightTasksCallback_invoke(FlightTasksCallback jself, long message) {
+    jself.invoke(new FlightTasks(message, false));
   }
   public static void SwigDirector_ConnectionListener_OnMessage(ConnectionListener jself, String message) {
     jself.OnMessage(message);

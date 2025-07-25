@@ -81,6 +81,7 @@ public class Main {
         long[] dockLocationListenIds = new long[deviceSNs.length];
         long[] aircraftPayloadsCameraLiveviewWorldRegionListenIds = new long[deviceSNs.length];
         long[] aircraftPayloadsGimbalAttitudeListenIds = new long[deviceSNs.length];
+        long[] flightTasksListenIds = new long[deviceSNs.length];
         
         System.out.println("[Java] Starting monitoring for multiple devices using Template API...");
         
@@ -388,6 +389,54 @@ public class Main {
                 frequency
             );
             
+            // 使用模板化API监听飞行任务状态
+            flightTasksListenIds[i] = client.ListenFlightTasks(
+                (FlightTasks flightTasks) -> {
+                    System.out.println("[Java] Received flight tasks message for device " + deviceSN + ":");
+                    FlightTaskVector tasks = flightTasks.getFlight_tasks();
+                    if (tasks != null && !tasks.isEmpty()) {
+                        System.out.println("  - Flight Tasks (飞行任务):");
+                        for (int j = 0; j < tasks.size(); j++) {
+                            FlightTask task = tasks.get(j);
+                            System.out.println("    Task [" + j + "]:");
+                            System.out.println("      - UUID: " + task.getUuid());
+                            System.out.println("      - Name: " + task.getName());
+                            System.out.println("      - Task Type: " + task.getTask_type());
+                            System.out.println("      - Status: " + task.getStatus());
+                            System.out.println("      - Progress: " + task.getProgress() + "%");
+                            System.out.println("      - SN: " + task.getSn());
+                            System.out.println("      - Run At: " + task.getRun_at());
+                            System.out.println("      - Complete At: " + task.getComplete_at());
+                            System.out.println("      - Total Waypoints: " + task.getTotal_waypoints());
+                            System.out.println("      - Current Waypoint Index: " + task.getCurrent_waypoint_index());
+                            System.out.println("      - Progress Version: " + task.getProgress_version());
+                            System.out.println("      - Resumable Status: " + task.getResumable_status());
+                            System.out.println("      - Obstacle Avoidance Notify: " + task.getObstacle_avoidance_notify());
+                            System.out.println("      - Wayline UUID: " + task.getWayline_uuid());
+                            
+                            FolderInfoData folderInfo = task.getFolder_info();
+                            if (folderInfo != null) {
+                                System.out.println("      - Folder Info:");
+                                System.out.println("        * Folder ID: " + folderInfo.getFolder_id());
+                                System.out.println("        * Expected File Count: " + folderInfo.getExpected_file_count());
+                                System.out.println("        * Uploaded File Count: " + folderInfo.getUploaded_file_count());
+                            }
+                        }
+                    } else {
+                        System.out.println("  - Flight Tasks: 空列表或无数据");
+                    }
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Flight tasks subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Flight tasks subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
             System.out.println("[Java] Started monitoring for device " + deviceSN + 
                              " with frequency " + frequency + 
                              " (Listen IDs - Location: " + locationListenIds[i] + 
@@ -402,7 +451,8 @@ public class Main {
                              ", PayloadsList: " + aircraftPayloadsListListenIds[i] + 
                              ", DockLocation: " + dockLocationListenIds[i] + 
                              ", CameraLiveviewWorldRegion: " + aircraftPayloadsCameraLiveviewWorldRegionListenIds[i] + 
-                             ", GimbalAttitude: " + aircraftPayloadsGimbalAttitudeListenIds[i] + ")");
+                             ", GimbalAttitude: " + aircraftPayloadsGimbalAttitudeListenIds[i] + 
+                             ", FlightTasks: " + flightTasksListenIds[i] + ")");
         }
         
         // 等待一段时间让自动poll处理消息
@@ -421,6 +471,7 @@ public class Main {
         System.out.println("  - Dock Location (机场位置)");
         System.out.println("  - Aircraft Payloads Camera Liveview World Region (飞机载荷相机实时视图世界区域)");
         System.out.println("  - Aircraft Payloads Gimbal Attitude (飞机载荷云台姿态)");
+        System.out.println("  - Flight Tasks (飞行任务状态)");
         Thread.sleep(1000000); // 等待1000秒
         
         // 取消所有设备的监听
@@ -439,6 +490,7 @@ public class Main {
             client.cancelListen(dockLocationListenIds[i]);
             client.cancelListen(aircraftPayloadsCameraLiveviewWorldRegionListenIds[i]);
             client.cancelListen(aircraftPayloadsGimbalAttitudeListenIds[i]);
+            client.cancelListen(flightTasksListenIds[i]);
             System.out.println("[Java] Cancelled all monitoring for device " + deviceSNs[i]);
         }
 
