@@ -11,9 +11,9 @@
 
 #include "../src/base/async/thread_pool_executor.h"
 
-constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
 // constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-// constexpr auto address = "ws://localhost:3001";
+constexpr auto address = "ws://localhost:3001";
 
 // 全局变量用于在回调中访问
 std::shared_ptr<SDKManager> g_sdk_manager = nullptr;
@@ -94,14 +94,14 @@ void start_device_monitoring() {
     std::vector<std::string> deviceSNs = {
         "8UUXN2D00A00VL",
         "1581F6Q8D242100CPKTJ",
-        "1581F8HHD24B10010084",
-        "8UUDMAQ00A0121",
-        "6QCDL820020093",
-        "8PHDM8L0010322",
-        "8UUDMAQ00A0138",
-        "8UUDMAQ00A0047",
-        "8UUDMAQ00A0152",
-        "8UUDMAQ00A0076",
+        // "1581F8HHD24B10010084",
+        // "8UUDMAQ00A0121",
+        // "6QCDL820020093",
+        // "8PHDM8L0010322",
+        // "8UUDMAQ00A0138",
+        // "8UUDMAQ00A0047",
+        // "8UUDMAQ00A0152",
+        // "8UUDMAQ00A0076",
     };
     NotifactionFrequency frequency = NotifactionFrequency_Push_1s;
     
@@ -155,6 +155,23 @@ void start_device_monitoring() {
             },
             [](const NotificationCenterErrorCode &error_code)-> void {
                 NC_LOG_INFO("[C++] ListenAircraftModeCode subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
+
+        listenId = g_business_manager->ListenAircraftPayloadsGimbalAttitude(
+            [](const AircraftPayloadsGimbalAttitudeMsg &msg)-> void {
+                auto size = msg.payloads_gimbal_attitude.size();
+                NC_LOG_INFO("[C++] ListenAircraftPayloadsGimbalAttitude: size: %d", size);
+                for (const auto& [payload_index, payload_gimbal]: msg.payloads_gimbal_attitude) {
+                    NC_LOG_INFO("[C++] ListenAircraftPayloadsGimbalAttitude: payload_index: %s, pitch: %.2f, roll: %.2f, yaw: %.2f",
+                        payload_index.c_str(), payload_gimbal.gimbal_pitch, payload_gimbal.gimbal_roll, payload_gimbal.gimbal_yaw);
+                }
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftPayloadsGimbalAttitude subscribe error_code: %d", error_code);
             },
             deviceSN,
             frequency
