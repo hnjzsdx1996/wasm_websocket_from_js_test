@@ -74,6 +74,7 @@ public:
     DEFINE_LISTEN_METHOD(ListenDeviceOnlineStatus, DeviceOnlineStatusMsg, DeviceOnlineStatusMsgCallback, PublishDeviceOnlineStatusTopic, "device_online")
     DEFINE_LISTEN_METHOD(ListenDockLocation, DockLocationMsg, DockLocationMsgCallback, PublishDockLocationTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDroneInDock, DroneInDockMsg, DroneInDockMsgCallback, PublishDroneInDockTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenFlightTasks, FlightTasksMsg, FlightTasksMsgCallback, PublishFlightTasksTopic, "flight_tasks_status_changed_v2")
 
     #undef DEFINE_LISTEN_METHOD
 };

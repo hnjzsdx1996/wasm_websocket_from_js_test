@@ -13,4 +13,5 @@
 #include "topic_message_define/PublishDeviceOnlineStatusTopic.h"
 #include "topic_message_define/PublishDockLocationTopic.h"
 #include "topic_message_define/PublishDroneInDockTopic.h"
+#include "topic_message_define/PublishFlightTasksTopic.h"
 
