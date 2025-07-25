@@ -72,7 +72,6 @@ public:
     DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftWindSpeed, AircraftWindSpeedMsg, AircraftWindSpeedMsgCallback, PublishAircraftWindSpeedTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDeviceOnlineStatus, DeviceOnlineStatusMsg, DeviceOnlineStatusMsgCallback, PublishDeviceOnlineStatusTopic, "device_online")
-    DEFINE_LISTEN_METHOD(ListenDeviceOsd, DeviceOsdMsg, DeviceOsdMsgCallback, PublishDeviceOsdTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDockLocation, DockLocationMsg, DockLocationMsgCallback, PublishDockLocationTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDroneInDock, DroneInDockMsg, DroneInDockMsgCallback, PublishDroneInDockTopic, "device_osd")
 

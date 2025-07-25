@@ -16,7 +16,6 @@
 #include "business_manager/topic_message_define/PublishAircraftLocationTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftAttitudeTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftSpeedTopic.h"
-#include "business_manager/topic_message_define/PublishDeviceOsdTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftBatteryInfoTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftControlCodeTopic.h"
 #include "business_manager/topic_message_define/PublishAircraftWindSpeedTopic.h"
@@ -83,28 +82,7 @@ public:
         : horizontal_speed(horizontal_speed), vertical_speed(vertical_speed) {}
 };
 
-// 定义新的DeviceOsdHost类（用于Java接口）
-class DeviceOsdHost {
-public:
-    int mode_code; // 模式代码
-    double attitude_head; // 机头朝向角度
-    double attitude_pitch; // 俯仰轴角度
-    double attitude_roll; // 横滚轴角度
-    
-    DeviceOsdHost() : mode_code(0), attitude_head(0.0), attitude_pitch(0.0), attitude_roll(0.0) {}
-    DeviceOsdHost(int mode_code, double attitude_head, double attitude_pitch, double attitude_roll) 
-        : mode_code(mode_code), attitude_head(attitude_head), attitude_pitch(attitude_pitch), attitude_roll(attitude_roll) {}
-};
 
-// 定义新的DeviceOsd类（用于Java接口）
-class DeviceOsd {
-public:
-    DeviceOsdHost host; // 主机信息
-    std::string sn; // 设备序列号
-    
-    DeviceOsd() {}
-    DeviceOsd(const DeviceOsdHost& host, const std::string& sn) : host(host), sn(sn) {}
-};
 
 // 定义新的BatteryInfo类
 class BatteryInfo {
@@ -205,12 +183,6 @@ class AircraftSpeedCallback {
 public:
     virtual ~AircraftSpeedCallback() {}
     virtual void invoke(const AircraftSpeed& message) = 0;
-};
-
-class DeviceOsdCallback {
-public:
-    virtual ~DeviceOsdCallback() {}
-    virtual void invoke(const DeviceOsd& message) = 0;
 };
 
 class AircraftBatteryInfoCallback {
@@ -368,7 +340,6 @@ public:
 %feature("director") AircraftLocationCallback;
 %feature("director") AircraftAttitudeCallback;
 %feature("director") AircraftSpeedCallback;
-%feature("director") DeviceOsdCallback;
 %feature("director") AircraftBatteryInfoCallback;
 %feature("director") AircraftControlCodeCallback;
 %feature("director") AircraftWindSpeedCallback;
@@ -524,47 +495,6 @@ public:
         }
         
         return $self->ListenAircraftSpeed(msg_cb, result_cb, sn, notify_freq);
-    }
-    
-    long ListenDeviceOsd(
-        DeviceOsdCallback* onSubscribeMessageCallback,
-        SDKSubscribeResultCallback* onSubscribeResultCallback,
-        const std::string& sn,
-        NotificationFrequency notificationFrequency) {
-        
-        auto msg_cb = [onSubscribeMessageCallback](const DeviceOsdMsg& msg) {
-            if (onSubscribeMessageCallback) {
-                // 将DeviceOsdMsg转换为DeviceOsd
-                DeviceOsdHost host(msg.host.mode_code, msg.host.attitude_head, 
-                                 msg.host.attitude_pitch, msg.host.attitude_roll);
-                DeviceOsd device_osd(host, msg.sn);
-                onSubscribeMessageCallback->invoke(device_osd);
-            }
-        };
-        
-        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
-            if (onSubscribeResultCallback) {
-                onSubscribeResultCallback->invoke(error_code);
-            }
-        };
-        
-        // Convert NotificationFrequency to NotifactionFrequency enum
-        NotifactionFrequency notify_freq;
-        switch (notificationFrequency) {
-            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
-            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
-            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
-            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
-            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
-            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
-            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
-            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
-            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
-            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
-            default: notify_freq = NotifactionFrequency_Any; break;
-        }
-        
-        return $self->ListenDeviceOsd(msg_cb, result_cb, sn, notify_freq);
     }
     
     long ListenAircraftBatteryInfo(

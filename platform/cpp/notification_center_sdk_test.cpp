@@ -1,7 +1,6 @@
 #include "../src/SDKManager.h"
 #include "../src/business_manager/BusinessManager.h"
 #include "../src/business_manager/BusinessManagerDefine.h"
-#include "../src/business_manager/topic_message_define/PublishDeviceOsdTopic.h"
 #include "base/logger/logger.h"
 #include <thread>
 #include <chrono>
@@ -23,41 +22,6 @@ std::atomic<bool> g_connection_established(false);
 // 存储所有监听ID，用于后续取消订阅
 std::vector<ListenId> g_device_osd_listen_ids;
 std::mutex g_listen_ids_mutex;
-
-// 设备OSD消息回调函数
-void on_device_osd_message(const DeviceOsdMsg& message) {
-    NC_LOG_INFO("[C++] Received device OSD message:");
-    NC_LOG_INFO("[C++]   - Device SN (设备序列号): %s", message.sn.c_str());
-    NC_LOG_INFO("[C++]   - Mode Code (模式代码): %d", message.host.mode_code);
-    NC_LOG_INFO("[C++]   - Attitude Head (机头朝向角度): %f", message.host.attitude_head);
-    NC_LOG_INFO("[C++]   - Attitude Pitch (俯仰轴角度): %f", message.host.attitude_pitch);
-    NC_LOG_INFO("[C++]   - Attitude Roll (横滚轴角度): %f", message.host.attitude_roll);
-}
-
-void on_device_osd_drone_in_dock_message(const DroneInDockMsg& message) {
-    NC_LOG_INFO("[C++] Received device OSD Drone In Dock message: %d", message.drone_in_dock);
-}
-
-// 订阅结果回调函数
-void on_device_osd_result(const NotificationCenterErrorCode& error_code) {
-    if (error_code == NotificationCenterErrorCode_NoError) {
-        NC_LOG_INFO("[C++] Device OSD subscription successful.");
-    } else {
-        NC_LOG_INFO("[C++] Device OSD subscription failed. Error code: %ld", error_code);
-        // 可以在这里处理不同的错误码
-        if (error_code == NotificationCenterErrorCode_InvalidParameter) {
-            NC_LOG_INFO("[C++] Error: Invalid parameter");
-        } else if (error_code == NotificationCenterErrorCode_NotConnected) {
-            NC_LOG_INFO("[C++] Error: Not connected");
-        } else if (error_code == NotificationCenterErrorCode_SendError) {
-            NC_LOG_INFO("[C++] Error: Send error");
-        } else if (error_code == NotificationCenterErrorCode_SubscribeError) {
-            NC_LOG_INFO("[C++] Error: Subscribe error");
-        } else {
-            NC_LOG_INFO("[C++] Error: Unknown error");
-        }
-    }
-}
 
 // 取消所有订阅的函数
 void cancel_all_subscriptions() {
@@ -261,15 +225,6 @@ void start_device_monitoring() {
         );
         g_device_osd_listen_ids.push_back(listenId);
 
-        listenId = g_business_manager->ListenDeviceOsd(
-            on_device_osd_message,
-            on_device_osd_result,
-            deviceSN,
-            frequency
-        );
-
-        g_device_osd_listen_ids.push_back(listenId);
-
         listenId = g_business_manager->ListenDockLocation(
             [](const DockLocationMsg &msg)-> void {
                 NC_LOG_INFO("[C++] ListenDockLocation: heading: %.2f, height: %.2f, lon: %.2f, lat: %.2f", msg.heading, msg.height, msg.longitude, msg.latitude);
@@ -283,8 +238,12 @@ void start_device_monitoring() {
         g_device_osd_listen_ids.push_back(listenId);
 
         listenId = g_business_manager->ListenDroneInDock(
-            on_device_osd_drone_in_dock_message,
-            on_device_osd_result,
+            [](const DroneInDockMsg &message)-> void {
+                NC_LOG_INFO("[C++] ListenDroneInDock: %d", message.drone_in_dock);
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenDroneInDock subscribe error_code: %d", error_code);
+            },
             deviceSN,
             frequency
         );

@@ -11,7 +11,6 @@
 #include "topic_message_define/PublishAircraftSpeedTopic.h"
 #include "topic_message_define/PublishAircraftWindSpeedTopic.h"
 #include "topic_message_define/PublishDeviceOnlineStatusTopic.h"
-#include "topic_message_define/PublishDeviceOsdTopic.h"
 #include "topic_message_define/PublishDockLocationTopic.h"
 #include "topic_message_define/PublishDroneInDockTopic.h"
 

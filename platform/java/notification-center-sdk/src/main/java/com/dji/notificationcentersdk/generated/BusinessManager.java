@@ -92,10 +92,6 @@ public class BusinessManager {
     return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenDeviceOnlineStatus__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fDeviceOnlineStatusMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
 
-  public SWIGTYPE_p_int64_t ListenDeviceOsd(SWIGTYPE_p_std__functionT_void_fDeviceOsdMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
-    return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenDeviceOsd__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fDeviceOsdMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
-  }
-
   public SWIGTYPE_p_int64_t ListenDockLocation(SWIGTYPE_p_std__functionT_void_fDockLocationMsg_const_RF_t on_messages_callback, SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t on_result_callback, String device_sn, SWIGTYPE_p_NotifactionFrequency freq) {
     return new SWIGTYPE_p_int64_t(notificationcenterJNI.BusinessManager_ListenDockLocation__SWIG_0(swigCPtr, this, SWIGTYPE_p_std__functionT_void_fDockLocationMsg_const_RF_t.getCPtr(on_messages_callback), SWIGTYPE_p_std__functionT_void_fNotificationCenterErrorCode_const_RF_t.getCPtr(on_result_callback), device_sn, SWIGTYPE_p_NotifactionFrequency.getCPtr(freq)), true);
   }
@@ -114,10 +110,6 @@ public class BusinessManager {
 
   public int ListenAircraftSpeed(AircraftSpeedCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
     return notificationcenterJNI.BusinessManager_ListenAircraftSpeed__SWIG_1(swigCPtr, this, AircraftSpeedCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SDKSubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
-  }
-
-  public int ListenDeviceOsd(DeviceOsdCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {
-    return notificationcenterJNI.BusinessManager_ListenDeviceOsd__SWIG_1(swigCPtr, this, DeviceOsdCallback.getCPtr(onSubscribeMessageCallback), onSubscribeMessageCallback, SDKSubscribeResultCallback.getCPtr(onSubscribeResultCallback), onSubscribeResultCallback, sn, notificationFrequency.swigValue());
   }
 
   public int ListenAircraftBatteryInfo(AircraftBatteryInfoCallback onSubscribeMessageCallback, SDKSubscribeResultCallback onSubscribeResultCallback, String sn, NotificationFrequency notificationFrequency) {

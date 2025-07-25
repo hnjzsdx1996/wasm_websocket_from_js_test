@@ -383,48 +383,6 @@ public class NotificationCenterClient {
         }
     }
     
-    /**
-     * 订阅设备OSD信息
-     */
-    public long ListenDeviceOsd(
-            OnSubscribeMessageCallback<DeviceOsd> onMessagesCallback, 
-            OnSubscribeResultCallback onResultCallback,
-            String deviceSn, 
-            NotificationFrequency freq) {
-        
-        try {
-            BusinessManager businessManager = sdk.getBusinessManager();
-            if (businessManager == null) {
-                throw new IllegalStateException("BusinessManager not available");
-            }
-            
-            return businessManager.ListenDeviceOsd(
-                new DeviceOsdCallback() {
-                    @Override
-                    public void invoke(DeviceOsd message) {
-                        if (onMessagesCallback != null) {
-                            onMessagesCallback.invoke(message);
-                        }
-                    }
-                },
-                new SDKSubscribeResultCallback() {
-                    @Override
-                    public void invoke(NotificationCenterErrorCode errorCode) {
-                        if (onResultCallback != null) {
-                            onResultCallback.invoke(errorCode);
-                        }
-                    }
-                },
-                deviceSn,
-                freq
-            );
-        } catch (Exception e) {
-            if (onResultCallback != null) {
-                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
-            }
-            return -1;
-        }
-    }
     
     /**
      * 订阅无人机在机场状态
