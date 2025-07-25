@@ -27,9 +27,18 @@ using OnSubscribeMessageCallback = std::function<void(const std::string& message
 using OnSubscribeResultCallback = std::function<void(const NotificationCenterErrorCode& error_code)>;
 
 using AircraftAttitudeMsgCallback = std::function<void(const AircraftAttitudeMsg& msg)>;
+using AircraftBatteryInfoMsgCallback = std::function<void(const AircraftBatteryInfoMsg& msg)>;
+using AircraftControlCodeMsgCallback = std::function<void(const AircraftControlCodeMsg& msg)>;
 using AircraftLocationMsgCallback = std::function<void(const AircraftLocationMsg& msg)>;
+using AircraftModeCodeMsgCallback = std::function<void(const AircraftModeCodeMsg& msg)>;
+using AircraftPayloadsCameraLiveviewWorldRegionMsgCallback = std::function<void(const AircraftPayloadsCameraLiveviewWorldRegionMsg& msg)>;
+using AircraftPayloadsGimbalAttitudeMsgCallback = std::function<void(const AircraftPayloadsGimbalAttitudeMsg& msg)>;
+using AircraftPayloadsListMsgCallback = std::function<void(const AircraftPayloadsListMsg& msg)>;
 using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
+using AircraftWindSpeedMsgCallback = std::function<void(const AircraftWindSpeedMsg& msg)>;
+using DeviceOnlineStatusMsgCallback = std::function<void(const DeviceOnlineStatusMsg& msg)>;
 using DeviceOsdMsgCallback = std::function<void(const DeviceOsdMsg& msg)>;
+using DockLocationMsgCallback = std::function<void(const DockLocationMsg& msg)>;
 using DroneInDockMsgCallback = std::function<void(const DroneInDockMsg& msg)>;
 
 

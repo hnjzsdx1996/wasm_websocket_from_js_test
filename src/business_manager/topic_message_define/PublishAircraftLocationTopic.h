@@ -14,6 +14,9 @@ public:
 
 class PublishAircraftLocationTopic : public PublishTopicWrapper {
 public:
+    bool isValid() override {
+        return is_valid_;
+    }
 
     explicit PublishAircraftLocationTopic(const std::shared_ptr<PublishTopicWrapper>& publish_msg) {
         message_topic = publish_msg->message_topic;
@@ -24,11 +27,7 @@ public:
         timestamp = publish_msg->timestamp;
         version = publish_msg->version;
 
-        std::string err;
-        aigc::JsonHelper::JsonToObject(msg, publish_msg->message_data, {}, &err);
-        if (!err.empty()) {
-            NC_LOG_ERROR("PublishAircraftLocationTopic ctor error, err: %s, json: %s", err.c_str(), publish_msg->ToJsonString().c_str());
-        }
+        MessageParserHook();
     }
 
     AircraftLocationMsg msg;
@@ -44,5 +43,28 @@ public:
     void FromJsonString(const std::string& json) override {
         std::string err;
         aigc::JsonHelper::JsonToObject(*this, json, {}, &err);
+    }
+private:
+    bool is_valid_ = true;
+
+    void MessageParserHook() {
+        // hook 消息解析
+        DeviceOsdType device_type(message_data);
+        if (device_type.isDrone() == false) {
+            // 机场的 osd，不处理
+            is_valid_ = false;
+            return;
+        }
+        // 解析飞机 osd 消息
+        DeviceOsdAircraft aircraft_parser(message_data);
+        if (aircraft_parser.isParsedSuccessfully() == false) {
+            is_valid_ = false;
+            return;
+        }
+        // 获取需要的字段
+        msg.height = aircraft_parser.getHeight();
+        msg.elevation = aircraft_parser.getAttitudePitch();
+        msg.longitude = aircraft_parser.getLongitude();
+        msg.latitude = aircraft_parser.getLatitude();
     }
 };

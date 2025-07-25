@@ -17,8 +17,7 @@ void MainThreadExecutor::postDelayed(Task task, std::chrono::milliseconds delay)
         delayed_tasks_.emplace(DelayedTask{std::move(task), exec_time});
         task_count_.fetch_add(1);
     }
-    NC_LOG_DEBUG("MainThreadExecutor: 提交延迟任务，延迟: %lldms，当前任务数: %zu", 
-                 delay.count(), task_count_.load());
+    NC_LOG_DEBUG("MainThreadExecutor: 提交延迟任务，延迟: %lldms，当前任务数: %zu", delay.count(), task_count_.load());
 }
 
 size_t MainThreadExecutor::poll() {
@@ -40,7 +39,7 @@ size_t MainThreadExecutor::poll() {
         while (!delayed_tasks_.empty()) {
             const auto& next_task = delayed_tasks_.top();
             if (next_task.exec_time <= now) {
-                tasks_to_execute.emplace_back(std::move(next_task.task));
+                tasks_to_execute.emplace_back(next_task.task);
                 delayed_tasks_.pop();
                 task_count_.fetch_sub(1);
             } else {
@@ -51,7 +50,6 @@ size_t MainThreadExecutor::poll() {
     
     // 执行任务（在锁外执行，避免死锁）
     for (auto& task : tasks_to_execute) {
-        // todo:sdk 禁用异常
         try {
             task();
             executed_count++;

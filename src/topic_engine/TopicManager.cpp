@@ -26,34 +26,20 @@ void TopicManager::setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& hold
     });
 }
 
-int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, SubscribeResultCallback result_cb) {
+int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, const SubscribeResultCallback& result_cb) {
     int64_t id;
-    bool need_subscribe = false;
     {
         std::lock_guard<std::mutex> lock(mtx_);
         id = next_listen_id_++;
-        need_subscribe = (topic_observers_[tuple].empty()); // 检查是否已经订阅过这个消息（在添加新回调之前检查）
         topic_observers_[tuple][id] = std::move(cb);
     }
     
-    // 如果需要订阅，发起订阅请求
-    if (need_subscribe) {
-        auto ret = SendSubscribe(tuple, freq, id, result_cb);
-        if (ret != TopicManager_NoError) {
-            return -1; // 返回错误ID
-        }
-    } else if (result_cb) {
-        // 已经订阅过，直接返回成功
-        result_cb(NotificationCenterErrorCode_NoError);
+    // 每次都发起订阅请求，确保服务器端订阅成功
+    auto ret = SendSubscribe(tuple, freq, id, result_cb);
+    if (ret != TopicManager_NoError) {
+        return -1; // 返回错误ID
     }
     
-    return id;
-}
-
-int64_t TopicManager::ObserveAll(PublishTopicCallback cb) {
-    std::lock_guard<std::mutex> lock(mtx_);
-    int64_t id = next_listen_id_++;
-    all_topic_observers_[id] = std::move(cb);
     return id;
 }
 
@@ -63,7 +49,6 @@ void TopicManager::CancelObserve(int64_t listen_id) {
         for (auto& [tuple, observers] : topic_observers_) {
             observers.erase(listen_id);
         }
-        all_topic_observers_.erase(listen_id);
     }
     // 如果没有人监听这个 sn+topic 了，取消监听
     UnsubscribeUnlistened();
@@ -196,7 +181,7 @@ void TopicManager::OnPublish(const std::string &json) {
     auto publish_msg = std::make_shared<PublishTopicWrapper>();
     publish_msg->FromJsonString(json);
 
-    NC_LOG_INFO("[TopicManager] OnPublish publish_msg: %s", json.c_str());
+    NC_LOG_DEBUG("[TopicManager] OnPublish publish_msg: %s", json.c_str());
 
     if (publish_msg->isValid() == false) {
         // 收到非法 publish 消息
@@ -219,16 +204,6 @@ void TopicManager::OnPublish(const std::string &json) {
         for (auto& [_, cb] : cbs) {
             cb(publish_msg);
         }
-    }
-
-    // 全量消息的监听者
-    std::unordered_map<int64_t, PublishTopicCallback> cbs;
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        cbs = all_topic_observers_;
-    }
-    for (auto& [_, cb] : cbs) {
-        cb(publish_msg);
     }
 }
 

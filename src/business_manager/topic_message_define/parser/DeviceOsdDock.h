@@ -143,7 +143,7 @@ public:
 };
 
 // 主机信息
-class DeviceOsdHost {
+class DeviceOsdDockHostMsg {
 public:
     AirConditioner air_conditioner;
     int alarm_state = 0;
@@ -184,7 +184,7 @@ public:
 // 机场OSD消息结构
 class DeviceOsdDockMsg {
 public:
-    DeviceOsdHost host;
+    DeviceOsdDockHostMsg host;
     std::string sn;
 
     AIGC_JSON_HELPER(host, sn);
@@ -209,7 +209,7 @@ public:
     }
 
     // 获取主机信息
-    const DeviceOsdHost& getHost() const {
+    const DeviceOsdDockHostMsg& getHost() const {
         return msg.host;
     }
 
@@ -325,8 +325,7 @@ private:
         }
         
         parsed_successfully_ = true;
-        NC_LOG_INFO("DeviceOsdDock: successfully parsed dock data for SN: %s, drone_in_dock: %d", 
-                   msg.sn.c_str(), msg.host.drone_in_dock);
+        NC_LOG_DEBUG("DeviceOsdDock: successfully parsed dock data for SN: %s, drone_in_dock: %d", msg.sn.c_str(), msg.host.drone_in_dock);
     }
 
     std::string json_string_;

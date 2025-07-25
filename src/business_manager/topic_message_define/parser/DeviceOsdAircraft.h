@@ -197,7 +197,7 @@ public:
 };
 
 // 电池信息
-class BatteryInfo {
+class SingleBatteryInfo {
 public:
     int capacity_percent = 0;
     std::string firmware_version;
@@ -217,7 +217,7 @@ public:
 // 电池组信息
 class BatteryGroup {
 public:
-    std::vector<BatteryInfo> batteries;
+    std::vector<SingleBatteryInfo> batteries;
     int capacity_percent = 0;
     int landing_power = 0;
     int remain_flight_time = 0;
@@ -361,7 +361,7 @@ public:
 };
 
 // 飞机主机信息
-class DeviceOsdAircraftHost {
+class DeviceOsdAircraftHostMsg {
 public:
     int64_t activation_time = 0;
     double attitude_head = 0.0;
@@ -412,7 +412,7 @@ public:
 // 飞机OSD消息结构
 class DeviceOsdAircraftMsg {
 public:
-    DeviceOsdAircraftHost host;
+    DeviceOsdAircraftHostMsg host;
     std::string sn;
 
     AIGC_JSON_HELPER(host, sn);
@@ -433,7 +433,7 @@ public:
     }
 
     // 获取主机信息
-    const DeviceOsdAircraftHost& getHost() const {
+    const DeviceOsdAircraftHostMsg& getHost() const {
         return msg.host;
     }
 
@@ -601,8 +601,7 @@ private:
         parseGimbalInfo();
         
         parsed_successfully_ = true;
-        NC_LOG_INFO("DeviceOsdAircraft: successfully parsed aircraft data for SN: %s, mode_code: %d", 
-                   msg.sn.c_str(), msg.host.mode_code);
+        NC_LOG_DEBUG("DeviceOsdAircraft: successfully parsed aircraft data for SN: %s, mode_code: %d", msg.sn.c_str(), msg.host.mode_code);
     }
 
     void parseGimbalInfo() {
@@ -652,7 +651,7 @@ private:
                     
                     if (gimbal_err.empty()) {
                         gimbal_info_map_[payload_index] = gimbal_info;
-                        NC_LOG_INFO("DeviceOsdAircraft: parsed gimbal info for payload_index: %s", payload_index.c_str());
+                        NC_LOG_DEBUG("DeviceOsdAircraft: parsed gimbal info for payload_index: %s", payload_index.c_str());
                     } else {
                         NC_LOG_ERROR("DeviceOsdAircraft: failed to parse gimbal info for payload_index %s, error: %s", 
                                     payload_index.c_str(), gimbal_err.c_str());

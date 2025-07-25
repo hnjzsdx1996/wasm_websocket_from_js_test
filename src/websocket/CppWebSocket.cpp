@@ -17,16 +17,36 @@
 class CppWebSocket::Impl : public AsyncCaptureProtect {
 public:
     Impl(CppWebSocket* parent)
-        : parent_(parent), context(nullptr), wsi(nullptr), connected(false), exitFlag(false) {}
+        : parent_(parent), context(nullptr), wsi(nullptr), connected(false), exitFlag(false), connecting(false) {}
     ~Impl() { close(); }
 
     // 连接 WebSocket
     void connect(const std::string& url) {
+        // 防止重复连接
+        bool expected = false;
+        if (!connecting.compare_exchange_strong(expected, true)) {
+            NC_LOG_WARN("CppWebSocket: 连接已在进行中，忽略重复请求");
+            return;
+        }
+
         this->url = url;
+        
+        // 确保之前的连接完全关闭
+        close();
+        
+        // 等待之前的线程完全退出
+        if (service_thread.joinable()) {
+            service_thread.join();
+        }
+        
         exitFlag = false;
+        connected = false;
+        
+        NC_LOG_INFO("CppWebSocket: 开始连接 %s", url.c_str());
+        
         // 启动事件循环线程
         WeakDummy(weak_ptr);
-        ThreadPoolExecutor::IO()->Post([this, weak_ptr]()->void {
+        service_thread = std::thread([this, weak_ptr]() {
             WeakDummyReturn(weak_ptr);
             this->serviceLoop();
         });
@@ -34,6 +54,11 @@ public:
 
     // 发送消息
     void send(const std::string& message) {
+        if (!connected.load()) {
+            NC_LOG_WARN("CppWebSocket: 连接未建立，无法发送消息");
+            return;
+        }
+        
         std::lock_guard<std::mutex> lock(sendMutex);
         sendQueue.push(message);
         if (wsi) {
@@ -43,11 +68,31 @@ public:
 
     // 关闭连接
     void close() {
+        NC_LOG_INFO("CppWebSocket: 关闭连接");
+        
+        // 设置退出标志
         exitFlag = true;
+        
+        // 取消服务
         if (context) {
             lws_cancel_service(context);
         }
-        // 资源释放在析构
+        
+        // 重置连接状态
+        connecting = false;
+        connected = false;
+        
+        // 等待服务线程退出
+        if (service_thread.joinable()) {
+            service_thread.join();
+        }
+        
+        // 清理资源
+        if (context) {
+            lws_context_destroy(context);
+            context = nullptr;
+        }
+        wsi = nullptr;
     }
 
     // 是否已连接
@@ -58,11 +103,14 @@ public:
 private:
     // 事件循环线程, IO线程
     void serviceLoop() {
+        NC_LOG_INFO("CppWebSocket: 服务线程启动");
+        
         // 协议定义
         static struct lws_protocols protocols[] = {
             { "cpp-websocket-protocol", &CppWebSocket::Impl::lwsCallback, sizeof(void*), 4096, 0, nullptr, 0 },
             { nullptr, nullptr, 0, 0, 0, nullptr, 0 }
         };
+        
         struct lws_context_creation_info info;
         memset(&info, 0, sizeof(info));
         info.port = -1; // CONTEXT_PORT_NO_LISTEN 通常为 -1
@@ -71,29 +119,38 @@ private:
         info.uid = -1;
         // 为客户端 SSL 连接启用 SSL 全局初始化
         info.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+        
         context = lws_create_context(&info);
         if (!context) {
-            NC_LOG_INFO("CppWebSocket: 创建 lws_context 失败");
+            NC_LOG_ERROR("CppWebSocket: 创建 lws_context 失败");
             WeakDummy(weak_ptr);
             ThreadPoolExecutor::Main().post([this, weak_ptr]()->void {
                 WeakDummyReturn(weak_ptr);
+                connecting = false;
                 parent_->callOnError("lws_context create failed");
             });
             return;
         }
+        
         // 解析 ws://host:port/path
         std::string address, path;
         int port = 80;
         bool ssl = false;
         if (!parseUrl(url, address, port, path, ssl)) {
-            NC_LOG_INFO("CppWebSocket: URL 解析失败: %s", url.c_str());
+            NC_LOG_ERROR("CppWebSocket: URL 解析失败: %s", url.c_str());
             WeakDummy(weak_ptr);
             ThreadPoolExecutor::Main().post([this, weak_ptr]()->void {
                 WeakDummyReturn(weak_ptr);
+                connecting = false;
                 parent_->callOnError("url parse failed");
             });
+            lws_context_destroy(context);
+            context = nullptr;
             return;
         }
+        
+        NC_LOG_INFO("CppWebSocket: 连接到 %s:%d%s", address.c_str(), port, path.c_str());
+        
         struct lws_client_connect_info ccinfo = {0};
         ccinfo.context = context;
         ccinfo.address = address.c_str();
@@ -105,26 +162,38 @@ private:
         ccinfo.ssl_connection = ssl ? LCCSCF_USE_SSL : 0;
         ccinfo.pwsi = &wsi;
         ccinfo.userdata = this;
+        
         wsi = lws_client_connect_via_info(&ccinfo);
         if (!wsi) {
-            NC_LOG_INFO("CppWebSocket: 连接失败");
+            NC_LOG_ERROR("CppWebSocket: 连接失败");
             WeakDummy(weak_ptr);
             ThreadPoolExecutor::Main().post([this, weak_ptr]()->void {
                 WeakDummyReturn(weak_ptr);
+                connecting = false;
                 parent_->callOnError("connect failed");
             });
             lws_context_destroy(context);
             context = nullptr;
             return;
         }
+        
+        NC_LOG_INFO("CppWebSocket: 连接请求已发送，等待连接建立...");
+        
         // 事件循环
         while (!exitFlag) {
             lws_service(context, 50);
         }
-        lws_context_destroy(context);
-        context = nullptr;
+        
+        NC_LOG_INFO("CppWebSocket: 服务线程退出");
+        
+        // 清理资源
+        if (context) {
+            lws_context_destroy(context);
+            context = nullptr;
+        }
         wsi = nullptr;
         connected = false;
+        connecting = false;
     }
 
     // lws 回调函数（静态）
@@ -136,23 +205,27 @@ private:
             }
         }
         if (!self) return 0;
+        
         switch (reason) {
             case LWS_CALLBACK_CLIENT_ESTABLISHED:
                 self->connected = true;
+                self->connecting = false;
                 NC_LOG_INFO("CppWebSocket: 连接已建立");
                 ThreadPoolExecutor::Main().post([self]()->void {
                     self->parent_->callOnOpen();
                 });
                 break;
+                
             case LWS_CALLBACK_CLIENT_RECEIVE:
                 if (in && len > 0) {
                     std::string msg((const char*)in, len);
-                    NC_LOG_INFO("CppWebSocket: 收到消息: %s", msg.c_str());
+                    NC_LOG_DEBUG("CppWebSocket: 收到消息: %s", msg.c_str());
                     ThreadPoolExecutor::Main().post([self, msg]()->void {
                         self->parent_->callOnMessage(msg);
                     });
                 }
                 break;
+                
             case LWS_CALLBACK_CLIENT_WRITEABLE: {
                 std::string msg;
                 {
@@ -167,12 +240,12 @@ private:
                     memcpy(buf.data() + LWS_PRE, msg.data(), msg.size());
                     int n = lws_write(wsi, buf.data() + LWS_PRE, msg.size(), LWS_WRITE_TEXT);
                     if (n < 0) {
-                        NC_LOG_INFO("CppWebSocket: 发送失败");
+                        NC_LOG_ERROR("CppWebSocket: 发送失败");
                         ThreadPoolExecutor::Main().post([self]()->void {
                             self->parent_->callOnError("send failed");
                         });
                     } else {
-                        NC_LOG_INFO("CppWebSocket: 已发送: %s", msg.c_str());
+                        NC_LOG_DEBUG("CppWebSocket: 已发送: %s", msg.c_str());
                     }
                 }
                 // 继续触发写事件（如果还有数据）
@@ -184,20 +257,25 @@ private:
                 }
                 break;
             }
+            
             case LWS_CALLBACK_CLIENT_CLOSED:
                 self->connected = false;
-                NC_LOG_INFO("CppWebSocket: 连接已关闭");
+                self->connecting = false;
+                NC_LOG_WARN("CppWebSocket: 连接已关闭");
                 ThreadPoolExecutor::Main().post([self]()->void {
                     self->parent_->callOnClose();
                 });
                 break;
+                
             case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
                 self->connected = false;
-                NC_LOG_INFO("CppWebSocket: 连接出错");
+                self->connecting = false;
+                NC_LOG_ERROR("CppWebSocket: 连接出错");
                 ThreadPoolExecutor::Main().post([self]()->void {
                     self->parent_->callOnError("connection error");
                 });
                 break;
+                
             default:
                 break;
         }
@@ -242,32 +320,35 @@ private:
     struct lws* wsi;
     std::atomic<bool> connected;
     std::atomic<bool> exitFlag;
+    std::atomic<bool> connecting;  // 新增：连接进行中标志
     std::string url;
     std::queue<std::string> sendQueue;
     std::mutex sendMutex;
+    std::thread service_thread;  // 新增：服务线程
 };
 
 CppWebSocket::CppWebSocket() : pImpl(new Impl(this)) {}
 
 CppWebSocket::~CppWebSocket() {
     if (pImpl) {
+        NC_LOG_INFO("CppWebSocket: 析构函数被调用");
         pImpl->close();
         pImpl.reset();
     }
 }
 
 void CppWebSocket::connect(const std::string& url) {
-    NC_LOG_INFO("CppWebSocket: 连接 %s", url.c_str());
+    NC_LOG_DEBUG("CppWebSocket: 连接 %s", url.c_str());
     pImpl->connect(url);
 }
 
 void CppWebSocket::send(const std::string& message) {
-    NC_LOG_INFO("CppWebSocket: 发送 %s", message.c_str());
+    NC_LOG_DEBUG("CppWebSocket: 发送 %s", message.c_str());
     pImpl->send(message);
 }
 
 void CppWebSocket::close() {
-    NC_LOG_INFO("CppWebSocket: 关闭连接");
+    NC_LOG_DEBUG("CppWebSocket: 关闭连接");
     pImpl->close();
 }
 

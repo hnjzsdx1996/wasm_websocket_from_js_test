@@ -1,0 +1,77 @@
+apply plugin: 'application'
+
+description = 'Notification Center Java Demo - SDK使用演示应用'
+
+mainClassName = 'com.dji.Main'
+
+dependencies {
+    // 依赖SDK模块
+    implementation project(':notification-center-sdk')
+    
+    // 添加日志依赖
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'ch.qos.logback:logback-classic:1.2.6'
+}
+
+// 配置运行任务以加载JNI库
+run {
+    // 传递dist目录的绝对路径作为系统属性
+    def distDir = new File(rootProject.projectDir, 'dist')
+    systemProperty 'notificationcenter.dist.path', distDir.absolutePath
+    
+    // 设置工作目录
+    workingDir = rootProject.projectDir
+    
+    // 添加JVM参数
+    jvmArgs = [
+        '-Djava.library.path=' + distDir.absolutePath,
+        '-Dfile.encoding=UTF-8'
+    ]
+}
+
+// 帮助IDE找到SWIG生成的源码
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            // 包含SDK模块生成的源码
+            srcDir project(':notification-center-sdk').sourceSets.main.java.srcDirs
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+// 配置资源处理，处理重复文件
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// 创建可执行jar任务
+task executableJar(type: Jar) {
+    archiveClassifier = 'executable'
+    description = '创建可执行的jar包'
+    
+    manifest {
+        attributes(
+            'Main-Class': mainClassName,
+            'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+        )
+    }
+    
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    
+    // 处理重复文件
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// 构建任务依赖
+build.dependsOn executableJar 

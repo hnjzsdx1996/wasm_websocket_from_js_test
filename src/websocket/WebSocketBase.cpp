@@ -54,7 +54,7 @@ void WebSocketBase::callOnClose() {
 }
 
 void WebSocketBase::callOnError(const std::string &error) {
-    if (error_callback_) {
+    if (error_callback_ == nullptr) {
         NC_LOG_ERROR("[WebSocketBase] callOnError but no callback");
         return;
     }

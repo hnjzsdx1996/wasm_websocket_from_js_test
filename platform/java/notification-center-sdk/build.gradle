@@ -1,0 +1,162 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+description = 'Notification Center Java SDK - 基于JNI的Java SDK封装'
+
+// 配置jar任务，将JNI库包含到jar中
+jar {
+    // 包含JNI库文件
+    from('../dist') {
+        include '*.jnilib'
+        include '*.so'
+        include '*.dll'
+        include '*.dylib'
+        into 'lib'
+    }
+    
+    // 设置manifest，指定JNI库的加载路径
+    manifest {
+        attributes(
+            'Implementation-Title': 'NotificationCenter SDK',
+            'Implementation-Version': version,
+            'Implementation-Vendor': 'DJI',
+            'Built-By': System.getProperty('user.name'),
+            'Built-Date': new Date(),
+            'Built-JDK': System.getProperty('java.version'),
+            'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+        )
+    }
+    
+    // 处理重复文件
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// 创建一个fat jar任务，包含所有依赖
+task fatJar(type: Jar) {
+    archiveClassifier = 'fat'
+    description = '创建一个包含所有依赖的fat jar'
+    
+    // 包含所有Java类
+    from sourceSets.main.output
+    
+    // 包含JNI库文件
+    from('../dist') {
+        include '*.jnilib'
+        include '*.so'
+        include '*.dll'
+        include '*.dylib'
+        into 'lib'
+    }
+    
+    // 包含运行时依赖
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    
+    manifest {
+        attributes(
+            'Implementation-Title': 'NotificationCenter SDK (Fat Jar)',
+            'Implementation-Version': version,
+            'Implementation-Vendor': 'DJI',
+            'Main-Class': 'com.dji.notificationcentersdk.SDKManager',
+            'Built-By': System.getProperty('user.name'),
+            'Built-Date': new Date(),
+            'Built-JDK': System.getProperty('java.version')
+        )
+    }
+    
+    // 排除重复的META-INF文件
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    
+    // 处理重复文件
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// 确保jar任务依赖于JNI库的存在
+jar.dependsOn('checkJniLibs')
+
+// 创建一个任务来检查JNI库是否存在
+task checkJniLibs {
+    description = '检查JNI库文件是否存在'
+    doLast {
+        def distDir = new File(projectDir, '../dist')
+        def jniFiles = distDir.listFiles(new FileFilter() {
+            boolean accept(File file) {
+                return file.name.endsWith('.jnilib') || 
+                       file.name.endsWith('.so') || 
+                       file.name.endsWith('.dll') || 
+                       file.name.endsWith('.dylib')
+            }
+        })
+        
+        if (jniFiles == null || jniFiles.length == 0) {
+            throw new RuntimeException("没有找到JNI库文件在 ${distDir.absolutePath}")
+        }
+        
+        println "找到JNI库文件: ${jniFiles.collect { it.name }}"
+    }
+}
+
+// 创建源码jar
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+    description = '创建源码jar包'
+}
+
+// 创建Javadoc jar
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+    description = '创建Javadoc jar包'
+}
+
+// 配置发布
+publishing {
+    publications {
+        mavenJar(MavenPublication) {
+            from components.java
+            artifactId = 'notificationcenter-sdk'
+            
+            // 添加源码和文档
+            artifact sourcesJar
+            artifact javadocJar
+            
+            pom {
+                name = 'Notification Center Java SDK'
+                description = '基于JNI的Java SDK封装，为C++ SDK提供Java平台接口'
+                url = 'https://github.com/dji/notification-center-java'
+                
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'dji'
+                        name = 'DJI'
+                        email = 'support@dji.com'
+                    }
+                }
+            }
+        }
+        
+        mavenFatJar(MavenPublication) {
+            artifact fatJar
+            artifactId = 'notificationcenter-sdk-fat'
+            
+            pom {
+                name = 'Notification Center Java SDK (Fat Jar)'
+                description = '包含所有依赖的fat jar包'
+            }
+        }
+    }
+}
+
+// 构建任务依赖
+build.dependsOn sourcesJar, javadocJar 

@@ -36,10 +36,10 @@ private:
             if (on_msg_cb && message) {
                 const auto msg = std::make_shared<TopicType>(message);
                 if (msg->isValid() == false) {
-                    NC_LOG_ERROR("[BusinessManager] ListenTopic [%s - %s] invalid! observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
+                    NC_LOG_DEBUG("[BusinessManager] ListenTopic [%s - %s] invalid! observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
                     return;
                 }
-                NC_LOG_INFO("[BusinessManager] ListenTopic [%s - %s] observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
+                NC_LOG_DEBUG("[BusinessManager] ListenTopic [%s - %s] observe: %s", device_sn.c_str(), topic_name.c_str(), msg->ToJsonString().c_str());
                 on_msg_cb(msg->msg);
             }
         }, [this, weak_ptr, on_result_cb = on_result_callback](int err)->void {
@@ -61,10 +61,19 @@ private:
 
 public:
     // 具体的监听接口，使用宏定义
-    DEFINE_LISTEN_METHOD(ListenAircraftAttitude, AircraftAttitudeMsg, AircraftAttitudeMsgCallback, PublishAircraftAttitudeTopic, "aircraft_attitude")
-    DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "aircraft_location")
-    DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "aircraft_speed")
+    DEFINE_LISTEN_METHOD(ListenAircraftAttitude, AircraftAttitudeMsg, AircraftAttitudeMsgCallback, PublishAircraftAttitudeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftBatteryInfo, AircraftBatteryInfoMsg, AircraftBatteryInfoMsgCallback, PublishAircraftBatteryInfoTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftControlCode, AircraftControlCodeMsg, AircraftControlCodeMsgCallback, PublishAircraftControlCodeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftModeCode, AircraftModeCodeMsg, AircraftModeCodeMsgCallback, PublishAircraftModeCodeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftPayloadsCameraLiveviewWorldRegion, AircraftPayloadsCameraLiveviewWorldRegionMsg, AircraftPayloadsCameraLiveviewWorldRegionMsgCallback, PublishAircraftPayloadsCameraLiveviewWorldRegionTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftPayloadsGimbalAttitude, AircraftPayloadsGimbalAttitudeMsg, AircraftPayloadsGimbalAttitudeMsgCallback, PublishAircraftPayloadsGimbalAttitudeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftPayloadsList, AircraftPayloadsListMsg, AircraftPayloadsListMsgCallback, PublishAircraftPayloadsListTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftWindSpeed, AircraftWindSpeedMsg, AircraftWindSpeedMsgCallback, PublishAircraftWindSpeedTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenDeviceOnlineStatus, DeviceOnlineStatusMsg, DeviceOnlineStatusMsgCallback, PublishDeviceOnlineStatusTopic, "device_online_status")
     DEFINE_LISTEN_METHOD(ListenDeviceOsd, DeviceOsdMsg, DeviceOsdMsgCallback, PublishDeviceOsdTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenDockLocation, DockLocationMsg, DockLocationMsgCallback, PublishDockLocationTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDroneInDock, DroneInDockMsg, DroneInDockMsgCallback, PublishDroneInDockTopic, "device_osd")
 
     #undef DEFINE_LISTEN_METHOD
