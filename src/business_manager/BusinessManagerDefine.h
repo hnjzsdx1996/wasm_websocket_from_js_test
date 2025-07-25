@@ -36,6 +36,7 @@ using AircraftPayloadsGimbalAttitudeMsgCallback = std::function<void(const Aircr
 using AircraftPayloadsListMsgCallback = std::function<void(const AircraftPayloadsListMsg& msg)>;
 using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
 using AircraftWindSpeedMsgCallback = std::function<void(const AircraftWindSpeedMsg& msg)>;
+using DeviceOnlineStatusMsgCallback = std::function<void(const DeviceOnlineStatusMsg& msg)>;
 using DeviceOsdMsgCallback = std::function<void(const DeviceOsdMsg& msg)>;
 using DockLocationMsgCallback = std::function<void(const DockLocationMsg& msg)>;
 using DroneInDockMsgCallback = std::function<void(const DroneInDockMsg& msg)>;

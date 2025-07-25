@@ -234,6 +234,19 @@ void start_device_monitoring() {
         );
         g_device_osd_listen_ids.push_back(listenId);
 
+        listenId = g_business_manager->ListenDeviceOnlineStatus(
+            [](const DeviceOnlineStatusMsg &msg)-> void {
+                NC_LOG_INFO("[C++] ListenDeviceOnlineStatus: online: %d, callsign: %s, model: %s, type: %s",
+                    msg.device_status, msg.device_callsign.c_str(), msg.device_model.c_str(), msg.device_type.c_str());
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenDeviceOnlineStatus subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
+
         listenId = g_business_manager->ListenAircraftBatteryInfo(
             [](const AircraftBatteryInfoMsg &msg)-> void {
                 NC_LOG_INFO("[C++] ListenAircraftBatteryInfo: capacity_percent: %d, ", msg.capacity_percent);
