@@ -50,7 +50,7 @@ public:
 
     void setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& holder);
 
-    int64_t Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, SubscribeResultCallback result_cb = nullptr);
+    int64_t Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, const SubscribeResultCallback& result_cb = nullptr);
     int64_t ObserveAll(PublishTopicCallback cb);
     void CancelObserve(int64_t listen_id);
 
