@@ -11,6 +11,10 @@
 
 #include "../src/base/async/thread_pool_executor.h"
 
+constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
+// constexpr auto address = "ws://localhost:3001";
+
 // 全局变量用于在回调中访问
 std::shared_ptr<SDKManager> g_sdk_manager = nullptr;
 std::shared_ptr<BusinessManager> g_business_manager = nullptr;
@@ -90,11 +94,14 @@ void start_device_monitoring() {
     std::vector<std::string> deviceSNs = {
         "8UUXN2D00A00VL",
         "1581F6Q8D242100CPKTJ",
-        // "8UUDMAQ00A0121",
-        // "6QCDL820020093",
-        // "8PHDM8L0010322",
-        // "8UUDMAQ00A0138",
-        // "8UUDMAQ00A0047",
+        "1581F8HHD24B10010084",
+        "8UUDMAQ00A0121",
+        "6QCDL820020093",
+        "8PHDM8L0010322",
+        "8UUDMAQ00A0138",
+        "8UUDMAQ00A0047",
+        "8UUDMAQ00A0152",
+        "8UUDMAQ00A0076",
     };
     NotifactionFrequency frequency = NotifactionFrequency_Push_1s;
     
@@ -325,7 +332,7 @@ private:
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     
                     // 执行重连
-                    g_sdk_manager->connect("ws://localhost:3001");
+                    g_sdk_manager->connect(address);
                     
                     NC_LOG_INFO("[C++] Reconnection request sent, waiting for connection events...");
                     
@@ -357,9 +364,6 @@ private:
     }
 }
 
-// constexpr auto address = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-// constexpr auto address = "wss://test-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
-constexpr auto address = "ws://localhost:3001";
 
 int main() {
     // 初始化日志
