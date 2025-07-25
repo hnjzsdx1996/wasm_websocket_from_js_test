@@ -161,6 +161,22 @@ void start_device_monitoring() {
         );
         g_device_osd_listen_ids.push_back(listenId);
 
+
+        listenId = g_business_manager->ListenAircraftPayloadsCameraLiveviewWorldRegion(
+            [](const AircraftPayloadsCameraLiveviewWorldRegionMsg &msg)-> void {
+                for (const auto& item: msg.payloads_list) {
+                    NC_LOG_INFO("[C++] ListenAircraftPayloadsCameraLiveviewWorldRegion: %s, t: %.2f, l: %.2f, r: %.2f, b: %.2f",
+                        item.first.c_str(), item.second.top, item.second.left, item.second.right, item.second.bottom);
+                }
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftPayloadsCameraLiveviewWorldRegion subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
+
         listenId = g_business_manager->ListenAircraftPayloadsGimbalAttitude(
             [](const AircraftPayloadsGimbalAttitudeMsg &msg)-> void {
                 auto size = msg.payloads_gimbal_attitude.size();
