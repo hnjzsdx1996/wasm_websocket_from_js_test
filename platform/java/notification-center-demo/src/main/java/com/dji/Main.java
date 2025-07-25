@@ -77,6 +77,9 @@ public class Main {
         long[] batteryInfoListenIds = new long[deviceSNs.length];
         long[] deviceOsdListenIds = new long[deviceSNs.length];
         long[] droneInDockListenIds = new long[deviceSNs.length];
+        long[] deviceOnlineStatusListenIds = new long[deviceSNs.length];
+        long[] aircraftPayloadsListListenIds = new long[deviceSNs.length];
+        long[] dockLocationListenIds = new long[deviceSNs.length];
         
         System.out.println("[Java] Starting monitoring for multiple devices using Template API...");
         
@@ -278,6 +281,74 @@ public class Main {
                 frequency
             );
             
+            
+            // 使用模板化API监听飞机载荷列表信息
+            aircraftPayloadsListListenIds[i] = client.ListenAircraftPayloadsList(
+                (AircraftPayloadsList payloadsList) -> {
+                    System.out.println("[Java] Received aircraft payloads list message for device " + deviceSN + ":");
+                    StringVector payloadsListVector = payloadsList.getPayloads_list();
+                    if (payloadsListVector != null && !payloadsListVector.isEmpty()) {
+                        System.out.println("  - Payloads List (载荷列表):");
+                        for (int j = 0; j < payloadsListVector.size(); j++) {
+                            System.out.println("    [" + j + "] " + payloadsListVector.get(j));
+                        }
+                    } else {
+                        System.out.println("  - Payloads List: 空列表或无数据");
+                    }
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Aircraft payloads list subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Aircraft payloads list subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
+            // 使用模板化API监听机场位置信息
+            dockLocationListenIds[i] = client.ListenDockLocation(
+                (DockLocation dockLocation) -> {
+                    System.out.println("[Java] Received dock location message for device " + deviceSN + ":");
+                    System.out.println("  - Heading (朝向): " + dockLocation.getHeading() + "°");
+                    System.out.println("  - Height (高度): " + dockLocation.getHeight() + " m");
+                    System.out.println("  - Latitude (纬度): " + dockLocation.getLatitude());
+                    System.out.println("  - Longitude (经度): " + dockLocation.getLongitude());
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Dock location subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Dock location subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
+            // 使用模板化API监听设备在线状态
+            deviceOnlineStatusListenIds[i] = client.ListenDeviceOnlineStatus(
+                (DeviceOnlineStatus deviceOnlineStatus) -> {
+                    System.out.println("[Java] Received device online status message for device " + deviceSN + ":");
+                    System.out.println("  - Device Status (设备状态): " + deviceOnlineStatus.getDevice_status());
+                    String statusDesc = deviceOnlineStatus.getDevice_status() ? "在线" : "离线";
+                    System.out.println("  - Status Description: " + statusDesc);
+                    System.out.println("  - Device Callsign (设备呼号): " + deviceOnlineStatus.getDevice_callsign());
+                    System.out.println("  - Device Model (设备型号): " + deviceOnlineStatus.getDevice_model());
+                    System.out.println("  - Device Type (设备类型): " + deviceOnlineStatus.getDevice_type());
+                },
+                (NotificationCenterErrorCode errorCode) -> {
+                    if (errorCode == NotificationCenterErrorCode.NotificationCenterErrorCode_NoError) {
+                        System.out.println("[Java] Device online status subscription successful for device " + deviceSN);
+                    } else {
+                        System.out.println("[Java] Device online status subscription failed for device " + deviceSN + ". Error code: " + errorCode);
+                    }
+                },
+                deviceSN,
+                frequency
+            );
+            
             System.out.println("[Java] Started monitoring for device " + deviceSN + 
                              " with frequency " + frequency + 
                              " (Listen IDs - Location: " + locationListenIds[i] + 
@@ -288,7 +359,10 @@ public class Main {
                              ", Wind: " + windSpeedListenIds[i] + 
                              ", Battery: " + batteryInfoListenIds[i] + 
                              ", OSD: " + deviceOsdListenIds[i] + 
-                             ", Dock: " + droneInDockListenIds[i] + ")");
+                             ", Dock: " + droneInDockListenIds[i] + 
+                             ", Online: " + deviceOnlineStatusListenIds[i] + 
+                             ", PayloadsList: " + aircraftPayloadsListListenIds[i] + 
+                             ", DockLocation: " + dockLocationListenIds[i] + ")");
         }
         
         // 等待一段时间让自动poll处理消息
@@ -303,6 +377,9 @@ public class Main {
         System.out.println("  - Aircraft Battery Info (飞机电池信息)");
         System.out.println("  - Device OSD (设备OSD信息)");
         System.out.println("  - Drone In Dock (无人机在机场状态)");
+        System.out.println("  - Device Online Status (设备在线状态)");
+        System.out.println("  - Aircraft Payloads List (飞机载荷列表)");
+        System.out.println("  - Dock Location (机场位置)");
         Thread.sleep(1000000); // 等待1000秒
         
         // 取消所有设备的监听
@@ -317,6 +394,9 @@ public class Main {
             client.cancelListen(batteryInfoListenIds[i]);
             client.cancelListen(deviceOsdListenIds[i]);
             client.cancelListen(droneInDockListenIds[i]);
+            client.cancelListen(deviceOnlineStatusListenIds[i]);
+            client.cancelListen(aircraftPayloadsListListenIds[i]);
+            client.cancelListen(dockLocationListenIds[i]);
             System.out.println("[Java] Cancelled all monitoring for device " + deviceSNs[i]);
         }
 

@@ -470,6 +470,139 @@ public class NotificationCenterClient {
     }
     
     /**
+     * 订阅设备在线状态
+     */
+    public long ListenDeviceOnlineStatus(
+            OnSubscribeMessageCallback<DeviceOnlineStatus> onMessagesCallback, 
+            OnSubscribeResultCallback onResultCallback,
+            String deviceSn, 
+            NotificationFrequency freq) {
+        
+        try {
+            BusinessManager businessManager = sdk.getBusinessManager();
+            if (businessManager == null) {
+                throw new IllegalStateException("BusinessManager not available");
+            }
+            
+            return businessManager.ListenDeviceOnlineStatus(
+                new DeviceOnlineStatusCallback() {
+                    @Override
+                    public void invoke(DeviceOnlineStatus message) {
+                        if (onMessagesCallback != null) {
+                            onMessagesCallback.invoke(message);
+                        }
+                    }
+                },
+                new SDKSubscribeResultCallback() {
+                    @Override
+                    public void invoke(NotificationCenterErrorCode errorCode) {
+                        if (onResultCallback != null) {
+                            onResultCallback.invoke(errorCode);
+                        }
+                    }
+                },
+                deviceSn,
+                freq
+            );
+        } catch (Exception e) {
+            if (onResultCallback != null) {
+                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
+            }
+            return -1;
+        }
+    }
+    
+
+    
+
+    
+    /**
+     * 订阅飞机载荷列表信息
+     */
+    public long ListenAircraftPayloadsList(
+            OnSubscribeMessageCallback<AircraftPayloadsList> onMessagesCallback, 
+            OnSubscribeResultCallback onResultCallback,
+            String deviceSn, 
+            NotificationFrequency freq) {
+        
+        try {
+            BusinessManager businessManager = sdk.getBusinessManager();
+            if (businessManager == null) {
+                throw new IllegalStateException("BusinessManager not available");
+            }
+            
+            return businessManager.ListenAircraftPayloadsList(
+                new AircraftPayloadsListCallback() {
+                    @Override
+                    public void invoke(AircraftPayloadsList message) {
+                        if (onMessagesCallback != null) {
+                            onMessagesCallback.invoke(message);
+                        }
+                    }
+                },
+                new SDKSubscribeResultCallback() {
+                    @Override
+                    public void invoke(NotificationCenterErrorCode errorCode) {
+                        if (onResultCallback != null) {
+                            onResultCallback.invoke(errorCode);
+                        }
+                    }
+                },
+                deviceSn,
+                freq
+            );
+        } catch (Exception e) {
+            if (onResultCallback != null) {
+                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
+            }
+            return -1;
+        }
+    }
+    
+    /**
+     * 订阅机场位置信息
+     */
+    public long ListenDockLocation(
+            OnSubscribeMessageCallback<DockLocation> onMessagesCallback, 
+            OnSubscribeResultCallback onResultCallback,
+            String deviceSn, 
+            NotificationFrequency freq) {
+        
+        try {
+            BusinessManager businessManager = sdk.getBusinessManager();
+            if (businessManager == null) {
+                throw new IllegalStateException("BusinessManager not available");
+            }
+            
+            return businessManager.ListenDockLocation(
+                new DockLocationCallback() {
+                    @Override
+                    public void invoke(DockLocation message) {
+                        if (onMessagesCallback != null) {
+                            onMessagesCallback.invoke(message);
+                        }
+                    }
+                },
+                new SDKSubscribeResultCallback() {
+                    @Override
+                    public void invoke(NotificationCenterErrorCode errorCode) {
+                        if (onResultCallback != null) {
+                            onResultCallback.invoke(errorCode);
+                        }
+                    }
+                },
+                deviceSn,
+                freq
+            );
+        } catch (Exception e) {
+            if (onResultCallback != null) {
+                onResultCallback.invoke(NotificationCenterErrorCode.NotificationCenterErrorCode_InvalidParameter);
+            }
+            return -1;
+        }
+    }
+    
+    /**
      * 取消监听
      * @param listenId 监听ID
      */

@@ -159,6 +159,51 @@ protected:
     Swig::BoolArray<1> swig_override;
 };
 
+class SwigDirector_DeviceOnlineStatusCallback : public DeviceOnlineStatusCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_DeviceOnlineStatusCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_DeviceOnlineStatusCallback();
+    virtual void invoke(DeviceOnlineStatus const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_AircraftPayloadsListCallback : public AircraftPayloadsListCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_AircraftPayloadsListCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_AircraftPayloadsListCallback();
+    virtual void invoke(AircraftPayloadsList const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
+class SwigDirector_DockLocationCallback : public DockLocationCallback, public Swig::Director {
+
+public:
+    void swig_connect_director(JNIEnv *jenv, jobject jself, jclass jcls, bool swig_mem_own, bool weak_global);
+    SwigDirector_DockLocationCallback(JNIEnv *jenv);
+    virtual ~SwigDirector_DockLocationCallback();
+    virtual void invoke(DockLocation const &message);
+public:
+    bool swig_overrides(int n) {
+      return (n < 1 ? swig_override[n] : false);
+    }
+protected:
+    Swig::BoolArray<1> swig_override;
+};
+
 class SwigDirector_ConnectionListener : public WebsocketEvent, public Swig::Director {
 
 public:

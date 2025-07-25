@@ -29,6 +29,7 @@
 %include "std_string.i"
 %include "std_shared_ptr.i"
 %include "std_vector.i"
+%include "std_unordered_map.i"
 
 // Instantiate templates for each class that will be held by a shared_ptr
 %shared_ptr(SDKManager);
@@ -245,6 +246,92 @@ public:
     virtual ~SDKSubscribeResultCallback() {}
     virtual void invoke(const NotificationCenterErrorCode& result) = 0;
 };
+
+// 定义新的DeviceOnlineStatus类
+class DeviceOnlineStatus {
+public:
+    bool device_status;
+    std::string device_callsign;
+    std::string device_model;
+    std::string device_type;
+    
+    DeviceOnlineStatus() : device_status(false) {}
+    DeviceOnlineStatus(bool device_status, const std::string& device_callsign, 
+                      const std::string& device_model, const std::string& device_type) 
+        : device_status(device_status), device_callsign(device_callsign), 
+          device_model(device_model), device_type(device_type) {}
+};
+
+// 定义新的CameraLiveviewWorldRegion类
+class CameraLiveviewWorldRegion {
+public:
+    double bottom;
+    double left;
+    double right;
+    double top;
+    
+    CameraLiveviewWorldRegion() : bottom(0.0), left(0.0), right(0.0), top(0.0) {}
+    CameraLiveviewWorldRegion(double bottom, double left, double right, double top) 
+        : bottom(bottom), left(left), right(right), top(top) {}
+};
+
+
+
+// 定义新的AircraftPayloadGimbalAttitude类
+class AircraftPayloadGimbalAttitude {
+public:
+    double gimbal_pitch;
+    double gimbal_roll;
+    double gimbal_yaw;
+    
+    AircraftPayloadGimbalAttitude() : gimbal_pitch(0.0), gimbal_roll(0.0), gimbal_yaw(0.0) {}
+    AircraftPayloadGimbalAttitude(double gimbal_pitch, double gimbal_roll, double gimbal_yaw) 
+        : gimbal_pitch(gimbal_pitch), gimbal_roll(gimbal_roll), gimbal_yaw(gimbal_yaw) {}
+};
+
+
+
+// 定义新的AircraftPayloadsList类
+class AircraftPayloadsList {
+public:
+    std::vector<std::string> payloads_list;
+    
+    AircraftPayloadsList() {}
+};
+
+// 定义新的DockLocation类
+class DockLocation {
+public:
+    double heading;
+    double height;
+    double latitude;
+    double longitude;
+    
+    DockLocation() : heading(0.0), height(0.0), latitude(0.0), longitude(0.0) {}
+    DockLocation(double heading, double height, double latitude, double longitude) 
+        : heading(heading), height(height), latitude(latitude), longitude(longitude) {}
+};
+
+// 定义具体的回调接口
+class DeviceOnlineStatusCallback {
+public:
+    virtual ~DeviceOnlineStatusCallback() {}
+    virtual void invoke(const DeviceOnlineStatus& message) = 0;
+};
+
+
+
+class AircraftPayloadsListCallback {
+public:
+    virtual ~AircraftPayloadsListCallback() {}
+    virtual void invoke(const AircraftPayloadsList& message) = 0;
+};
+
+class DockLocationCallback {
+public:
+    virtual ~DockLocationCallback() {}
+    virtual void invoke(const DockLocation& message) = 0;
+};
 %}
 
 // Create Java-friendly callback interfaces and data structures
@@ -258,6 +345,12 @@ public:
 %feature("director") AircraftModeCodeCallback;
 %feature("director") DroneInDockCallback;
 %feature("director") SDKSubscribeResultCallback;
+%feature("director") DeviceOnlineStatusCallback;
+
+%feature("director") AircraftPayloadsListCallback;
+%feature("director") DockLocationCallback;
+
+%template(StringVector) std::vector<std::string>;
 
 // Include the type definitions and enums
 %include "message_define/common.h"
@@ -654,6 +747,138 @@ public:
         }
         
         return $self->ListenDroneInDock(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenDeviceOnlineStatus(
+        DeviceOnlineStatusCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const DeviceOnlineStatusMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将DeviceOnlineStatusMsg转换为DeviceOnlineStatus
+                DeviceOnlineStatus device_online_status(
+                    msg.device_status,
+                    msg.device_callsign,
+                    msg.device_model,
+                    msg.device_type
+                );
+                onSubscribeMessageCallback->invoke(device_online_status);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenDeviceOnlineStatus(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+
+    
+
+    
+    long ListenAircraftPayloadsList(
+        AircraftPayloadsListCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const AircraftPayloadsListMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将AircraftPayloadsListMsg转换为AircraftPayloadsList
+                AircraftPayloadsList aircraft_payloads_list;
+                aircraft_payloads_list.payloads_list = msg.payloads_list;
+                onSubscribeMessageCallback->invoke(aircraft_payloads_list);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenAircraftPayloadsList(msg_cb, result_cb, sn, notify_freq);
+    }
+    
+    long ListenDockLocation(
+        DockLocationCallback* onSubscribeMessageCallback,
+        SDKSubscribeResultCallback* onSubscribeResultCallback,
+        const std::string& sn,
+        NotificationFrequency notificationFrequency) {
+        
+        auto msg_cb = [onSubscribeMessageCallback](const DockLocationMsg& msg) {
+            if (onSubscribeMessageCallback) {
+                // 将DockLocationMsg转换为DockLocation
+                DockLocation dock_location(
+                    msg.heading,
+                    msg.height,
+                    msg.latitude,
+                    msg.longitude
+                );
+                onSubscribeMessageCallback->invoke(dock_location);
+            }
+        };
+        
+        auto result_cb = [onSubscribeResultCallback](const NotificationCenterErrorCode& error_code) {
+            if (onSubscribeResultCallback) {
+                onSubscribeResultCallback->invoke(error_code);
+            }
+        };
+        
+        // Convert NotificationFrequency to NotifactionFrequency enum
+        NotifactionFrequency notify_freq;
+        switch (notificationFrequency) {
+            case NotificationFrequency::ANY: notify_freq = NotifactionFrequency_Any; break;
+            case NotificationFrequency::ON_CHANGED: notify_freq = NotifactionFrequency_OnChanged; break;
+            case NotificationFrequency::PUSH_1S: notify_freq = NotifactionFrequency_Push_1s; break;
+            case NotificationFrequency::PUSH_2S: notify_freq = NotifactionFrequency_Push_2s; break;
+            case NotificationFrequency::PUSH_3S: notify_freq = NotifactionFrequency_Push_3s; break;
+            case NotificationFrequency::PUSH_4S: notify_freq = NotifactionFrequency_Push_4s; break;
+            case NotificationFrequency::PUSH_5S: notify_freq = NotifactionFrequency_Push_5s; break;
+            case NotificationFrequency::PUSH_10S: notify_freq = NotifactionFrequency_Push_10s; break;
+            case NotificationFrequency::PUSH_20S: notify_freq = NotifactionFrequency_Push_20s; break;
+            case NotificationFrequency::PUSH_30S: notify_freq = NotifactionFrequency_Push_30s; break;
+            default: notify_freq = NotifactionFrequency_Any; break;
+        }
+        
+        return $self->ListenDockLocation(msg_cb, result_cb, sn, notify_freq);
     }
     
     void cancelObserve(long listen_id) {
