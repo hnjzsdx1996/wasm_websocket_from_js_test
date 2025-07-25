@@ -43,20 +43,12 @@ int64_t TopicManager::Observe(const SubscribeTopicTuple& tuple, NotifactionFrequ
     return id;
 }
 
-int64_t TopicManager::ObserveAll(PublishTopicCallback cb) {
-    std::lock_guard<std::mutex> lock(mtx_);
-    int64_t id = next_listen_id_++;
-    all_topic_observers_[id] = std::move(cb);
-    return id;
-}
-
 void TopicManager::CancelObserve(int64_t listen_id) {
     {
         std::lock_guard<std::mutex> lock(mtx_);
         for (auto& [tuple, observers] : topic_observers_) {
             observers.erase(listen_id);
         }
-        all_topic_observers_.erase(listen_id);
     }
     // 如果没有人监听这个 sn+topic 了，取消监听
     UnsubscribeUnlistened();
@@ -212,16 +204,6 @@ void TopicManager::OnPublish(const std::string &json) {
         for (auto& [_, cb] : cbs) {
             cb(publish_msg);
         }
-    }
-
-    // 全量消息的监听者
-    std::unordered_map<int64_t, PublishTopicCallback> cbs;
-    {
-        std::lock_guard<std::mutex> lock(mtx_);
-        cbs = all_topic_observers_;
-    }
-    for (auto& [_, cb] : cbs) {
-        cb(publish_msg);
     }
 }
 

@@ -51,7 +51,6 @@ public:
     void setWebSocketHolder(const std::weak_ptr<WebSocketHolder>& holder);
 
     int64_t Observe(const SubscribeTopicTuple& tuple, NotifactionFrequency freq, PublishTopicCallback cb, const SubscribeResultCallback& result_cb = nullptr);
-    int64_t ObserveAll(PublishTopicCallback cb);
     void CancelObserve(int64_t listen_id);
 
 private:
@@ -73,7 +72,7 @@ private:
     std::atomic<int64_t> next_listen_id_{1};
     std::mutex mtx_;
     std::unordered_map<SubscribeTopicTuple, std::unordered_map<int64_t, PublishTopicCallback>> topic_observers_;
-    std::unordered_map<int64_t, PublishTopicCallback> all_topic_observers_;
     std::unordered_map<std::string, SendTopicCallback> pending_requests_; // uuid -> 回调
+
     std::weak_ptr<WebSocketHolder> ws_holder_;
 };
