@@ -67,6 +67,7 @@ public:
     DEFINE_LISTEN_METHOD(ListenAircraftLocation, AircraftLocationMsg, AircraftLocationMsgCallback, PublishAircraftLocationTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftModeCode, AircraftModeCodeMsg, AircraftModeCodeMsgCallback, PublishAircraftModeCodeTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftPayloadsGimbalAttitude, AircraftPayloadsGimbalAttitudeMsg, AircraftPayloadsGimbalAttitudeMsgCallback, PublishAircraftPayloadsGimbalAttitudeTopic, "device_osd")
+    DEFINE_LISTEN_METHOD(ListenAircraftPayloadsList, AircraftPayloadsListMsg, AircraftPayloadsListMsgCallback, PublishAircraftPayloadsListTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftSpeed, AircraftSpeedMsg, AircraftSpeedMsgCallback, PublishAircraftSpeedTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenAircraftWindSpeed, AircraftWindSpeedMsg, AircraftWindSpeedMsgCallback, PublishAircraftWindSpeedTopic, "device_osd")
     DEFINE_LISTEN_METHOD(ListenDeviceOsd, DeviceOsdMsg, DeviceOsdMsgCallback, PublishDeviceOsdTopic, "device_osd")

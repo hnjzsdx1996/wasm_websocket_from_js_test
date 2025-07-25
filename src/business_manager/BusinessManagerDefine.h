@@ -32,6 +32,7 @@ using AircraftControlCodeMsgCallback = std::function<void(const AircraftControlC
 using AircraftLocationMsgCallback = std::function<void(const AircraftLocationMsg& msg)>;
 using AircraftModeCodeMsgCallback = std::function<void(const AircraftModeCodeMsg& msg)>;
 using AircraftPayloadsGimbalAttitudeMsgCallback = std::function<void(const AircraftPayloadsGimbalAttitudeMsg& msg)>;
+using AircraftPayloadsListMsgCallback = std::function<void(const AircraftPayloadsListMsg& msg)>;
 using AircraftSpeedMsgCallback = std::function<void(const AircraftSpeedMsg& msg)>;
 using AircraftWindSpeedMsgCallback = std::function<void(const AircraftWindSpeedMsg& msg)>;
 using DeviceOsdMsgCallback = std::function<void(const DeviceOsdMsg& msg)>;

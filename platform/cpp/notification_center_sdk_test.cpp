@@ -178,6 +178,22 @@ void start_device_monitoring() {
         );
         g_device_osd_listen_ids.push_back(listenId);
 
+        listenId = g_business_manager->ListenAircraftPayloadsList(
+            [](const AircraftPayloadsListMsg &msg)-> void {
+                auto size = msg.payloads_list.size();
+                NC_LOG_INFO("[C++] ListenAircraftPayloadsList: size: %d", size);
+                for (const auto& payload_index: msg.payloads_list) {
+                    NC_LOG_INFO("[C++] ListenAircraftPayloadsList: payload_index: %s",payload_index.c_str());
+                }
+            },
+            [](const NotificationCenterErrorCode &error_code)-> void {
+                NC_LOG_INFO("[C++] ListenAircraftPayloadsList subscribe error_code: %d", error_code);
+            },
+            deviceSN,
+            frequency
+        );
+        g_device_osd_listen_ids.push_back(listenId);
+
         listenId = g_business_manager->ListenAircraftControlCode(
             [](const AircraftControlCodeMsg &msg)-> void {
                 NC_LOG_INFO("[C++] ListenAircraftControlCode: %d", msg.control_mode);
