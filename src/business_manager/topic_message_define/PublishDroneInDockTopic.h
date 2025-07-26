@@ -50,8 +50,7 @@ private:
     void MessageParserHook() {
         // hook 消息解析
         DeviceOsdType device_type(message_data);
-        if (device_type.isDrone()) {
-            // 飞机的 osd，不处理
+        if (device_type.getDeviceOsdTypeEnum() != DeviceOsdTypeEnum::DeviceOsdDock) {
             is_valid_ = false;
             return;
         }

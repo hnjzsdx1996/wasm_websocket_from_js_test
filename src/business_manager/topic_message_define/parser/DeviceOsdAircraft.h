@@ -6,8 +6,9 @@
 #include "AIGCJson.hpp"
 #include "base/logger/logger.h"
 
+
+// 飞机 OSD 消息：OSD 数据
 /*
-json结构案例：把里面的结构都解析出来
 {
     "host": {
         "81-0-0": {
