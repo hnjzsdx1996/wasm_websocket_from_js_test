@@ -2,6 +2,9 @@
 #include <cstdint>
 #include <string>
 #include <AIGCJson.hpp>
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 #include "base/logger/logger.h"
 #include "base/utils/cpp_uuid.h"
@@ -12,6 +15,7 @@ public:
 
     virtual bool isValid() {
         if (message_type.empty()) {
+            NC_LOG_ERROR("TopicMessageWrapper isValid: message_type.empty()");
             return false;
         }
         if (message_type != "subscribe" &&
@@ -19,9 +23,11 @@ public:
             message_type != "publish" &&
             message_type != "ping" &&
             message_type != "pong") {
+            NC_LOG_ERROR("TopicMessageWrapper isValid: message_type unknown: %s", message_type.c_str());
             return false;
         }
         if (message_id.empty()) {
+            NC_LOG_ERROR("TopicMessageWrapper isValid: message_id.empty()");
             return false;
         }
         return true;
@@ -186,9 +192,11 @@ class PublishTopicWrapper : public TopicMessageWrapper {
 public:
     bool isValid() override {
         if (TopicMessageWrapper::isValid() == false) {
+            NC_LOG_ERROR("PublishTopicWrapper isValid: TopicMessageWrapper::isValid() == false");
             return false;
         }
         if (message_topic.empty()) {
+            NC_LOG_ERROR("PublishTopicWrapper isValid: message_topic.empty()");
             return false;
         }
         return true;
@@ -211,6 +219,29 @@ public:
     void FromJsonString(const std::string& json) override {
         std::string err;
         aigc::JsonHelper::JsonToObject(*this, json, {}, &err);
+        
+        // 使用rapidjson直接从JSON字符串中提取message_data字段
+        rapidjson::Document doc;
+        doc.Parse(json.c_str());
+
+        if (message_data.empty() == false) {
+            return;
+        }
+
+        if (!doc.HasParseError() && doc.HasMember("message_data")) {
+            const rapidjson::Value& message_data_value = doc["message_data"];
+            if (message_data_value.IsString()) {
+                message_data = message_data_value.GetString();
+            } else {
+                // 如果不是字符串，将其转换为JSON字符串
+                rapidjson::StringBuffer buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                message_data_value.Accept(writer);
+                message_data = buffer.GetString();
+            }
+        }
+        NC_LOG_WARN("PublishTopicWrapper FromJsonString message_data: %s", message_data.c_str());
+        
     }
 };
 

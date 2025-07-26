@@ -46,7 +46,7 @@ public class Main {
         client.setWebsocketEventListener(listener);
         System.out.println("[Java] Websocket event listener set.");
 
-        String url = "ws://localhost:3001";
+        String url = "wss://dev-es310-api.dbeta.me/notification/ws/v1/notifications?x-auth-token=test";
         System.out.println("[Java] Connecting to " + url + "...");
         client.connect(url);
 
@@ -56,14 +56,15 @@ public class Main {
 
         // 监听多个设备
         String[] deviceSNs = {
-            "8UUXN2D00A00VL",
-            "1581F8HGD24BN0010286",
-            "1581F6Q8D242100CPKTJ",
-            "8UUDMAQ00A0121",
-            "6QCDL820020093",
-            "8PHDM8L0010322",
-            "8UUDMAQ00A0138",
-            "8UUDMAQ00A0047",
+            // "8UUXN2D00A00VL",
+            // "1581F8HGD24BN0010286",
+            // "1581F6Q8D242100CPKTJ",
+            // "8UUDMAQ00A0121",
+            // "6QCDL820020093",
+            // "8PHDM8L0010322",
+            // "8UUDMAQ00A0138",
+            // "8UUDMAQ00A0047",
+            "8UUDMAQ00A0152",
         };
         NotificationFrequency frequency = NotificationFrequency.PUSH_1S;
         

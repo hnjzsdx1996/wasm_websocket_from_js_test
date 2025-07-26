@@ -56,8 +56,9 @@ void start_device_monitoring() {
 
     // 监听多个设备
     std::vector<std::string> deviceSNs = {
-        "8UUXN2D00A00VL",
-        "1581F8HGD24BN0010286",
+        "8UUDMAQ00A0152", // 测试航线用
+        // "8UUXN2D00A00VL",
+        // "1581F8HGD24BN0010286",
         // "1581F6Q8D242100CPKTJ",
         // "1581F8HHD24B10010084",
         // "8UUDMAQ00A0121",
